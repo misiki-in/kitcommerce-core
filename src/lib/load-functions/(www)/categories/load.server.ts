@@ -1,6 +1,6 @@
-import { CategoryService } from '$lib/core/services'
+import { CategoryService } from '$lib/services'
+import type { PageServerLoad } from '$lib/types/index.js'
 import { error } from '@sveltejs/kit'
-import type { PageServerLoad } from '../../../../../routes/(www)/categories/$types'
 
 // Sample categories data for development
 const sampleCategories = [

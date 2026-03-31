@@ -1,7 +1,7 @@
-import { CollectionService } from '$lib/core/services'
-import type { Collection } from '$lib/core/types'
+import { CollectionService } from '$lib/services'
+import type { Collection } from '$lib/types'
+import type { PageLoad } from '$lib/types/index.ts'
 import { error } from '@sveltejs/kit'
-import type { PageLoad } from '../../../../../../routes/(www)/collections/[slug]/$types'
 
 function transformCollectionOptions(options: Collection['options']) {
 	return options?.map((option) => {

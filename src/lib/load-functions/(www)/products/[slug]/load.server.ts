@@ -1,6 +1,6 @@
-import type { StoreData } from '$lib/core/types'
-import { checkSecuredCatalogue } from '$lib/core/utils/secure-catalogue'
-import type { PageServerLoad } from '../../../../../../routes/(www)/products/[slug]/$types'
+import type { StoreData } from '$lib/types'
+import type { PageServerLoad } from '$lib/types/index.ts'
+import { checkSecuredCatalogue } from '$lib/utils'
 
 export const load: PageServerLoad = async ({ cookies, url, request, parent }) => {
 	const { store }: { store: StoreData | {} } = await parent()

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { paymentMethodService } from '$lib/core/services'
-	import { injectAffirm } from '$lib/core/utils/affirm-injector'
+	import { paymentMethodService } from '$lib/services'
+	import { injectAffirm } from '$lib/utils'
 	import { onMount } from 'svelte'
 	import { toast } from 'svelte-sonner'
 

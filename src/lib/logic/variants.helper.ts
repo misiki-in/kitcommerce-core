@@ -1,4 +1,4 @@
-import type { Variant } from '$lib/core/types'
+import type { Variant } from '$lib/types'
 
 /**
  * Find a variant with a specific option value, also taking into account the previously selected options.

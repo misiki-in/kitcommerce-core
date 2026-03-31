@@ -1,5 +1,5 @@
+import type { PageServerLoad } from '$lib/types/index.js'
 import { error } from '@sveltejs/kit'
-import type { PageServerLoad } from '../../../../../../routes/(www)/categories/[slug]/$types'
 
 // Sample category detail data
 const categoryDetails = {

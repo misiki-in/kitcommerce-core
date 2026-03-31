@@ -1,6 +1,6 @@
-import { OrderService } from '$lib/core/services'
+import { OrderService } from '$lib/services'
+import type { PageServerLoad } from '$lib/types/index.js'
 import { redirect } from '@sveltejs/kit'
-import type { PageServerLoad } from '../../../../../../routes/(www)/checkout/success/$types'
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
 	const failed = url.searchParams.get('failed')

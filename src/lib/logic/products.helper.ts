@@ -1,4 +1,4 @@
-import type { Product, Variant } from '$lib/core/types'
+import type { Product, Variant } from '$lib/types'
 
 /**
  * This function stores the product and variant details to the recently viewed list in local storage.

@@ -1,5 +1,5 @@
-import { PageService } from '$lib/core/services'
-import type { PageServerLoad } from '../../../../../routes/(legal)/shipping-policy/$types'
+import { PageService } from '$lib/services'
+import type { PageServerLoad } from '$lib/types/index.js'
 
 export const load: PageServerLoad = async ({ fetch }) => {
 	try {

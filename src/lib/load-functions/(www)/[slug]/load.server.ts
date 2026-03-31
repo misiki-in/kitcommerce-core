@@ -1,7 +1,6 @@
-import { MeilisearchService } from '$lib/core/services'
-import type { StoreData } from '$lib/core/types'
-import { checkSecuredCatalogue } from '$lib/core/utils/secure-catalogue'
-import type { PageServerLoad } from '../../../../../routes/(www)/[slug]/$types'
+import { MeilisearchService } from '$lib/services'
+import type { PageServerLoad, StoreData } from '$lib/types/index.js'
+import { checkSecuredCatalogue } from '$lib/utils/index.js'
 
 export const load: PageServerLoad = async ({ cookies, url, params, request, parent, fetch }) => {
 	const { store }: { store: StoreData | {} } = await parent()

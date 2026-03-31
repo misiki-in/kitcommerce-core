@@ -1,6 +1,6 @@
 import { error } from '@sveltejs/kit'
-import { AuthService } from '$lib/core/services'
-import type { PageServerLoad } from '../../../../../../routes/(www)/auth/verify/$types'
+import { AuthService } from '$lib/services'
+import type { PageServerLoad } from '$lib/types/index.js'
 
 export const load: PageServerLoad = async ({ locals, url, fetch }) => {
 	try {

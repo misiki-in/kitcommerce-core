@@ -1,5 +1,5 @@
-import { SearchService } from '$lib/core/services'
-import type { PageLoad } from '../../../../../routes/(www)/products/$types'
+import { SearchService } from '$lib/services'
+import type { PageLoad } from '$lib/types/index.ts'
 
 export const load: PageLoad = async ({ url, fetch }) => {
 	const searchService = new SearchService(fetch)

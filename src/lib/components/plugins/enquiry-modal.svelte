@@ -3,7 +3,7 @@
 	import { Input } from '$lib/components/ui/input'
 	import { Textarea } from '$lib/components/ui/textarea'
 	import { X } from 'lucide-svelte'
-	import { enquiryService, EnquiryService } from '$lib/core/services'
+	import { enquiryService, EnquiryService } from '$lib/services'
 
 	let { isOpen = false, productId = '', productTitle = '', onClose = () => {} } = $props()
 

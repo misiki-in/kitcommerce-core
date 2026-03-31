@@ -1,6 +1,6 @@
-import { CheckoutService } from '$lib/core/services'
+import { CheckoutService } from '$lib/services'
+import type { PageServerLoad } from '$lib/types/index.js'
 import { redirect } from '@sveltejs/kit'
-import type { PageServerLoad } from '../../../../../../routes/(www)/checkout/process/$types'
 
 export const load: PageServerLoad = async ({ url, fetch }) => {
 	const paymentSessionId = url.searchParams.get('payment_session_id')

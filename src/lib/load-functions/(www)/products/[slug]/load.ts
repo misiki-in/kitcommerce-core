@@ -1,7 +1,7 @@
-import { ProductService } from '$lib/core/services'
-import type { Product } from '$lib/core/types'
+import { ProductService } from '$lib/services'
+import type { Product } from '$lib/types'
+import type { PageLoad } from '$lib/types/index.ts'
 import { redirect } from '@sveltejs/kit'
-import type { PageLoad } from '../../../../../../routes/(www)/products/[slug]/$types'
 
 function transformProductOptions(options: Product['options']) {
 	return options?.map((option) => {

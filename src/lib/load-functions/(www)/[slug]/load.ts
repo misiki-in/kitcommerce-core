@@ -1,5 +1,5 @@
-import { SearchService } from '$lib/core/services'
-import type { PageLoad } from '../../../../../routes/(www)/[slug]/$types'
+import { SearchService } from '$lib/services'
+import type { PageLoad } from '$lib/types/index.js'
 
 export const load: PageLoad = async ({ url, params, fetch }) => {
 	const searchService = new SearchService(fetch)

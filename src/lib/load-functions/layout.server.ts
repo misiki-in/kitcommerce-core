@@ -1,5 +1,5 @@
-import { StoreService } from '$lib/core/services'
-import type { LayoutServerLoad } from '../../../routes/$types'
+import { StoreService } from '$lib/services'
+import type { LayoutServerLoad } from '$lib/types/index.ts'
 
 export const load: LayoutServerLoad = async ({ locals, url, cookies, fetch, request }) => {
 	let storeDetails = locals?.storeDetails
