@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner'
 	import { z } from 'zod'
-	import { getUserState } from '$lib/core/stores/auth.svelte'
+	import { getUserState } from '$lib/stores'
 	import { goto, replaceState } from '$app/navigation'
 	import { page } from '$app/state'
 	import type { Snippet } from 'svelte'

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte'
-	import { getCartState } from '$lib/core/stores/cart.svelte'
-	import { wishlistService, profileService, type Wishlist, type Product } from '$lib/core/services'
+	import { getCartState } from '$lib/stores'
+	import { wishlistService, profileService, type Wishlist, type Product } from '$lib/services'
 	import { toast } from 'svelte-sonner'
 	import { page } from '$app/state'
 

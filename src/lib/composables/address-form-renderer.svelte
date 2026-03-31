@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { page } from '$app/state'
-	import type { Address } from '$lib/core/types'
+	import type { Address } from '$lib/types/index.js'
 	import { onMount, type Snippet } from 'svelte'
-	import { AddressSchema } from '../components/address/schema'
 	import { z } from 'zod'
 	import { toast } from 'svelte-sonner'
+	import { AddressSchema } from '$lib/components/address/schema.js';
 
 	interface Props {
 		content: Snippet<[SnippetParams]>

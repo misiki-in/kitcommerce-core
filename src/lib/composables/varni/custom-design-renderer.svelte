@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte'
-	import { varniCustomDesignService } from '$lib/core/services'
+	import { varniCustomDesignService } from '$lib/services'
 	import { z, ZodSchema } from 'zod'
 	import { toast } from 'svelte-sonner'
 

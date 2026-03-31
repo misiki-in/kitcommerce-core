@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { contactService } from '$lib/core/services'
+	import { contactService } from '$lib/services'
 	import type { Snippet } from 'svelte'
 	import { z } from 'zod'
   

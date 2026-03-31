@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { orderService } from '$lib/core/services'
+	import { orderService } from '$lib/services'
 	import type { Snippet } from 'svelte'
 	let orders: any = $state({})
 	let currentPage = 1 // Start on page 1

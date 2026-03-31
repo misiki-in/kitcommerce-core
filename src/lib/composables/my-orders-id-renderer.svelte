@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/state'
-	import type { Order } from '$lib/core/types'
+	import type { Order } from '$lib/types'
 	import { onMount, type Snippet } from 'svelte'
-	import { orderService } from '$lib/core/services'
+	import { orderService } from '$lib/services'
 
 	const { content }: { content: Snippet<[SnippetParams]> } = $props()
 

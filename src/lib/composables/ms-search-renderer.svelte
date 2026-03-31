@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Snippet } from 'svelte'
-	import { meilisearchService } from '$lib/core/services'
+	import { meilisearchService } from '$lib/services'
 	import { page } from '$app/state'
 	import { goto } from '$app/navigation'
 

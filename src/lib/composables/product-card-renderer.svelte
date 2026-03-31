@@ -1,11 +1,11 @@
 <script lang="ts">
-	import { getCartState } from '$lib/core/stores/cart.svelte'
+	import { getCartState } from '$lib/stores'
 	import { page } from '$app/state'
 	import { goto } from '$app/navigation'
 	import type { Snippet } from 'svelte'
-	import type { Product } from '../services'
+	import type { Product } from '$lib/types'
 	import { toast } from 'svelte-sonner'
-	import { getProductKey, wishlistState } from '../stores/wishlist.svelte'
+	import { getProductKey, wishlistState } from '$lib/stores'
 
 	const cartState = getCartState()
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { blogService } from '$lib/core/services'
-	import type { Blog } from '$lib/core/types'
+	import { blogService } from '$lib/services'
+	import type { Blog } from '$lib/types'
 	import { onMount, type Snippet } from 'svelte'
-	import SeoHeader from '$lib/core/components/plugins/seo-header.svelte'
+	import SeoHeader from '$lib/components/plugins/seo-header.svelte'
 
 	const { content }: { content: Snippet<[SnippetParams]> } = $props()
 

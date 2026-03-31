@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner'
 	import { onMount, type Snippet } from 'svelte'
-	import { couponService } from '$lib/core/services'
-	import { getCartState } from '$lib/core/stores/cart.svelte'
+	import { couponService } from '$lib/services'
+	import { getCartState } from '$lib/stores'
 	import { browser } from '$app/environment'
 
   interface Props {

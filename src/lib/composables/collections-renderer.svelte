@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Collection } from '$lib/core/types'
-	import { collectionService } from '$lib/core/services'
+	import type { Collection } from '$lib/types'
+	import { collectionService } from '$lib/services'
 	import { onMount, type Snippet } from 'svelte'
 
 	interface Props {

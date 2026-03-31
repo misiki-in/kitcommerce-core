@@ -1,4 +1,4 @@
-import { wishlistService } from '$lib/core/services'
+import { wishlistService } from '$lib/services/index.js'
 
 /**
  * Checks if there are any pending wishlist actions in local storage and executes them if the user is logged in.
