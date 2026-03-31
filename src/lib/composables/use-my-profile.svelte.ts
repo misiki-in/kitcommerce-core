@@ -1,9 +1,12 @@
 import { browser } from '$app/environment'
-import { profileService } from '$lib/core/services'
-import { getUserState } from '$lib/core/stores/auth.svelte'
+import { profileService } from '$lib/services/index.js'
+import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class MyProfileModule {
+class MyProfileModule {
+  static _instance: MyProfileModule
+
 	userState = getUserState()
 
 	isLoading = $state(false)
@@ -96,3 +99,6 @@ export class MyProfileModule {
 	}
 }
 
+
+export const getMyProfileModule = getInstance(MyProfileModule)
+export const setMyProfileModule = setInstance(MyProfileModule)

@@ -1,8 +1,11 @@
-import { chatService, userService } from '$lib/core/services'
+import { chatService, userService } from '$lib/services/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class MessagesModule {
+class MessagesModule {
+  static _instance: MessagesModule
+
 	allChats: any[] = $state([])
 	filteredAllChats: any[] = $state([])
 	chatsCount = 0
@@ -134,3 +137,5 @@ export class MessagesModule {
 	// }
 }
 
+export const setMessagesModule = setInstance(MessagesModule)
+export const getMessagesModule = getInstance(MessagesModule)

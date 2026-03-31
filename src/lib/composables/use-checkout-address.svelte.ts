@@ -1,20 +1,13 @@
 import { goto } from '$app/navigation'
-
 import { page } from '$app/state'
-
-import { addressService } from '$lib/core/services'
-
-import { getUserState } from '$lib/core/stores/auth.svelte'
-
-import { Cart2State, getCartState } from '$lib/core/stores/cart.svelte'
-
-import type { Address, Cart } from '$lib/core/types'
-
+import { addressService } from '$lib/services/index.js'
+import { getUserState } from '$lib/stores/index.js'
+import { Cart2State, getCartState } from '$lib/stores/index.js'
+import type { Address, Cart } from '$lib/types/index.js'
 import { onMount } from 'svelte'
-
 import { toast } from 'svelte-sonner'
-
 import { z } from 'zod'
+import { getInstance, setInstance } from './helpers/index.ts'
 
 interface CartExtended extends Cart {
 	shippingAddress?: Address
@@ -26,7 +19,7 @@ interface CartState extends Cart2State {
 	cart: CartExtended
 }
 
-export const schemas = {
+export const checkoutAddressSchema = {
 	email: z.union([z.string().email('Please enter a valid email address').optional(), z.literal('')]),
 
 	phone: z
@@ -67,7 +60,9 @@ export const emptyAddress = (id: string): BaseAddress => {
 	}
 }
 
-export class AddressModule {
+class AddressModule {
+  static _instance: AddressModule
+
 	userState = getUserState()
 
 	cartState = getCartState() as CartState
@@ -561,3 +556,6 @@ export class AddressModule {
 		}
 	}
 }
+
+export const getCheckoutAddressModule = getInstance(AddressModule)
+export const setCheckoutAddressModule = setInstance(AddressModule)

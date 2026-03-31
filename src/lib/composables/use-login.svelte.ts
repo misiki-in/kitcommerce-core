@@ -4,8 +4,9 @@ import { authService } from '$lib/services/index.js'
 import { getUserState, getCartState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
+import { setInstance, getInstance } from './helpers/index.ts'
 
-export const schemas = {
+export const loginModuleSchema = {
 	email: z
 		.string()
 		.email('Please enter a valid email address')
@@ -23,7 +24,9 @@ export const schemas = {
 		.regex(/^[0-9]+$/, 'OTP must contain only numbers')
 }
 
-export class LoginModule {
+class LoginModule {
+  static _instance: LoginModule
+
 	userState = getUserState()
 	cartState = getCartState()
 
@@ -104,3 +107,5 @@ export class LoginModule {
 	}
 }
 
+export const getLoginModule = getInstance(LoginModule)
+export const setLoginModule = setInstance(LoginModule)

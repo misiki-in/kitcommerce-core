@@ -1,10 +1,13 @@
 import { page } from '$app/state'
-import { authService } from '$lib/core/services'
-import { getUserState } from '$lib/core/stores/auth.svelte'
+import { authService } from '$lib/services/index.js'
+import { getUserState } from '$lib/stores/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class ResetPasswordModule {
+class ResetPasswordModule {
+  static _instance: ResetPasswordModule
+
 	userState = getUserState()
 	email: string = $state('')
 	success = $state(false)
@@ -41,3 +44,5 @@ export class ResetPasswordModule {
 	}
 }
 
+export const getResetPasswordModule = getInstance(ResetPasswordModule)
+export const setResetPasswordModule = setInstance(ResetPasswordModule)

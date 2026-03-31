@@ -5,6 +5,14 @@ import { cubicOut } from 'svelte/easing'
 import type { TransitionConfig } from 'svelte/transition'
 import { twMerge } from 'tailwind-merge'
 
+export * from './gtag.ts'
+export * from './time.ts'
+export * from './stripe.ts'
+export * from './navigator.ts'
+export * from './whatsapp.js'
+export * from './affirm-injector.ts'
+export * from './secure-catalogue.ts'
+
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
 }
@@ -258,6 +266,6 @@ export const wait = (delay: number) => new Promise((res) => {
   setTimeout(res, delay)
 })
 
-export { debounce } from './debounce'
+export { debounce } from './debounce.ts'
 
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T

@@ -1,7 +1,6 @@
 import { page } from '$app/state'
 import Fuse from 'fuse.js'
-import { formatPrice } from '../utils'
-import { getSerialNavigator } from '../utils/navigator'
+import { formatPrice, getSerialNavigator } from '$lib/utils/index.js'
 import { afterNavigate } from '$app/navigation'
 
 const searchParamAsNumber = (name: string) => {

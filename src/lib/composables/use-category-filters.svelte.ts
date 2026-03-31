@@ -1,5 +1,5 @@
 import { onMount } from "svelte"
-import { categoryService } from "../services"
+import { categoryService } from "$lib/services/index.js"
 import { page } from "$app/state"
 
 export interface CategoryTree {
@@ -13,6 +13,7 @@ export interface CategoryTree {
 
 class CategoryFilterState {
   static _instance: CategoryFilterState
+
   initialLoading: boolean = $state(true)
 
   allCategories: CategoryTree[] = $state([])

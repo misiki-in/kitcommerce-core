@@ -1,10 +1,13 @@
-import { showAuthModal } from '$lib/core/components/auth/auth-utils'
-import { userService } from '$lib/core/services'
-import { getUserState } from '$lib/core/stores/auth.svelte'
+import { showAuthModal } from '$lib/components/index.js'
+import { userService } from '$lib/services/index.js'
+import { getUserState } from '$lib/stores/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class ChangePasswordModule {
+class ChangePasswordModule {
+  static _instance: ChangePasswordModule
+
 	userState = getUserState()
 	old: string = $state('')
 	password: string = $state('')
@@ -62,3 +65,6 @@ export class ChangePasswordModule {
 		}
 	}
 }
+
+export const getChangePasswordModule = getInstance(ChangePasswordModule)
+export const setChangePasswordModule = setInstance(ChangePasswordModule)

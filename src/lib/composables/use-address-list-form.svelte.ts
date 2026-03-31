@@ -1,7 +1,10 @@
-import { getCartState } from '../stores/cart.svelte'
-import { toast } from '../utils'
+import { getCartState } from '$lib/stores/index.js'
+import { toast } from '$lib/utils/index.js'
+import { getInstance } from './helpers/index.ts'
 
-export class AddressListState {
+class AddressListModule {
+  static _instance: AddressListModule
+
 	cartState = getCartState()
 
 	loading = $state(false)
@@ -69,3 +72,6 @@ export class AddressListState {
 		})
 	}
 }
+
+export const getAddressListModule = getInstance(AddressListModule)
+export const setAddressListModule = getInstance(AddressListModule)

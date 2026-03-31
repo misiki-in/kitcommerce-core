@@ -1,12 +1,12 @@
 import { browser } from '$app/environment'
 import { goto, replaceState } from '$app/navigation'
-import { page } from '$app/state'
-import { authService } from '$lib/core/services'
+import { authService } from '$lib/services/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export const schemas = {
+export const forgotPasswordSchema = {
 	email: z
 		.string()
 		.email('Please enter a valid email address')
@@ -17,7 +17,9 @@ export const schemas = {
 		})
 }
 
-export class ForgotPasswordModule {
+class ForgotPasswordModule {
+  static _instance: ForgotPasswordModule
+
 	email = $state('')
 	success = $state(false)
 	isLoading = $state(false)
@@ -55,3 +57,5 @@ export class ForgotPasswordModule {
 	}
 }
 
+export const getForgotPasswordModule = getInstance(ForgotPasswordModule)
+export const setForgotPasswordModule = setInstance(ForgotPasswordModule)

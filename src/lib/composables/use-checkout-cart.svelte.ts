@@ -1,8 +1,9 @@
 import { goto } from '$app/navigation'
 import { page } from '$app/state'
-import { wishlistService, type Address, type Cart, type CartLineItem, type Variant } from '$lib/core/services'
-import { getCartState, type Cart2State } from '$lib/core/stores/cart.svelte'
-import { fireGTagEvent } from '$lib/core/utils/gtag'
+import { wishlistService, type Address, type Cart, type CartLineItem, type Variant } from '$lib/services/index.js'
+import { getCartState, type Cart2State } from '$lib/stores/index.js'
+import { fireGTagEvent } from '$lib/utils/index.js'
+import { getInstance, setInstance } from './helpers/index.ts'
 
 interface CartLineItemExtended extends CartLineItem {
 	isSelectedForCheckout: boolean
@@ -22,7 +23,9 @@ interface CartStateExtended extends Cart2State {
 	cart: CartExtended
 }
 
-export class CartModule {
+class CartModule {
+  static _instance: CartModule
+
   isMovingToWishlist = $state<Record<string, boolean>>({})
 
 	cartState = getCartState() as CartStateExtended
@@ -178,3 +181,5 @@ export class CartModule {
   }
 }
 
+export const getCheckoutCartModule = getInstance(CartModule)
+export const setCheckoutCartModule = setInstance(CartModule)

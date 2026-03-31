@@ -1,10 +1,13 @@
 import { page } from '$app/state'
-import { addressService, type Address, type PaginatedResponse } from '$lib/core/services'
-import { getUserState } from '$lib/core/stores/auth.svelte'
+import { addressService, type Address, type PaginatedResponse } from '$lib/services/index.js'
+import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
-import { showAuthModal } from '$lib/core/components/auth/auth-utils'
+import { showAuthModal } from '$lib/components/index.js'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class MyAddressesModule {
+class MyAddressesModule {
+  static _instance: MyAddressesModule
+
 	userState = getUserState()
 	loading = $state(false)
 	addresses = $state<PaginatedResponse<Address> | null>(null)
@@ -86,3 +89,6 @@ export class MyAddressesModule {
 		}
 	}
 }
+
+export const getMyAddressesModule = getInstance(MyAddressesModule)
+export const setMyAddressesModule = setInstance(MyAddressesModule)

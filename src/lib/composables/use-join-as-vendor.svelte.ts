@@ -1,12 +1,15 @@
 import { goto } from '$app/navigation'
 import { page } from '$app/state'
-import { authService } from '$lib/core/services'
+import { authService } from '$lib/services/index.js'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-const IS_DEV = import.meta.env.DEV
+const IS_DEV = false
 
-export class JoinAsVendorModule {
+class JoinAsVendorModule {
+  static _instance: JoinAsVendorModule
+
 	firstName = $state(IS_DEV ? 'Swadesh' : '')
 	lastName = $state(IS_DEV ? 'Behera' : '')
 	phone = $state(IS_DEV ? '1234567890' : '')
@@ -66,3 +69,5 @@ export class JoinAsVendorModule {
 	}
 }
 
+export const getJoinAsVendorModule = getInstance(JoinAsVendorModule)
+export const setJoinAsVendorModule = setInstance(JoinAsVendorModule)

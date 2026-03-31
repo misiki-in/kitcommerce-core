@@ -1,7 +1,8 @@
 import { page } from '$app/state'
 import { onMount } from 'svelte'
-import { categoryService, orderService, productService } from '$lib/core/services'
-import type { Product, Order, ProductStructuredData, Category } from '$lib/core/types'
+import { categoryService, orderService, productService } from '$lib/services/index.js'
+import type { Product, Category } from '$lib/types/index.js'
+import { getInstance, setInstance } from './helpers/index.ts'
 
 const getRandomIntervals = (size: number, multiplier = 1000, min = 10000) => {
 	let intervals: number[] = []
@@ -34,7 +35,9 @@ interface PublicOrder {
 	createdAt?: string
 }
 
-export class HomepageModule {
+class HomepageModule {
+  static _instance: HomepageModule
+
 	displayProduct = $state('hidden')
 	featuredProducts: ProductWithVendor[] = $state([])
 	loadingFeaturedProducts = $state(true)
@@ -257,3 +260,5 @@ export class HomepageModule {
 	// })
 }
 
+export const getHomepageModule = getInstance(HomepageModule)
+export const setHomepageModule = setInstance(HomepageModule)

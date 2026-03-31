@@ -1,25 +1,20 @@
 import { browser } from '$app/environment'
 import { afterNavigate, goto } from '$app/navigation'
 import { page } from '$app/state'
-import type { CarouselAPI } from '$lib/components/ui/carousel/context'
-import { storeProductToRecentlyViewed } from '$lib/core/logic/products.helper'
-import { findVariantWithOptionValue } from '$lib/core/logic/variants.helper'
-import { addPendingWishlistAction, checkPendingWishlistActions } from '$lib/core/logic/wishlist.helper'
-import { getUserState } from '$lib/core/stores/auth.svelte'
-import { getCartState } from '$lib/core/stores/cart.svelte'
-import { getSettingState } from '$lib/core/stores/setting.svelte'
-import { deepCopy } from '$lib/core/utils'
-import { fireGTagEvent } from '$lib/core/utils/gtag'
-import { meilisearchService, productService, reviewService, wishlistService } from '@misiki/litekart-connector'
-import { getContext, onMount, setContext, untrack } from 'svelte'
+import type { CarouselAPI } from '$lib/types/index.js'
+import { storeProductToRecentlyViewed, findVariantWithOptionValue, addPendingWishlistAction, checkPendingWishlistActions } from '$lib/logic/index.js'
+import { getUserState, getCartState } from '$lib/stores/index.js'
+import { deepCopy, fireGTagEvent } from '$lib/utils/index.js'
+import { meilisearchService, productService, reviewService, wishlistService } from '$lib/services/index.js'
+import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 
 const PRODUCT_STATE_KEY = Symbol('product-state')
 
 class ProductState {
+  static _instance: ProductState
 	ADD_TO_CART_MESSAGE_DURATION = 10000
 
-	settingState = getSettingState()
 	userState = getUserState()
 	cartState = getCartState()
 
@@ -576,10 +571,10 @@ class ProductState {
 
 export function createProductStateContext() {
 	const productState = new ProductState()
-  ProductState.instance = productState
+  ProductState._instance = productState
 	return productState
 }
 
 export function useProductState() {
-  return ProductState.instance
+  return ProductState._instance
 }

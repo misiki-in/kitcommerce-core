@@ -1,12 +1,12 @@
 import { page } from '$app/state'
-import { categoryService, type Menu, menuService } from '$lib/core/services'
-import { fireGTagEvent } from '$lib/core/utils/gtag'
-import { getUserState } from '$lib/core/stores/auth.svelte'
+import { categoryService, type Menu, menuService } from '$lib/services/index.js'
+import { fireGTagEvent } from '$lib/utils/gtag.js'
+import { getUserState, getCartState } from '$lib/stores/index.js'
 import { cubicOut } from 'svelte/easing'
 import { onMount } from 'svelte'
-import type { Category, StoreData } from '$lib/core/types'
-import { getCartState } from '$lib/core/stores/cart.svelte'
+import type { Category, StoreData } from '$lib/types/index.js'
 import { goto } from '$app/navigation'
+import { getInstance, setInstance } from './helpers/index.ts'
 
 function count(...args: any[]) {
 	return args.filter(Boolean).length
@@ -16,7 +16,9 @@ interface MegaMenuItem extends Category {
 	children: MegaMenuItem[]
 }
 
-export class NavModule {
+class NavModule {
+  static _instance: NavModule
+
 	storeData = $derived(page?.data?.store as StoreData)
 	cartState = getCartState()
 	userState = getUserState()
@@ -47,6 +49,7 @@ export class NavModule {
 
 	productsCount = $derived(page?.data?.products?.count || 0)
 	constructor() {
+    console.log("page.data from core", page.data)
 		onMount(async () => {
 			try {
 				const response = await menuService.list()
@@ -73,7 +76,7 @@ export class NavModule {
 		})
 	}
 
-	removeCartItem = () => {
+	removeCartItem = (i: number) => {
 		this.cartState.remove({
 			cartId: this.cartState.cart.id,
 			lineId: this.cartState.cart.lineItems[i].id
@@ -139,3 +142,5 @@ export class NavModule {
 	}
 }
 
+export const getNavModule = getInstance(NavModule)
+export const setNavModule = setInstance(NavModule)

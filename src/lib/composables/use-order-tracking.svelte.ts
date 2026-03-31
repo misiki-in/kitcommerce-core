@@ -1,9 +1,12 @@
 import { page } from '$app/state'
-import { orderService, type Order } from '$lib/core/services'
+import { orderService, type Order } from '$lib/services/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
+import { getInstance, setInstance } from './helpers/index.ts'
 
-export class OrderTrackingModule {
+class OrderTrackingModule {
+  static _instance: OrderTrackingModule
+
 	loading = $state(true)
 	order: Order | null = $state(null)
 
@@ -29,3 +32,5 @@ export class OrderTrackingModule {
 	}
 }
 
+export const getOrderTrackingModule = getInstance(OrderTrackingModule)
+export const setOrderTrackingModule = setInstance(OrderTrackingModule)

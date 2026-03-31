@@ -1,12 +1,12 @@
-import { getCartState } from '$lib/core/stores/cart.svelte'
+import { getCartState } from '$lib/stores/index.js'
 import { onMount } from 'svelte'
 import { goto } from '$app/navigation'
 import { toast } from 'svelte-sonner'
-import { checkoutService, couponService } from '$lib/core/services'
+import { checkoutService, couponService, paymentMethodService } from '$lib/services/index.js'
 import { browser } from '$app/environment'
-import { paymentMethodService } from '$lib/core/services'
 import { page } from '$app/state'
-import { injectAffirm } from '../utils/affirm-injector'
+import { injectAffirm } from '$lib/utils/index.js'
+import { getInstance, setInstance } from './helpers/index.ts'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -55,7 +55,9 @@ declare global {
 	const affirm: any
 }
 
-export class PaymentModule {
+class PaymentModule {
+  static _instance: PaymentModule
+
 	cartState = getCartState() as CartState
 	private _selectedPgCode = ''
 	get SELECTED_PG_CODE(): string {
@@ -420,3 +422,6 @@ export class PaymentModule {
     }
   }
 }
+
+export const getPaymentModule = getInstance(PaymentModule)
+export const setPaymentModule = setInstance(PaymentModule)
