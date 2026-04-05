@@ -3,6 +3,7 @@ interface ModuleInterface<T extends { new(): InstanceType<T> }> {
   _instance: InstanceType<T>
 }
 
+/*
 export function setInstance<T extends ModuleInterface<T>>(Module: T) {
   return () => {
   if (Module._instance)
@@ -19,3 +20,4 @@ export function getInstance<T extends ModuleInterface<T>>(Module: T) {
     return Module._instance
   }
 }
+*/

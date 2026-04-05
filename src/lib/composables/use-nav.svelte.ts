@@ -16,7 +16,7 @@ interface MegaMenuItem extends Category {
 	children: MegaMenuItem[]
 }
 
-class NavModule {
+export class NavModule {
   static _instance: NavModule
 
 	storeData = $derived(page?.data?.store as StoreData)
@@ -141,6 +141,3 @@ class NavModule {
 		}
 	}
 }
-
-export const getNavModule = getInstance(NavModule)
-export const setNavModule = setInstance(NavModule)

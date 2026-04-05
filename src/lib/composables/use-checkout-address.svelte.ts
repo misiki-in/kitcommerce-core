@@ -7,7 +7,6 @@ import type { Address, Cart } from '$lib/types/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 interface CartExtended extends Cart {
 	shippingAddress?: Address
@@ -60,7 +59,7 @@ export const emptyAddress = (id: string): BaseAddress => {
 	}
 }
 
-class AddressModule {
+export class AddressModule {
   static _instance: AddressModule
 
 	userState = getUserState()
@@ -188,7 +187,7 @@ class AddressModule {
 		e.preventDefault()
 
 		if (this.email) {
-			schemas.email.parse(this.email)
+			checkoutAddressSchema.email.parse(this.email)
 		} else if (this.isEmailRequired) {
 			throw new z.ZodError([
 				{
@@ -200,7 +199,7 @@ class AddressModule {
 		}
 
 		if (this.phone) {
-			schemas.phone.parse(this.phone)
+			checkoutAddressSchema.phone.parse(this.phone)
 		} else if (this.isPhoneRequired) {
 			throw new z.ZodError([
 				{
@@ -211,9 +210,9 @@ class AddressModule {
 			])
 		}
 		try {
-			schemas.email.parse(this.email)
+			checkoutAddressSchema.email.parse(this.email)
 
-			schemas.phone.parse(this.phone ?? '')
+			checkoutAddressSchema.phone.parse(this.phone ?? '')
 
 			await this.cartState.updateEmail({ email: this.email, phone: this.phone })
 
@@ -557,5 +556,3 @@ class AddressModule {
 	}
 }
 
-export const getCheckoutAddressModule = getInstance(AddressModule)
-export const setCheckoutAddressModule = setInstance(AddressModule)

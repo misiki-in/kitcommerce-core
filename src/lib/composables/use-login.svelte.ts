@@ -4,7 +4,6 @@ import { authService } from '$lib/services/index.js'
 import { getUserState, getCartState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
-import { setInstance, getInstance } from './helpers/index.ts'
 
 export const loginModuleSchema = {
 	email: z
@@ -24,7 +23,7 @@ export const loginModuleSchema = {
 		.regex(/^[0-9]+$/, 'OTP must contain only numbers')
 }
 
-class LoginModule {
+export class LoginModule {
   static _instance: LoginModule
 
 	userState = getUserState()
@@ -106,6 +105,3 @@ class LoginModule {
 		this.handleSubmit(e)
 	}
 }
-
-export const getLoginModule = getInstance(LoginModule)
-export const setLoginModule = setInstance(LoginModule)

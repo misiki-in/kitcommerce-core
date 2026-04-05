@@ -3,11 +3,10 @@ import { page } from '$app/state'
 import { authService } from '$lib/services/index.js'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 const IS_DEV = false
 
-class JoinAsVendorModule {
+export class JoinAsVendorModule {
   static _instance: JoinAsVendorModule
 
 	firstName = $state(IS_DEV ? 'Swadesh' : '')
@@ -69,5 +68,3 @@ class JoinAsVendorModule {
 	}
 }
 
-export const getJoinAsVendorModule = getInstance(JoinAsVendorModule)
-export const setJoinAsVendorModule = setInstance(JoinAsVendorModule)

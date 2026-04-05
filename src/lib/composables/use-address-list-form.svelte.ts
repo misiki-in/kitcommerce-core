@@ -1,8 +1,7 @@
 import { getCartState } from '$lib/stores/index.js'
 import { toast } from '$lib/utils/index.js'
-import { getInstance } from './helpers/index.ts'
 
-class AddressListModule {
+export class AddressListModule {
   static _instance: AddressListModule
 
 	cartState = getCartState()
@@ -72,6 +71,3 @@ class AddressListModule {
 		})
 	}
 }
-
-export const getAddressListModule = getInstance(AddressListModule)
-export const setAddressListModule = getInstance(AddressListModule)

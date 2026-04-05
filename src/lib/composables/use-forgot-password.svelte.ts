@@ -4,7 +4,6 @@ import { authService } from '$lib/services/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 export const forgotPasswordSchema = {
 	email: z
@@ -17,7 +16,7 @@ export const forgotPasswordSchema = {
 		})
 }
 
-class ForgotPasswordModule {
+export class ForgotPasswordModule {
   static _instance: ForgotPasswordModule
 
 	email = $state('')
@@ -57,5 +56,3 @@ class ForgotPasswordModule {
 	}
 }
 
-export const getForgotPasswordModule = getInstance(ForgotPasswordModule)
-export const setForgotPasswordModule = setInstance(ForgotPasswordModule)

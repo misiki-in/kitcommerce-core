@@ -3,9 +3,8 @@ import { userService } from '$lib/services/index.js'
 import { getUserState } from '$lib/stores/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
-import { getInstance, setInstance } from './helpers/index.ts'
 
-class ChangePasswordModule {
+export class ChangePasswordModule {
   static _instance: ChangePasswordModule
 
 	userState = getUserState()
@@ -66,5 +65,3 @@ class ChangePasswordModule {
 	}
 }
 
-export const getChangePasswordModule = getInstance(ChangePasswordModule)
-export const setChangePasswordModule = setInstance(ChangePasswordModule)

@@ -6,7 +6,6 @@ import { checkoutService, couponService, paymentMethodService } from '$lib/servi
 import { browser } from '$app/environment'
 import { page } from '$app/state'
 import { injectAffirm } from '$lib/utils/index.js'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -55,7 +54,7 @@ declare global {
 	const affirm: any
 }
 
-class PaymentModule {
+export class PaymentModule {
   static _instance: PaymentModule
 
 	cartState = getCartState() as CartState
@@ -422,6 +421,3 @@ class PaymentModule {
     }
   }
 }
-
-export const getPaymentModule = getInstance(PaymentModule)
-export const setPaymentModule = setInstance(PaymentModule)

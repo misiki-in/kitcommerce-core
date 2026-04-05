@@ -1,9 +1,8 @@
 import { userService } from '$lib/services/index.js'
 import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
-import { getInstance, setInstance } from './helpers/index.ts'
 
-class MyProfileDeleteModule {
+export class MyProfileDeleteModule {
   static _instance: MyProfileDeleteModule
 
 	user = getUserState()
@@ -25,5 +24,3 @@ class MyProfileDeleteModule {
 	}
 }
 
-export const getMyProfileDeleteModule = getInstance(MyProfileDeleteModule)
-export const setMyProfileDeleteModule = setInstance(MyProfileDeleteModule)

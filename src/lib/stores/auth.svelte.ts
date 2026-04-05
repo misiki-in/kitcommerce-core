@@ -12,7 +12,9 @@ export function parseCookies(cookieString: string): Record<string, string> {
 }
 
 const initialUser = { user_id: '0', items: [], subtotal: 0, total: 0 }
-export class UserState {
+class UserState {
+  static _instance: UserState
+
 	user = $state<any>(initialUser)
   lastError = $state<any | null>(null)
 	loading = $state<boolean>(false)
@@ -25,12 +27,14 @@ export class UserState {
 	}
 
 	constructor() {
+    console.log("auth contstroctor")
 		this.hasLoaded = new Promise((res, rej) => {
 			onMount(async () => {
 				try {
 					this.loading = true
           this.lastError = null
 					const { sid, me } = this.retrieveUserId()
+          console.log("info", sid, me)
 					// console.log('🚀 ~ UserState ~ fetch:', sid, me)
 					if (sid) {
 						this.user = me
@@ -183,6 +187,7 @@ export class UserState {
 const USER_KEY = Symbol('USER')
 
 export function setUserState() {
+  console.log("Setting UserState")
 	return setContext(USER_KEY, new UserState())
 }
 

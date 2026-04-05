@@ -3,9 +3,8 @@ import { addressService, type Address, type PaginatedResponse } from '$lib/servi
 import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
 import { showAuthModal } from '$lib/components/index.js'
-import { getInstance, setInstance } from './helpers/index.ts'
 
-class MyAddressesModule {
+export class MyAddressesModule {
   static _instance: MyAddressesModule
 
 	userState = getUserState()
@@ -90,5 +89,3 @@ class MyAddressesModule {
 	}
 }
 
-export const getMyAddressesModule = getInstance(MyAddressesModule)
-export const setMyAddressesModule = setInstance(MyAddressesModule)

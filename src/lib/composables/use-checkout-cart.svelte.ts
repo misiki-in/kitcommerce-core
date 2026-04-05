@@ -3,7 +3,6 @@ import { page } from '$app/state'
 import { wishlistService, type Address, type Cart, type CartLineItem, type Variant } from '$lib/services/index.js'
 import { getCartState, type Cart2State } from '$lib/stores/index.js'
 import { fireGTagEvent } from '$lib/utils/index.js'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 interface CartLineItemExtended extends CartLineItem {
 	isSelectedForCheckout: boolean
@@ -23,7 +22,7 @@ interface CartStateExtended extends Cart2State {
 	cart: CartExtended
 }
 
-class CartModule {
+export class CartModule {
   static _instance: CartModule
 
   isMovingToWishlist = $state<Record<string, boolean>>({})
@@ -181,5 +180,20 @@ class CartModule {
   }
 }
 
-export const getCheckoutCartModule = getInstance(CartModule)
-export const setCheckoutCartModule = setInstance(CartModule)
+//import { getContext, setContext } from "svelte"
+//
+//interface ModuleInterface<T extends { new(): InstanceType<T> }> {
+//  new (...args: any[]): InstanceType<T>
+//}
+//
+//function setInstance<T extends ModuleInterface<T>>(key: Symbol, Module: T) {
+//	return setContext(key, new Module())
+//}
+//
+//function getInstance<T extends ModuleInterface<T>>(key: Symbol, Module: T) {
+//	return getContext<T>(key)
+//}
+//
+//const key = Symbol('checkout-cart-module')
+//export const getCheckoutCartModule = getInstance(key, CartModule)
+//export const setCheckoutCartModule = setInstance(key, CartModule)

@@ -2,9 +2,8 @@ import { browser } from '$app/environment'
 import { profileService } from '$lib/services/index.js'
 import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
-import { getInstance, setInstance } from './helpers/index.ts'
 
-class MyProfileModule {
+export class MyProfileModule {
   static _instance: MyProfileModule
 
 	userState = getUserState()
@@ -100,5 +99,3 @@ class MyProfileModule {
 }
 
 
-export const getMyProfileModule = getInstance(MyProfileModule)
-export const setMyProfileModule = setInstance(MyProfileModule)

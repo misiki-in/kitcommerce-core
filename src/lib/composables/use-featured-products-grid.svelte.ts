@@ -1,7 +1,6 @@
 import { onMount } from "svelte"
-import { getInstance, setInstance } from "./helpers/index.ts"
 
-class FeaturedProductsGrid {
+export class FeaturedProductsGrid {
   static _instance: FeaturedProductsGrid
 
   loadMoreTrigger: HTMLDivElement | null = $state(null)
@@ -32,5 +31,3 @@ class FeaturedProductsGrid {
   }
 }
 
-export const getFeaturedProductsGridModule = getInstance(FeaturedProductsGrid)
-export const setFeaturedProductsGridModule = setInstance(FeaturedProductsGrid)
