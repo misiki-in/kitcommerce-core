@@ -9,7 +9,7 @@ const searchParamAsNumber = (name: string) => {
   return false
 }
 
-class DesktopFilterState {
+export class DesktopFilterState {
   static _instance: DesktopFilterState
 
   navigator = getSerialNavigator()
