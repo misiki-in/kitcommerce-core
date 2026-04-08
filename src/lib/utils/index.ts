@@ -269,3 +269,48 @@ export const wait = (delay: number) => new Promise((res) => {
 export { debounce } from './debounce.ts'
 
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T
+
+export const priceRoundUp = (price: number, currencyCode: string) => {
+  const code = currencyCode?.toUpperCase() || 'USD'
+  const currencySymbols: Record<string, string> = {
+    AUD: '$', // Australian Dollar
+    USD: '$', // US Dollar
+    EUR: '€', // Euro
+    GBP: '£', // British Pound
+    JPY: '¥', // Japanese Yen
+    CAD: '$', // Canadian Dollar
+    CHF: 'Fr.', // Swiss Franc
+    CNY: '¥', // Chinese Yuan
+    INR: '₹', // Indian Rupee
+    BRL: 'R$', // Brazilian Real
+    RUB: '₽', // Russian Rubles
+    KRW: '₩', // South Korean Won
+    NZD: '$', // New Zealand Dollar
+    MXN: '$', // Mexican Peso
+    SGD: '$', // Singapore Dollar
+    HKD: '$', // Hong Kong Dollar
+    HUF: 'Ft', // Hungarian Forint
+    ISK: 'kr', // Icelandic Króna
+    CLP: '$', // Chilean Peso
+    TWD: 'NT$', // Taiwan Dollar
+    IDR: 'Rp', // Indonesian Rupiah
+    VND: '₫' // Vietnamese Dong
+    // Add more currencies as needed
+  }
+  const symbol = currencySymbols[code] || code
+  const nonDecimalCurrencies = ['JPY', 'KRW', 'HUF', 'ISK', 'CLP', 'TWD', 'IDR', 'VND']
+  const formattedPrice = Math.round(price).toString()
+  if (
+    code === 'AUD' ||
+    code === 'CAD' ||
+    code === 'NZD' ||
+    code === 'SGD' ||
+    code === 'HKD' ||
+    code === 'JPY' ||
+    code === 'NZD' ||
+    code === 'MXN'
+  ) {
+    return `${symbol}${formattedPrice} ${code}`
+  }
+  return `${symbol}${formattedPrice}`
+}
