@@ -8,7 +8,7 @@ interface Query {
 const key = (x: string, y: string) =>
   `${x}-${y}`
 
-//export const getProductKey = (product: Product) => key(product?.id, product?.variants?.[0]?.id)
+const getProductKey = (product: Product) => key(product?.id, product?.variants?.[0]?.id)
 
 class WishlistState {
   static instance: WishlistState | null = null
