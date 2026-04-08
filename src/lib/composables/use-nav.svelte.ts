@@ -6,7 +6,6 @@ import { cubicOut } from 'svelte/easing'
 import { onMount } from 'svelte'
 import type { Category, StoreData } from '$lib/types/index.js'
 import { goto } from '$app/navigation'
-import { getInstance, setInstance } from './helpers/index.ts'
 
 function count(...args: any[]) {
 	return args.filter(Boolean).length
