@@ -17,7 +17,7 @@ type GotoOptions = {
 
 type URLResolver = (url: URL) => void
 
-class SerialNavigator {
+export class SerialNavigator {
   static _instance: SerialNavigator
   currentURL = new URL(page.url)
 
@@ -30,7 +30,7 @@ class SerialNavigator {
       this.requestResolvers.push(res)
     })
     if (!this.isNavigating && this.requestResolvers.length == 1) {
-      setTimeout(this.resolveURLRequest, 500)
+      setTimeout(() => this.resolveURLRequest(), 500)
     }
     return promise
   }
@@ -39,7 +39,7 @@ class SerialNavigator {
     this.currentURL = url
   }
 
-  private resolveURLRequest = () => {
+  public resolveURLRequest = () => {
     const resolver = this.requestResolvers.shift()
     if (!resolver) return
     console.log("resolved", this.currentURL)
