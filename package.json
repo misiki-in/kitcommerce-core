@@ -11,7 +11,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
-		"p": "npm run build && npm publish"
+		"p": "npm run build && npm publish --access public"
 	},
 	"files": [
 		"dist",
