@@ -24,3 +24,5 @@ export { load as legalLayoutServer } from "./(legal)/layout.server.ts"
 
 export { load as myLayoutServer } from "./(my)/layout.server.ts"
 export { load as layoutServer } from "./layout.server.ts"
+
+export * from './load-one-page.ts'
