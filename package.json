@@ -1,6 +1,6 @@
 {
 	"name": "@misiki/kitcommerce-core",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -98,5 +98,8 @@
 	},
 	"keywords": [
 		"svelte"
-	]
+	],
+	"dependencies": {
+		"jsdom": "^29.0.2"
+	}
 }
