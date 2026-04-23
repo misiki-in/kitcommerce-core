@@ -75,7 +75,7 @@ export class PaymentModule {
 		if (!code) return ''
 		return typeof code.toUpperCase === 'function' ? code.toUpperCase() : String(code).toUpperCase()
 	}
-	listOfPaymentMethods: PaymentMethod[] = $state([])
+
 	paymentLoader = $state(false)
 	loadingForCart = $state(false)
 	payment_sessions = []
@@ -92,39 +92,54 @@ export class PaymentModule {
 	shippingRates = $state({})
 	affirmPaymentMethod: PaymentMethod | null = null
 
+  allPaymentMethods: PaymentMethod[] = $state([])
+  listOfPaymentMethods: PaymentMethod[] = $derived.by(() => {
+    const shippingAddress = this.cartState?.cart?.shippingAddress
+	  if (!shippingAddress) return this.allPaymentMethods
+
+    if (shippingAddress && shippingAddress.country !== 'USA' && shippingAddress.countryCode !== 'US')
+				return this.allPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY')
+
+				/* if (this.getPaymentCode() === 'AFFIRMPAY') {
+					this.SELECTED_PG_CODE = ''
+					try {
+						if (this.cartState?.cart) {
+							;(this.cartState.cart as { paymentMethod?: string }).paymentMethod = ''
+						}
+					} catch (_) {}
+				} */
+    return this.allPaymentMethods
+  })
+
 	constructor() {
 		onMount(async () => {
 			if (browser) {
 				const allPaymentMethods: any = await paymentMethodService.list({})
-				this.listOfPaymentMethods = allPaymentMethods?.data || []
+				this.allPaymentMethods = allPaymentMethods?.data || []
 
-				// Filter out Affirm Pay if country is not USA
-				const shippingAddress = this.cartState?.cart?.shippingAddress
-				if (shippingAddress && shippingAddress?.country !== 'USA' && shippingAddress?.countryCode !== 'US') {
-					this.listOfPaymentMethods = this.listOfPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY')
-				}
-				if (this.listOfPaymentMethods.length === 0) {
+        const shippingAddress = this.cartState?.cart?.shippingAddress
+				if (this.allPaymentMethods.length === 0) {
 					this.showError = true
 					this.errorMessage = 'No payment methods available'
 					this.checkoutDisabled = true
 				} else {
 					const savedCode = this.cartState?.cart?.paymentMethod as string | undefined
 					if (savedCode) {
-						const exists = this.listOfPaymentMethods.some((m: PaymentMethod) => m?.code?.toUpperCase?.() === savedCode.toUpperCase())
+						const exists = this.allPaymentMethods.some((m: PaymentMethod) => m?.code?.toUpperCase?.() === savedCode.toUpperCase())
 						if (exists) {
 							this.SELECTED_PG_CODE = savedCode
 						}
 					}
 
-					if (!this.SELECTED_PG_CODE && this.listOfPaymentMethods.length === 1) {
-						const singleMethod = this.listOfPaymentMethods[0]
+					if (!this.SELECTED_PG_CODE && this.allPaymentMethods.length === 1) {
+						const singleMethod = this.allPaymentMethods[0]
 						if (singleMethod?.code) {
 							this.SELECTED_PG_CODE = singleMethod.code
 						}
 					}
 					this.showPaymentMethods = true
 				}
-				if (this.listOfPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'RAZORPAY')) {
+				if (this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'RAZORPAY')) {
 					const razorpayScript = document.createElement('script')
 					razorpayScript.src = 'https://checkout.razorpay.com/v1/checkout.js'
 					razorpayScript.async = true
@@ -136,7 +151,7 @@ export class PaymentModule {
 					}
 					document.head.appendChild(razorpayScript)
 				}
-				this.affirmPaymentMethod = this.listOfPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'AFFIRMPAY') || null
+				this.affirmPaymentMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'AFFIRMPAY') || null
 				if (this.affirmPaymentMethod) {
 					if (shippingAddress?.country === 'USA' || shippingAddress?.countryCode === 'US') {
 						injectAffirm(this.affirmPaymentMethod.apiKey, this.affirmPaymentMethod.isTest)
@@ -158,28 +173,6 @@ export class PaymentModule {
 		$effect(() => {
 			if (this.cartState?.cart?.id) {
 				this.getShippingRates(this.cartState.cart.id)
-			}
-		})
-
-		// Effect to update payment methods if shipping address country changes
-		$effect(() => {
-			const cartObj = this.cartState
-			if (!cartObj) return
-
-			const shippingAddress = cartObj.cart?.shippingAddress
-
-			// If country is not USA, filter out Affirm Pay
-			if (shippingAddress && shippingAddress?.country !== 'USA' && shippingAddress?.countryCode !== 'US') {
-				this.listOfPaymentMethods = this.listOfPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY')
-
-				if (this.getPaymentCode() === 'AFFIRMPAY') {
-					this.SELECTED_PG_CODE = ''
-					try {
-						if (this.cartState?.cart) {
-							;(this.cartState.cart as { paymentMethod?: string }).paymentMethod = ''
-						}
-					} catch (_) {}
-				}
 			}
 		})
 	}
