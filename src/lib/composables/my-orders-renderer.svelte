@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { orderService } from '$lib/services'
 	import type { Snippet } from 'svelte'
+
+  let loading = $state(true)
 	let orders: any = $state({})
 	let currentPage = 1 // Start on page 1
 	let perPage = 10 // Number of orders per page
@@ -10,16 +12,24 @@
 
   interface SnippetParams {
     paginateOrders: () => void
+    loading: boolean
     orders: any
   }
 
 	// Function to paginate orders
 	async function paginateOrders() {
-		orders = await orderService.list({ page: 1, q: '', sort: 'createdAt' })
-		if (orders?.data) {
-			const start = (currentPage - 1) * perPage
-			paginatedOrders = orders.data.slice(start, start + perPage)
-		}
+    try {
+      loading = true
+		  orders = await orderService.list({ page: 1, q: '', sort: 'createdAt' })
+		  if (orders?.data) {
+		  	const start = (currentPage - 1) * perPage
+		  	paginatedOrders = orders.data.slice(start, start + perPage)
+		  }
+    } catch(e: any) {
+      console.error(e)
+    } finally {
+      loading = false
+    }
 	}
 
 	// Function to go to the previous page
@@ -49,6 +59,7 @@
 {@render
   content({
     paginateOrders,
-    orders
+    orders,
+    loading,
   })
 }

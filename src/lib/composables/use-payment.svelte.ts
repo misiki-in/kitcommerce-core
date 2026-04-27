@@ -78,6 +78,7 @@ export class PaymentModule {
 
 	paymentLoader = $state(false)
 	loadingForCart = $state(false)
+  loadingForPaymentMethods = $state(true)
 	payment_sessions = []
 	editAddress = $state(false)
 	razorpayReady = $state(false)
@@ -114,8 +115,10 @@ export class PaymentModule {
 	constructor() {
 		onMount(async () => {
 			if (browser) {
+        this.loadingForPaymentMethods = true
 				const allPaymentMethods: any = await paymentMethodService.list({})
 				this.allPaymentMethods = allPaymentMethods?.data || []
+        this.loadingForPaymentMethods = false
 
         const shippingAddress = this.cartState?.cart?.shippingAddress
 				if (this.allPaymentMethods.length === 0) {
