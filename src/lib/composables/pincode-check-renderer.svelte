@@ -59,7 +59,7 @@
 				const userLat = data[0].lat
 				const userLng = data[0].lon
 
-				console.log(warehouses)
+				// console.log(warehouses)
 
 				for (const wh of warehouses) {
 					const distance = distanceKm(wh.lat, wh.lng, userLat, userLng)

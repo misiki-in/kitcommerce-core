@@ -268,7 +268,7 @@ export class PaymentModule {
 					}
 					affirmPayOrder.currency = 'USD'
 
-					console.log(affirmPayOrder)
+					// console.log(affirmPayOrder)
 					try {
 						affirm.checkout(affirmPayOrder)
 						affirm.checkout.open({
@@ -291,7 +291,7 @@ export class PaymentModule {
 									// @ts-ignore - API might require this but TS doesn't know
 									return_url: `${page.url.origin}/checkout/success`
 								})
-								console.log('Affirm checkout success:', res1)
+								// console.log('Affirm checkout success:', res1)
 								goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
 							}
 						})

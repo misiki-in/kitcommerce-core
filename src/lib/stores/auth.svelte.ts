@@ -27,14 +27,14 @@ class UserState {
 	}
 
 	constructor() {
-    console.log("auth contstroctor")
+    //console.log("auth contstroctor")
 		this.hasLoaded = new Promise((res, rej) => {
 			onMount(async () => {
 				try {
 					this.loading = true
           this.lastError = null
 					const { sid, me } = this.retrieveUserId()
-          console.log("info", sid, me)
+          // console.log("info", sid, me)
 					// console.log('🚀 ~ UserState ~ fetch:', sid, me)
 					if (sid) {
 						this.user = me
@@ -187,7 +187,7 @@ class UserState {
 const USER_KEY = Symbol('USER')
 
 export function setUserState() {
-  console.log("Setting UserState")
+  // console.log("Setting UserState")
 	return setContext(USER_KEY, new UserState())
 }
 

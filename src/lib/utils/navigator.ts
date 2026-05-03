@@ -25,7 +25,7 @@ export class SerialNavigator {
   isNavigating = false
 
   getCurrentURL = () => {
-    console.log("requested")
+    // console.log("requested")
     const promise = new Promise<URL>((res) => {
       this.requestResolvers.push(res)
     })
@@ -42,7 +42,7 @@ export class SerialNavigator {
   public resolveURLRequest = () => {
     const resolver = this.requestResolvers.shift()
     if (!resolver) return
-    console.log("resolved", this.currentURL)
+    // console.log("resolved", this.currentURL)
     resolver(this.currentURL)
   }
 
@@ -53,7 +53,7 @@ export class SerialNavigator {
       await wait(500)
     if (!this.requestResolvers.length) {
       this.isNavigating = true
-      console.log("going to", url)
+      // console.log("going to", url)
       await goto(url, options)
       this.isNavigating = false
     }
