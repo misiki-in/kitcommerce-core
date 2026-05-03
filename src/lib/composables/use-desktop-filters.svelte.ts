@@ -105,9 +105,10 @@ export class DesktopFilterState {
       const keys = Object.keys(this.allFilters)?.filter((f: string) => !this.ignoreFilters?.includes(f))
       const filtersMap: Record<string, string[]> = {}
       for (const k of keys) {
-        if (this.allFilters[k] && Object.keys(this.allFilters[k]).length > 0) {
-          filtersMap[k] = Object.keys(this.allFilters[k])
-        }
+				if (this.allFilters[k] && Object.keys(this.allFilters[k]).length > 0) {
+					const formattedKey = k.replace('attributes.', '').replace(/_/g, ' ')
+					filtersMap[formattedKey] = Object.keys(this.allFilters[k])
+				}
       }
       return filtersMap
     }
