@@ -48,7 +48,7 @@ export class NavModule {
 
 	productsCount = $derived(page?.data?.products?.count || 0)
 	constructor() {
-    console.log("page.data from core", page.data)
+    // console.log("page.data from core", page.data)
 		onMount(async () => {
 			try {
 				const response = await menuService.list()

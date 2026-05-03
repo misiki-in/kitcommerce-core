@@ -545,7 +545,7 @@ export class AddressModule {
 		this.showAddressList = true
 	}
 	handleBilingAddOrChangeClick = () => {
-		console.log('called')
+		// console.log('called')
 		if (!this.userState.user?.role) {
 			this.showBillingAddressForm = true
 			if (this.cartState.cart.billingAddress) this.openAddressForm(this.cartState.cart.billingAddress, 'billing', true)
