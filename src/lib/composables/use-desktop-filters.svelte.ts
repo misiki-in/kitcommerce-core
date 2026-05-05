@@ -296,6 +296,7 @@ export class DesktopFilterState {
   }
 
   formatFilterName = (key: string) => {
+    key = key.replaceAll("_", " ")
     let formattedKey = key
     if (key?.includes?.('.')) {
       const parts = key.split('.')
