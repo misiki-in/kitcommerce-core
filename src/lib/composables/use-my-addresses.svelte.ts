@@ -32,8 +32,8 @@ export class MyAddressesModule {
 				await this.paginateAddress()
 			}
 			toast.success('Address saved')
-		} catch (e) {
-			toast.error('Failed to save address')
+		} catch (e: any) {
+			toast.error(e?.message || 'Failed to save address')
 			console.error('Error saving address:', e)
 		}
 	}
@@ -43,9 +43,9 @@ export class MyAddressesModule {
 			await addressService.deleteAddress(address.id)
 			toast.success('Address Deleted')
 			await this.paginateAddress()
-		} catch (e) {
+		} catch (e: any) {
 			// also happens when address is used in cart
-			toast.error('Failed to delete address')
+			toast.error(e?.message || 'Failed to delete address')
 			console.error('Error deleting address:', e)
 		}
 	}
