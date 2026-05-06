@@ -3,7 +3,7 @@ import { afterNavigate, goto } from '$app/navigation'
 import { page } from '$app/state'
 import type { CarouselAPI } from '$lib/types/index.js'
 import { storeProductToRecentlyViewed, findVariantWithOptionValue, addPendingWishlistAction, checkPendingWishlistActions } from '$lib/logic/index.js'
-import { getUserState, getCartState } from '$lib/stores/index.js'
+import { getUserState, getCartState, getWishlistState, getProductKey } from '$lib/stores/index.js'
 import { deepCopy, fireGTagEvent } from '$lib/utils/index.js'
 import { meilisearchService, productService, reviewService, wishlistService } from '$lib/services/index.js'
 import { onMount } from 'svelte'
@@ -17,6 +17,7 @@ class ProductState {
 
 	userState = getUserState()
 	cartState = getCartState()
+  wishlistState = getWishlistState()
 
 	isAdding = $state(false)
 	showReviewForm = $state(false)
@@ -79,7 +80,7 @@ class ProductState {
 	isIndianPincodesPluginEnabled = $derived(page?.data?.store?.plugins?.isIndianPincodes?.active)
 	wareHousePluginEnabled = $derived(page?.data?.store?.plugins?.warehouse?.active)
 
-	wishlisted = $state(false)
+	wishlisted = $derived(this.wishlistState.isWishlisted[getProductKey(page.data.product)])
 	wishlistLoading = $state(false)
 
 	warehouses = $state<Record<string, unknown>[]>([])
@@ -305,22 +306,8 @@ class ProductState {
 		}
 
 		this.wishlistLoading = true
-		try {
-			const res = await wishlistService.toggleWishlist({
-				productId: page.data?.product?.id,
-				variantId: this.selectedVariant?.id
-			})
-
-			if (res?.id) {
-				this.wishlisted = res?.active
-			} else {
-				this.wishlisted = false
-			}
-		} catch (error) {
-			console.log(error)
-		} finally {
-			this.wishlistLoading = false
-		}
+    await this.wishlistState.toggleWishlist(page.data.product)
+		this.wishlistLoading = false
 	}
 
 	buyNow = async () => {
