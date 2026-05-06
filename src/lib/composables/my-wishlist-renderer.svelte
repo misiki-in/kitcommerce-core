@@ -67,8 +67,8 @@
 		wishlistItems = wishlistItems.filter((item) => item?.productId !== productId)
 	}
 
-	function moveToCart(item: WishlistItem) {
-		cartState.addOrUpdate({
+	async function moveToCart(item: WishlistItem) {
+		await cartState.addOrUpdate({
 			productId: item?.productId,
 			variantId: item?.variantId,
 			qty: 1
