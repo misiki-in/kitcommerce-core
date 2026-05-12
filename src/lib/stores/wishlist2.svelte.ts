@@ -49,6 +49,7 @@ class WishlistState {
 			...this.isWishlisted,
 			[k]: next
 		}
+    this.isWishlisted = { ...this.isWishlisted }
 
 		try {
 			await wishlistService.toggleWishlist({

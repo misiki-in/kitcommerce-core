@@ -5,9 +5,10 @@
 	import type { Snippet } from 'svelte'
 	import type { Product } from '$lib/types'
 	import { toast } from 'svelte-sonner'
-	import { getProductKey, wishlistState } from '$lib/stores'
+	import { getProductKey, getWishlistState } from '$lib/stores/index.js'
 
 	const cartState = getCartState()
+  const wishlistState = getWishlistState()
 
 	interface Props {
 		aspectRatio: string
