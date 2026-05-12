@@ -317,3 +317,5 @@ export const priceRoundUp = (price: number, currencyCode: string) => {
   }
   return `${symbol}${formattedPrice}`
 }
+
+export const formatPlural = (text: string, count: number) => count === 1 ? text: `${text}s`
