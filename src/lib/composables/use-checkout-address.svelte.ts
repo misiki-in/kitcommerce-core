@@ -480,7 +480,11 @@ export class AddressModule {
 			return
 		}
 
-		await addressService.deleteAddress(address.id)
+    try {
+		  await addressService.deleteAddress(address.id)
+    } catch(e: any) {
+      toast.error(e?.message || "Failed to delete address")
+    }
 
 		this.addresses = this.addresses.filter((addr) => addr.id !== address.id)
 	}
