@@ -5,9 +5,11 @@
 	import type { Snippet } from 'svelte'
 	import type { Product } from '$lib/types'
 	import { toast } from 'svelte-sonner'
-	import { getProductKey, getWishlistState } from '$lib/stores/index.js'
+	import { getProductKey, getUserState, getWishlistState } from '$lib/stores/index.js'
+	import { showAuthModal } from '$lib/components/index.ts';
 
 	const cartState = getCartState()
+  const userState = getUserState()
   const wishlistState = getWishlistState()
 
 	interface Props {
@@ -40,8 +42,20 @@
 	}
 
 	async function toggleWishlist() {
+    console.log("new")
+	  loadingForWishlist = true
 		try {
-			loadingForWishlist = true
+		  if (!userState?.user?.userId) {
+        showAuthModal("login")
+		  	toast.error('Please login to add to wishlist', { position: 'top-right' })
+		  	return
+		  }
+
+		  if (userState?.user?.role !== 'USER') {
+		  	toast.error('Only users can add to wishlist', { position: 'top-right' })
+		  	return
+		  }
+
 			await wishlistState.toggleWishlist(product)
 		} catch (error: any) {
 			console.error(error)
