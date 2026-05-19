@@ -1,17 +1,17 @@
 <script lang="ts">
-	// import { page } from '$app/state'
-	let { storeData } = $props()
-	// let storePlugins = $derived(page?.data?.store?.plugins)
+	import { browser } from '$app/environment';
+	import { page } from '$app/state'
+	import { onMount } from 'svelte';
 
-	// First check store data, then fall back to setting state
-	let gtagId = storeData?.plugins?.googleTagManager?.id
+  const googleTagManagerPlugin = $derived(page.data.store?.plugins?.googleTagManager?.id)
+	const gtagId = $derived(googleTagManagerPlugin.id)
 
-	let isActive = storeData?.plugins?.googleTagManager?.active
+	onMount(() => {
+    if (!googleTagManagerPlugin) return
 
-	$effect(() => {
-		if (isActive && gtagId && typeof document !== 'undefined') {
-			// console.log('GTM initializing with ID:', gtagId)
+	  const isActive = googleTagManagerPlugin.active
 
+		if (isActive && gtagId  && browser) {
 			// Clean up existing scripts to avoid duplicates
 			const existingLoader = document.querySelector(`script[src="https://www.googletagmanager.com/gtm.js?id=${gtagId}"]`)
 			const existingConfig = document.querySelector('script#gtag-config')
@@ -45,7 +45,7 @@
 </script>
 
 <!-- Add noscript fallback iframe for users with JavaScript disabled -->
-{#if isActive && gtagId}
+{#if googleTagManagerPlugin.isActive && gtagId}
 	<noscript>
 		<iframe
 			src="https://www.googletagmanager.com/ns.html?id={gtagId}"

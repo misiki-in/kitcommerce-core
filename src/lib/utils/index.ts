@@ -319,3 +319,11 @@ export const priceRoundUp = (price: number, currencyCode: string) => {
 }
 
 export const formatPlural = (text: string, count: number) => count === 1 ? text: `${text}s`
+
+export function parseHTMLToText(html: string): string {
+  return html
+  /*
+  const root = parse(html)
+  return root.textContent || root.innerHTML
+  */
+}
