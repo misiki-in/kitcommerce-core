@@ -5,11 +5,12 @@
 		type?: 'order' | 'product' | 'shop'
 		children?: any
 	}
-	let { type = 'product', children }: Props = $props()
+
+	const { type = 'product', children }: Props = $props()
 
 	const plugin = $derived(page.data?.store?.plugins?.trustBadges)
 
-	let content = $derived.by(() => {
+	const content = $derived.by(() => {
 		if (plugin && plugin?.active) {
 			if (type === 'order') {
 				return plugin?.order_html // @todo: need to modify api

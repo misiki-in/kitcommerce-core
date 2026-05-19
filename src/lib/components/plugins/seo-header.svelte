@@ -1,17 +1,47 @@
 <script lang="ts">
-	let { metaTitle, metaDescription = '', metaKeywords = '', image = '' } = $props()
+	import { page } from '$app/state';
+	import { parseHTMLToText } from '$lib/utils/index.js';
+
+	const {
+		metaTitle = '',
+		metaDescription = '',
+		metaKeywords = '',
+		image = '',
+		canonicalUrl = '',
+		noindex = false
+	} = $props();
+
+	const finalCanonicalUrl = $derived(canonicalUrl || page.url.origin + page.url.pathname);
+	const storeName = $derived(page.data?.store?.name || 'Litekart');
+	const finalTitle = $derived(metaTitle || page.data.store?.name || `${storeName} | Premium E-commerce Shopping`);
+	const finalDescription = $derived(
+		metaDescription ||
+			parseHTMLToText(page.data?.store?.description) ||
+			`Discover the best deals at ${storeName}. Free delivery available.`
+	);
 </script>
 
 <svelte:head>
-	<title>{metaTitle}</title>
-	<meta name="description" content={metaDescription} />
+	<title>{finalTitle}</title>
+	<meta name="description" content={finalDescription} />
 	<meta name="keywords" content={metaKeywords} />
-	<meta property="og:title" content={metaTitle} />
-	<meta property="og:description" content={metaDescription} />
+	<link rel="alternate" hreflang="en" href={finalCanonicalUrl} />
+	<link rel="alternate" hreflang="x-default" href={finalCanonicalUrl} />
+	{#if noindex}
+		<meta name="robots" content="noindex, follow" />
+	{:else}
+		<link rel="canonical" href={finalCanonicalUrl} />
+	{/if}
+
+	<meta property="og:title" content={finalTitle} />
+	<meta property="og:description" content={finalDescription} />
 	<meta property="og:image" content={image} />
+	<meta property="og:url" content={finalCanonicalUrl} />
+	<meta property="og:site_name" content={storeName} />
 	<meta property="og:type" content="website" />
+
 	<meta name="twitter:card" content="summary_large_image" />
-	<meta name="twitter:title" content={metaTitle} />
-	<meta name="twitter:description" content={metaDescription} />
+	<meta name="twitter:title" content={finalTitle} />
+	<meta name="twitter:description" content={finalDescription} />
 	<meta name="twitter:image" content={image} />
 </svelte:head>
