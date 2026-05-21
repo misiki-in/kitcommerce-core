@@ -61,6 +61,10 @@
 			"types": "./dist/index.d.ts",
 			"svelte": "./dist/index.js"
 		},
+		"./request-handlers": {
+			"types": "./dist/request-handlers/index.d.ts",
+			"svelte": "./dist/request-handlers/index.js"
+		},
 		"./composables": {
 			"types": "./dist/composables/index.d.ts",
 			"svelte": "./dist/composables/index.js"
