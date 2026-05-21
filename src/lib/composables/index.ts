@@ -40,3 +40,4 @@ export { default as ProductCardRenderer } from './product-card-renderer.svelte'
 export { default as SignupRenderer } from './signup-renderer.svelte'
 
 export { default as CustomDesignRenderer } from './varni/custom-design-renderer.svelte'
+export { default as NewsletterRenderer } from './newsletter-renderer.svelte'
