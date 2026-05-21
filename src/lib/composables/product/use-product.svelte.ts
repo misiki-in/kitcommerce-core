@@ -84,6 +84,7 @@ class ProductState {
 	wishlistLoading = $state(false)
 
 	warehouses = $state<Record<string, unknown>[]>([])
+  warehouseLoaded = $state(false)
 
 	addToCartButtonDisabled = $derived(
 		this.isAdding ||
@@ -447,6 +448,10 @@ class ProductState {
 
 		onMount(async () => {
 			try {
+        if (!this.wareHousePluginEnabled)
+          return
+        this.warehouseLoaded = false
+
 				const res = await fetch(`/api/products/${page.data?.product?.id}/warehouse`, {
 					method: 'GET',
 					headers: {
@@ -459,9 +464,11 @@ class ProductState {
 				if (jsonRes?.data?.length) {
 					this.warehouses = jsonRes.data
 				}
+
+        this.warehouseLoaded = true
 			} catch (error) {
 				console.error(error)
-			}
+			} 
 		})
 
 		$effect(() => {
