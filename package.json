@@ -76,7 +76,7 @@
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.7.0",
-		"@misiki/litekart-connector": "^2.0.26",
+		"@misiki/litekart-connector": "^2.0.28",
 		"@stripe/stripe-js": "^9.0.0",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/package": "^2.5.7",

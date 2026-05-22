@@ -114,6 +114,7 @@ export class PaymentModule {
 
 	constructor() {
 		onMount(async () => {
+      console.log('PaymentModule mounted, fetching payment methods...')
 			if (browser) {
         this.loadingForPaymentMethods = true
 				const allPaymentMethods: any = await paymentMethodService.list({})
@@ -357,6 +358,23 @@ export class PaymentModule {
 				})
 				if (res?.redirect_url && res?.redirect_url !== null) {
 					window.location.href = `${res.redirect_url}`
+				} else {
+					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
+				}
+			} catch (e: any) {
+				toast.error(e.message || 'Payment Failed')
+			} finally {
+				this.paymentLoader = false
+			}
+		} else if (this.getPaymentCode() === 'CASHFREE') {
+			try {
+				const cf: any = await checkoutService.checkoutCashfree({
+					cartId: this.cartState.cart.id,
+					email: this.cartState.cart.email || this.cartState.cart.shippingAddress?.email || '',
+					origin: page.url.origin
+				})
+				if (cf?.payment_link) {
+					window.location.href = cf.payment_link
 				} else {
 					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
 				}
