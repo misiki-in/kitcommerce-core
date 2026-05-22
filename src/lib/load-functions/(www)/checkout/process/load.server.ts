@@ -21,6 +21,12 @@ export function getLoadWithContext(redirect: typeof coreRedirect) {
 					storeId
 				});
 				console.log(`🚀 ~ payment processed.........: ${order_no}`);
+			} else if (pg_name?.toUpperCase?.() === 'CASHFREE') {
+				const checkoutService = new CheckoutService(fetch);
+				await checkoutService.captureCashfreePayment({
+					order_no: order_no || ''
+				});
+				console.log(`🚀 ~ Cashfree payment processed: ${order_no}`);
 			}
 			failed = false;
 		} catch (e) {
