@@ -50,8 +50,10 @@ declare global {
 	interface Window {
 		Razorpay: any
 		affirm: any
+		Cashfree: any
 	}
 	const affirm: any
+	const Cashfree: any
 }
 
 export class PaymentModule {
@@ -368,15 +370,47 @@ export class PaymentModule {
 			}
 		} else if (this.getPaymentCode() === 'CASHFREE') {
 			try {
+				await this.loadCashfreeScript()
 				const cf: any = await checkoutService.checkoutCashfree({
 					cartId: this.cartState.cart.id,
 					email: this.cartState.cart.email || this.cartState.cart.shippingAddress?.email || '',
 					origin: page.url.origin
 				})
-				if (cf?.payment_link) {
-					window.location.href = cf.payment_link
+
+				const cashfreeMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'CASHFREE')
+				const mode = cashfreeMethod?.isTest === false ? 'production' : 'sandbox'
+
+				if (typeof (window as any).Cashfree === 'undefined') {
+					toast.error('Cashfree SDK could not be loaded')
+					return
+				}
+
+				const cashfree = (window as any).Cashfree({ mode })
+
+				if (cf?.payment_session_id) {
+					let checkoutOptions = {
+						paymentSessionId: cf.payment_session_id,
+						redirectTarget: "_modal",
+					}
+					cashfree.checkout(checkoutOptions).then((result: any) => {
+						if (result.error) {
+							console.log("User has closed the popup or there is some payment error, Check for Payment Status");
+							console.log(result.error);
+							toast.error(result.error.message || 'Payment closed or failed');
+						}
+						if (result.redirect) {
+							console.log("Payment will be redirected");
+						}
+						if (result.paymentDetails) {
+							console.log("Payment has been completed, Check for Payment Status");
+							console.log(result.paymentDetails.paymentMessage);
+							const cartId = this.cartState.cart.id
+							const orderNo = cf.order_no || cf.order_id || ''
+							goto(`/checkout/process?pg=cashfree&order_no=${orderNo}&cart_id=${cartId}`)
+						}
+					})
 				} else {
-					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
+					toast.error('Something went wrong, payment session could not be created')
 				}
 			} catch (e: any) {
 				toast.error(e.message || 'Payment Failed')
@@ -398,6 +432,20 @@ export class PaymentModule {
 			}
 		}
 	}
+
+  private async loadCashfreeScript(): Promise<void> {
+    if (typeof window !== 'undefined' && (window as any).Cashfree) {
+      return
+    }
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = 'https://sdk.cashfree.com/js/v3/cashfree.js'
+      script.async = true
+      script.onload = () => resolve()
+      script.onerror = () => reject(new Error('Failed to load Cashfree SDK'))
+      document.head.appendChild(script)
+    })
+  }
 
 	getShippingRates = async (cartId: string) => {
 		try {
