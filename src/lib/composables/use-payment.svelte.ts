@@ -60,13 +60,14 @@ export class PaymentModule {
   static _instance: PaymentModule
 
 	cartState = getCartState() as CartState
-	private _selectedPgCode = ''
+	selectedPGCode = $state('')
+
 	get SELECTED_PG_CODE(): string {
-		return this._selectedPgCode
+		return this.selectedPGCode
 	}
 
 	set SELECTED_PG_CODE(value: string | undefined) {
-		this._selectedPgCode = value || ''
+		this.selectedPGCode = value || ''
     if (value)
       this.checkoutDisabled = false
 	}
