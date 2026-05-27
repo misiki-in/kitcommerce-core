@@ -5,7 +5,7 @@ import { toast } from 'svelte-sonner'
 import { checkoutService, couponService, paymentMethodService } from '$lib/services/index.js'
 import { browser } from '$app/environment'
 import { page } from '$app/state'
-import { injectAffirm } from '$lib/utils/index.js'
+import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -476,6 +476,10 @@ export class PaymentModule {
 		} finally {
 		}
 	}
+
+  handleAddressChange = async () => {
+    goto(appendOneTimeCartId('/checkout/address?showEditAddress=true'))
+  }
 
   handlePaymentMethodChange = async (code?: string) => {
     this.SELECTED_PG_CODE = code
