@@ -9,129 +9,129 @@ import { toast } from 'svelte-sonner'
 import { z } from 'zod'
 
 interface CartExtended extends Cart {
-	shippingAddress?: Address
+  shippingAddress?: Address
 
-	billingAddress?: Address
+  billingAddress?: Address
 }
 
 interface CartState extends Cart2State {
-	cart: CartExtended
+  cart: CartExtended
 }
 
 export const checkoutAddressSchema = {
-	email: z.union([z.string().email('Please enter a valid email address').optional(), z.literal('')]),
+  email: z.union([z.string().email('Please enter a valid email address').optional(), z.literal('')]),
 
-	phone: z
-		.string()
-		.optional()
-		.refine((val) => !val || (val.length > 0 && val.length <= 20 && /^\+?[0-9\s\-()]*$/.test(val)), { message: 'Phone number must be valid' })
+  phone: z
+    .string()
+    .optional()
+    .refine((val) => !val || (val.length > 0 && val.length <= 20 && /^\+?[0-9\s\-()]*$/.test(val)), { message: 'Phone number must be valid' })
 }
 
 export interface BaseAddress {
-	[key: string]: any
+  [key: string]: any
 
-	id: string
-	firstName: string | null
-	lastName: string | null
-	phone: string | null
-	address_1: string | null
-	address_2: string | null
-	city: string | null
-	state: string | null
-	zip: string | null
-	countryCode: string | null
+  id: string
+  firstName: string | null
+  lastName: string | null
+  phone: string | null
+  address_1: string | null
+  address_2: string | null
+  city: string | null
+  state: string | null
+  zip: string | null
+  countryCode: string | null
 }
 
 export type AddressType = 'billing' | 'shipping' | null
 
 export const emptyAddress = (id: string): BaseAddress => {
-	return {
-		id,
-		firstName: '',
-		lastName: '',
-		phone: '',
-		address_1: '',
-		address_2: '',
-		city: '',
-		state: '',
-		zip: '',
-		countryCode: page?.data?.store?.country?.code || 'IN'
-	}
+  return {
+    id,
+    firstName: '',
+    lastName: '',
+    phone: '',
+    address_1: '',
+    address_2: '',
+    city: '',
+    state: '',
+    zip: '',
+    countryCode: page?.data?.store?.country?.code || 'IN'
+  }
 }
 
 export class AddressModule {
   static _instance: AddressModule
 
-	userState = getUserState()
+  userState = getUserState()
 
-	cartState = getCartState() as CartState
+  cartState = getCartState() as CartState
 
-	noItemsChecked = $derived(this.cartState?.cart?.lineItems?.every((item: any) => !item.isSelectedForCheckout))
+  noItemsChecked = $derived(this.cartState?.cart?.lineItems?.every((item: any) => !item.isSelectedForCheckout))
 
-	isPhoneRequired = page.data?.store?.isPhoneMandatory
+  isPhoneRequired = page.data?.store?.isPhoneMandatory
 
-	isEmailRequired = page.data?.store?.isEmailMandatory
+  isEmailRequired = page.data?.store?.isEmailMandatory
 
-	isEmailOk = $derived(!this.isEmailRequired || this.cartState.cart.email)
+  isEmailOk = $derived(!this.isEmailRequired || this.cartState.cart.email)
 
-	isPhoneOk = $derived(!this.isPhoneRequired || this.cartState.cart.phone)
+  isPhoneOk = $derived(!this.isPhoneRequired || this.cartState.cart.phone)
 
-	email = $state('')
+  email = $state('')
 
-	phone = $state('')
+  phone = $state('')
 
-	loadingForCart = $state(false)
+  loadingForCart = $state(false)
 
-	loadingForCheckout = $state(false)
+  loadingForCheckout = $state(false)
 
-	editAddress = $state(false)
+  editAddress = $state(false)
 
-	editEmail = $state(false)
+  editEmail = $state(false)
 
-	isBillingAddressSameAsShipping = $state(true)
+  isBillingAddressSameAsShipping = $state(true)
 
-	currentAddress = $state(emptyAddress('new'))
+  currentAddress = $state(emptyAddress('new'))
 
-	currentAddressType: AddressType = $state(null)
+  currentAddressType: AddressType = $state(null)
 
-	isLoggedIn = $state(false)
+  isLoggedIn = $state(false)
 
-	showAddressList = $state(false)
+  showAddressList = $state(false)
 
-	showAddressForm = $state(false)
+  showAddressForm = $state(false)
 
-	showBillingAddressForm = $state(false)
+  showBillingAddressForm = $state(false)
 
-	isEditingAddress = $state(false)
+  isEditingAddress = $state(false)
 
-	addresses: any[] = $state([])
+  addresses: any[] = $state([])
 
-	showError = $state(false)
+  showError = $state(false)
 
-	errorMessage = $state('')
+  errorMessage = $state('')
 
-	showLoginModal = $state(false)
+  showLoginModal = $state(false)
 
-	loadingForSaveToCart = $state(false)
+  loadingForSaveToCart = $state(false)
 
-	constructor() {
-		$effect(() => {
-			if (this.cartState?.cart?.shippingAddressId && this.cartState?.cart?.billingAddressId) {
-				this.isBillingAddressSameAsShipping = this.cartState.cart.shippingAddressId === this.cartState.cart.billingAddressId
-			} else {
-				this.isBillingAddressSameAsShipping = true
-			}
-		})
+  constructor() {
+    $effect(() => {
+      if (this.cartState?.cart?.shippingAddressId && this.cartState?.cart?.billingAddressId) {
+        this.isBillingAddressSameAsShipping = this.cartState.cart.shippingAddressId === this.cartState.cart.billingAddressId
+      } else {
+        this.isBillingAddressSameAsShipping = true
+      }
+    })
 
-		// handle case where user logs in the current page
+    // handle case where user logs in the current page
 
-		$effect(() => {
-			if (!this.isLoggedIn && this.userState?.user?.userId) this.mount()
-		})
+    $effect(() => {
+      if (!this.isLoggedIn && this.userState?.user?.userId) this.mount()
+    })
 
-		onMount(this.mount)
+    onMount(this.mount)
 
-		/*
+    /*
     $effect(() => {
 
       // When checkbox is toggled, update billing address
@@ -181,99 +181,99 @@ export class AddressModule {
     })
 
     */
-	}
+  }
 
-	saveContactInfo = async (e: any) => {
-		e.preventDefault()
+  saveContactInfo = async (e: any) => {
+    e.preventDefault()
 
-		if (this.email) {
-			checkoutAddressSchema.email.parse(this.email)
-		} else if (this.isEmailRequired) {
-			throw new z.ZodError([
-				{
-					code: 'custom',
-					path: ['email'],
-					message: 'Email is required'
-				}
-			])
-		}
+    if (this.email) {
+      checkoutAddressSchema.email.parse(this.email)
+    } else if (this.isEmailRequired) {
+      throw new z.ZodError([
+        {
+          code: 'custom',
+          path: ['email'],
+          message: 'Email is required'
+        }
+      ])
+    }
 
-		if (this.phone) {
-			checkoutAddressSchema.phone.parse(this.phone)
-		} else if (this.isPhoneRequired) {
-			throw new z.ZodError([
-				{
-					code: 'custom',
-					path: ['phone'],
-					message: 'Phone is required'
-				}
-			])
-		}
-		try {
-			checkoutAddressSchema.email.parse(this.email)
+    if (this.phone) {
+      checkoutAddressSchema.phone.parse(this.phone)
+    } else if (this.isPhoneRequired) {
+      throw new z.ZodError([
+        {
+          code: 'custom',
+          path: ['phone'],
+          message: 'Phone is required'
+        }
+      ])
+    }
+    try {
+      checkoutAddressSchema.email.parse(this.email)
 
-			checkoutAddressSchema.phone.parse(this.phone ?? '')
+      checkoutAddressSchema.phone.parse(this.phone ?? '')
 
-			await this.cartState.updateEmail({ email: this.email, phone: this.phone })
+      await this.cartState.updateEmail({ email: this.email, phone: this.phone })
 
-			if (this.addresses.length === 0) {
-				this.showAddressForm = true
+      if (this.addresses.length === 0) {
+        this.showAddressForm = true
 
-				this.currentAddressType = 'shipping'
-			} else if (!this.cartState.cart.shippingAddress) {
-				this.currentAddress = this.addresses[0]
+        this.currentAddressType = 'shipping'
+      } else if (!this.cartState.cart.shippingAddress) {
+        this.currentAddress = this.addresses[0]
 
-				this.isBillingAddressSameAsShipping = true
-				this.saveAddressToCart()
-			}
-		} catch (e: any) {
-			toast.error(`Failed to save contact details${e.toString()}`)
-		}
+        this.isBillingAddressSameAsShipping = true
+        this.saveAddressToCart()
+      }
+    } catch (e: any) {
+      toast.error(`Failed to save contact details${e.toString()}`)
+    }
 
-		this.editEmail = false
-	}
+    this.editEmail = false
+  }
 
-	saveAddressToCart = async (e?: Event) => {
-		if (e) e?.preventDefault?.()
+  saveAddressToCart = async (e?: Event) => {
+    if (e) e?.preventDefault?.()
 
-		try {
-			this.loadingForSaveToCart = true
-			if (this.isBillingAddressSameAsShipping) {
-				await this.cartState.updateShippingAddress({
-					shippingAddress: this.currentAddress,
-					billingAddress: this.currentAddress,
-					isBillingAddressSameAsShipping: true
-				})
-			} else if (this.currentAddressType == 'shipping') {
-				await this.cartState.updateShippingAddress({
-					shippingAddress: this.currentAddress,
-					billingAddress: this.cartState.cart.billingAddress,
-					isBillingAddressSameAsShipping: false
-				})
-			} else if (this.currentAddressType == 'billing') {
-				await this.cartState.updateShippingAddress({
-					shippingAddress: this.cartState.cart.shippingAddress,
-					billingAddress: this.currentAddress,
-					isBillingAddressSameAsShipping: false
-				})
-			} else throw 'Bad currentAddressType'
-		} catch (e: any) {
-			console.error(e)
-			toast.error(e.message)
-		} finally {
-			this.loadingForSaveToCart = false
-		}
+    try {
+      this.loadingForSaveToCart = true
+      if (this.isBillingAddressSameAsShipping) {
+        await this.cartState.updateShippingAddress({
+          shippingAddress: this.currentAddress,
+          billingAddress: this.currentAddress,
+          isBillingAddressSameAsShipping: true
+        })
+      } else if (this.currentAddressType == 'shipping') {
+        await this.cartState.updateShippingAddress({
+          shippingAddress: this.currentAddress,
+          billingAddress: this.cartState.cart.billingAddress,
+          isBillingAddressSameAsShipping: false
+        })
+      } else if (this.currentAddressType == 'billing') {
+        await this.cartState.updateShippingAddress({
+          shippingAddress: this.cartState.cart.shippingAddress,
+          billingAddress: this.currentAddress,
+          isBillingAddressSameAsShipping: false
+        })
+      } else throw 'Bad currentAddressType'
+    } catch (e: any) {
+      console.error(e)
+      toast.error(e.message)
+    } finally {
+      this.loadingForSaveToCart = false
+    }
 
-		this.editAddress = false
-	}
+    this.editAddress = false
+  }
 
-	cancelSaveShippingAddress = (e: any) => {
-		e.preventDefault()
+  cancelSaveShippingAddress = (e: any) => {
+    e.preventDefault()
 
-		this.editAddress = false
-	}
+    this.editAddress = false
+  }
 
-	/*
+  /*
   saveBillingAddress = async (e: any) => {
 
     e?.preventDefault?.()
@@ -298,126 +298,131 @@ export class AddressModule {
 
   */
 
-	cancelSaveBillingAddress = (e: any) => {
-		e.preventDefault()
+  cancelSaveBillingAddress = (e: any) => {
+    e.preventDefault()
 
-		this.editAddress = false
+    this.editAddress = false
 
-		this.showBillingAddressForm = false
-	}
+    this.showBillingAddressForm = false
+  }
 
-	paginateAddress = async (pageNo: number) => {
-		try {
-			const res: any = await addressService.list({
-				page: pageNo,
-				user: this.userState?.user?.userId
-			})
+  paginateAddress = async (pageNo: number) => {
+    try {
+      const res: any = await addressService.list({
+        page: pageNo,
+        user: this.userState?.user?.userId
+      })
 
-			const addressIds = new Set()
+      const addressIds = new Set()
 
-			this.addresses = [...this.addresses, ...(res?.data || [])].filter((x) => {
-				if (addressIds.has(x.id)) return false
-				addressIds.add(x.id)
-				return true
-			})
+      this.addresses = [...this.addresses, ...(res?.data || [])].filter((x) => {
+        if (addressIds.has(x.id)) return false
+        addressIds.add(x.id)
+        return true
+      })
 
-			return res?.pageSize == res?.data?.length
-		} catch (e: any) {
-			console.error(e)
-			const msg = e?.message || e?.toString?.() || ''
-			if (e?.status === 401 || e?.status === 403 || /invalid jwt/i.test(msg)) {
-				toast.error('Session expired. Please log in again.')
-				await this.userState.logout()
-				// showAuthModal is triggered by logout; keep here only if needed in future
-				// showAuthModal('login')
-			} else {
-				toast.error('Failed to load addresses')
-			}
-			return false
-		}
-	}
+      return res?.pageSize == res?.data?.length
+    } catch (e: any) {
+      console.error(e)
+      const msg = e?.message || e?.toString?.() || ''
+      if (e?.status === 401 || e?.status === 403 || /invalid jwt/i.test(msg)) {
+        toast.error('Session expired. Please log in again.')
+        await this.userState.logout()
+        // showAuthModal is triggered by logout; keep here only if needed in future
+        // showAuthModal('login')
+      } else {
+        toast.error('Failed to load addresses')
+      }
+      return false
+    }
+  }
 
-	mount = async () => {
-		await this.userState.hasLoaded
+  mount = async () => {
+    await this.userState.hasLoaded
 
-		if (this.userState?.user?.email) {
-			this.isLoggedIn = true
+    if (this.userState?.user?.email) {
+      this.isLoggedIn = true
 
-			try {
-				this.email = this.userState.user.email
+      try {
+        this.email = this.userState.user.email
 
-				this.phone = this.userState.user.phone ?? ''
+        this.phone = this.userState.user.phone ?? ''
 
-				this.paginateAddress(1)
+        this.paginateAddress(1)
 
-				await this.cartState.hasLoaded
+        await this.cartState.hasLoaded
 
-				if (!this.cartState.cart.shippingAddress && this.addresses?.[0]) {
-					this.currentAddress = { ...this.addresses[0] }
+        if (!this.cartState.cart.shippingAddress && this.addresses?.[0]) {
+          this.currentAddress = { ...this.addresses[0] }
 
-					this.isBillingAddressSameAsShipping = true
-					this.saveAddressToCart()
-				}
+          this.isBillingAddressSameAsShipping = true
+          this.saveAddressToCart()
+        }
 
-				if (this.cartState.cart.shippingAddress && !this.addresses.find((x) => x?.id === this.cartState.cart?.shippingAddress?.id)) {
-					this.addresses = [this.cartState.cart?.shippingAddress, ...this.addresses]
-				}
-			} catch (e) {
-				console.log(e)
+        if (this.cartState.cart.shippingAddress && !this.addresses.find((x) => x?.id === this.cartState.cart?.shippingAddress?.id)) {
+          this.addresses = [this.cartState.cart?.shippingAddress, ...this.addresses]
+        }
+      } catch (e) {
+        console.log(e)
 
-				toast.error((e as any)?.message)
-			}
-		} else {
-			this.isLoggedIn = false
-		}
-	}
+        toast.error((e as any)?.message)
+      }
+    } else {
+      this.isLoggedIn = false
+    }
 
-	handleEditEmail = async () => {
-		this.editEmail = true
-	}
+    // Check for showEditAddress
+    if (page.url.searchParams.get('showEditAddress')) {
+      this.handleAddressChangeClick()
+    }
+  }
 
-	handleAddNewAddress = () => {
-		this.isEditingAddress = false
+  handleEditEmail = async () => {
+    this.editEmail = true
+  }
 
-		if (this.addresses.length > 0) {
-			this.currentAddress = { ...this.addresses[0] }
+  handleAddNewAddress = () => {
+    this.isEditingAddress = false
 
-			this.openAddressList('shipping')
-		} else {
-			this.showAddressList = false
+    if (this.addresses.length > 0) {
+      this.currentAddress = { ...this.addresses[0] }
 
-			this.openAddressForm(emptyAddress('new'), 'shipping', false)
-		}
-	}
+      this.openAddressList('shipping')
+    } else {
+      this.showAddressList = false
 
-	handleAddNewAddressFromModal = () => {
-		this.showAddressList = false
+      this.openAddressForm(emptyAddress('new'), 'shipping', false)
+    }
+  }
 
-		if (this.currentAddressType === null) console.error('Current Address Type should be set')
-		this.openAddressForm(emptyAddress('new'), this.currentAddressType, false)
-	}
+  handleAddNewAddressFromModal = () => {
+    this.showAddressList = false
 
-	handleEditAddress = (address: BaseAddress) => {
-		this.showAddressList = false
+    if (this.currentAddressType === null) console.error('Current Address Type should be set')
+    this.openAddressForm(emptyAddress('new'), this.currentAddressType, false)
+  }
 
-		if (this.currentAddressType === null) console.error('Current Address Type should be set')
-		this.openAddressForm({ ...address }, this.currentAddressType, true)
-	}
+  handleEditAddress = (address: BaseAddress) => {
+    this.showAddressList = false
 
-	handleSelectAddress = async (address: any) => {
-		// if (address.isNew) {
+    if (this.currentAddressType === null) console.error('Current Address Type should be set')
+    this.openAddressForm({ ...address }, this.currentAddressType, true)
+  }
 
-		// 	address.id = 'new'
+  handleSelectAddress = async (address: any) => {
+    // if (address.isNew) {
 
-		// 	delete address.isNew
+    // 	address.id = 'new'
 
-		// }
+    // 	delete address.isNew
 
-		this.currentAddress = { ...address }
+    // }
 
-		this.saveAddressToCart()
+    this.currentAddress = { ...address }
 
-		/*
+    this.saveAddressToCart()
+
+    /*
     if (this.isBillingAddressSameAsShipping) {
 
       this.billingAddress = this.currentAddress
@@ -441,122 +446,144 @@ export class AddressModule {
     })
 
     */
-		this.showAddressList = false
-	}
+    this.showAddressList = false
+  }
 
-	handleFormClose = () => {
-		this.currentAddressType = null
-	}
+  handleFormClose = () => {
+    this.currentAddressType = null
+  }
 
-	handleFormSave = async (address: BaseAddress) => {
-		if (!this.userState?.user?.role) {
-			/* Logged out state */
-			await this.handleSaveAddress(address, true)
-		} else {
-			await this.handleSaveAddress(address)
-		}
-	}
+  handleFormSave = async (address: BaseAddress) => {
+    if (!this.userState?.user?.role) {
+      /* Logged out state */
+      await this.handleSaveAddress(address, true)
+    } else {
+      await this.handleSaveAddress(address)
+    }
+  }
 
-	handleFormBack = () => {
-		if (this.userState?.user?.role) {
-			this.showAddressForm = false
+  handleFormBack = () => {
+    if (this.userState?.user?.role) {
+      this.showAddressForm = false
 
-			this.showAddressList = true
-		}
-	}
+      this.showAddressList = true
+    }
+  }
 
-	removeUndefinedProperties = (obj: any): Record<string, any> => {
-		return Object.keys(obj).reduce((acc: any, key) => {
-			if (obj[key] !== undefined && obj[key] !== null) {
-				acc[key] = obj[key]
-			}
+  removeUndefinedProperties = (obj: any): Record<string, any> => {
+    return Object.keys(obj).reduce((acc: any, key) => {
+      if (obj[key] !== undefined && obj[key] !== null) {
+        acc[key] = obj[key]
+      }
 
-			return acc
-		}, {})
-	}
+      return acc
+    }, {})
+  }
 
-	handleDeleteAddress = async (address: any) => {
-		if (!address.id) {
-			return
-		}
+  handleDeleteAddress = async (address: any) => {
+    if (!address.id) {
+      return
+    }
 
     try {
-		  await addressService.deleteAddress(address.id)
-    } catch(e: any) {
+      await addressService.deleteAddress(address.id)
+    } catch (e: any) {
       toast.error(e?.message || "Failed to delete address")
     }
 
-		this.addresses = this.addresses.filter((addr) => addr.id !== address.id)
-	}
+    this.addresses = this.addresses.filter((addr) => addr.id !== address.id)
+  }
 
-	handleSaveAddress = async (address: any, saveToCart = false) => {
-		if (saveToCart) {
-			this.saveAddressToCart()
+  handleSaveAddress = async (address: any, saveToCart = false) => {
+    if (saveToCart) {
+      this.saveAddressToCart()
 
-			this.showAddressForm = false
+      this.showAddressForm = false
 
-			return
-		}
+      return
+    }
 
-		// console.log('🚀 ~ handleSaveAddress ~ address:', address)
+    // console.log('🚀 ~ handleSaveAddress ~ address:', address)
 
-		const newAddress = this.removeUndefinedProperties(address)
+    const newAddress = this.removeUndefinedProperties(address)
 
-		if (this.isEditingAddress) {
-			this.addresses = this.addresses.map((addr) => (addr.id === newAddress.id ? newAddress : addr))
+    if (this.isEditingAddress) {
+      this.addresses = this.addresses.map((addr) => (addr.id === newAddress.id ? newAddress : addr))
 
-			await addressService.saveAddress(newAddress as any)
-		} else {
-			// newAddress.id = (addresses.length + 1).toString()
+      await addressService.saveAddress(newAddress as any)
+    } else {
+      // newAddress.id = (addresses.length + 1).toString()
 
-			// newAddress.isNew = true
+      // newAddress.isNew = true
 
-			const res = await addressService.saveAddress(newAddress as any)
+      const res = await addressService.saveAddress(newAddress as any)
 
-			this.addresses = [...this.addresses, res]
-		}
+      this.addresses = [...this.addresses, res]
+    }
 
-		//this.currentAddress = { ...newAddress }
+    //this.currentAddress = { ...newAddress }
 
-		this.showAddressForm = false
+    this.showAddressForm = false
 
-		this.showAddressList = true
-	}
+    this.showAddressList = true
+  }
 
-	handleProceedToPayment = async () => {
-		if (!this.isBillingAddressSameAsShipping && !this.cartState.cart.billingAddress?.address_1) {
-			toast.error('Enter billing address to proceed')
+  handleProceedToPayment = async () => {
+    if (!this.isBillingAddressSameAsShipping && !this.cartState.cart.billingAddress?.address_1) {
+      toast.error('Enter billing address to proceed')
 
-			return
-		}
+      return
+    }
 
-		this.loadingForCheckout = true
+    this.loadingForCheckout = true
 
-		await goto('/checkout/payment')
+    await goto('/checkout/payment')
 
-		this.loadingForCheckout = false
-	}
+    this.loadingForCheckout = false
+  }
 
-	openAddressForm = (address: BaseAddress, type: AddressType, isEditing: boolean) => {
-		this.editAddress = true
-		this.currentAddress = address
-		this.currentAddressType = type
-		this.showAddressForm = true
-		this.isEditingAddress = isEditing
-	}
-	openAddressList = (type: AddressType) => {
-		this.currentAddressType = type
-		this.showAddressList = true
-	}
-	handleBilingAddOrChangeClick = () => {
-		// console.log('called')
-		if (!this.userState.user?.role) {
-			this.showBillingAddressForm = true
-			if (this.cartState.cart.billingAddress) this.openAddressForm(this.cartState.cart.billingAddress, 'billing', true)
-			else this.openAddressForm(emptyAddress('new'), 'billing', false)
-		} else {
-			this.openAddressList('billing')
-		}
-	}
+  openAddressForm = (address: BaseAddress, type: AddressType, isEditing: boolean) => {
+    this.editAddress = true
+    this.currentAddress = address
+    this.currentAddressType = type
+    this.showAddressForm = true
+    this.isEditingAddress = isEditing
+  }
+  openAddressList = (type: AddressType) => {
+    this.currentAddressType = type
+    this.showAddressList = true
+  }
+
+  handleBilingAddOrChangeClick = () => {
+    // console.log('called')
+    if (!this.userState.user?.role) {
+      this.showBillingAddressForm = true
+      if (this.cartState.cart.billingAddress) this.openAddressForm(this.cartState.cart.billingAddress, 'billing', true)
+      else this.openAddressForm(emptyAddress('new'), 'billing', false)
+    } else {
+      this.openAddressList('billing')
+    }
+  }
+
+  handleAddressChangeClick = async () => {
+    if (!this.userState?.user?.role && !this.cartState?.cart?.shippingAddress) {
+      this.openAddressForm(emptyAddress('new'), 'shipping', true)
+    } else if (!this.userState.user?.role) {
+      this.openAddressForm({ ...this.cartState.cart.shippingAddress }, 'shipping', true)
+    } else {
+      this.openAddressList('shipping')
+    }
+  }
+
+  handleBillingAddressSameCheck = async (val: boolean) => {
+    this.isBillingAddressSameAsShipping = val
+    if (val) {
+      this.cartState.updateShippingAddress({
+        shippingAddress: this.cartState?.cart?.shippingAddress,
+        billingAddress: null,
+        isBillingAddressSameAsShipping: true
+      })
+    }
+  }
 }
 
