@@ -263,8 +263,7 @@ export class Cart2State {
 			this.cart = c
 			return c
 		} catch (e: unknown) {
-			// console.log(e)
-			toast.error(e instanceof Error ? e.message : 'Apply coupon failed')
+			toast.error(e?.message || 'Apply coupon failed')
 			throw e instanceof Error ? e.message : String(e)
 		} finally {
 			this.isUpdatingCart = false
