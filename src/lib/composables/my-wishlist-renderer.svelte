@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { onMount, type Snippet } from 'svelte'
-	import { getCartState } from '$lib/stores'
+	import { getCartState, getWishlistState } from '$lib/stores/index.js'
 	import { wishlistService, profileService, type Wishlist, type Product } from '$lib/services'
 	import { toast } from 'svelte-sonner'
 	import { page } from '$app/state'
 
 	let wishlistPlugin = $derived(page?.data?.store?.plugins?.isWishlist)
+  const wishlistState = getWishlistState()
 
 	const { content }: { content: Snippet<[SnippetParams]> } = $props()
 
@@ -55,10 +56,10 @@
 
 	async function removeFromWishlist(productId: string, variantId: string) {
 		try {
-			const res = await wishlistService.toggleWishlist({
+			const res = await wishlistState.toggleWishlistFromIds(
 				productId,
 				variantId
-			})
+			)
 			toast.success('Product removed from wishlist')
 		} catch (error: any) {
 			toast.error(error.message || 'Remove operation failed')
