@@ -452,6 +452,11 @@ export class PaymentModule {
 		try {
 			const res = await checkoutService.getShippingRates({ cartId })
 			this.shippingRates = res || {}
+
+      // only one shipping rate and shipping rate not selected
+      if (!this.cartState.cart?.shippingRateId && res?.data?.length === 1) {
+        this.handleShippingRateChange(res?.data?.[0])
+      }
 		} catch (error) {
 			console.log(error)
 		}
