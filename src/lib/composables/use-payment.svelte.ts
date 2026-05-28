@@ -245,7 +245,7 @@ export class PaymentModule {
 						toast.error('Something went wrong')
 					}
 				} catch (e: any) {
-					toast.error(e.message)
+					toast.error(e.message || "Checkout failed")
 				} finally {
 					this.paymentLoader = false
 				}
@@ -304,7 +304,7 @@ export class PaymentModule {
 						this.paymentLoader = false
 					}
 				} catch (e: any) {
-					toast.error(e.message)
+					toast.error(e.message || "Checkout failed")
 					this.paymentLoader = false
 				} finally {
 					this.cartState?.restorePrevCart()
@@ -329,7 +329,8 @@ export class PaymentModule {
 					window.location.href = redirectUrl
 				} else {
 				}
-			} catch (e) {
+			} catch (e: any) {
+        toast.error(e?.message || "Checkout failed")
 				console.log(e)
 			} finally {
 				this.paymentLoader = false
@@ -348,7 +349,7 @@ export class PaymentModule {
 					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
 				}
 			} catch (e: any) {
-				toast.error(e.message)
+				toast.error(e.message || "Checkout failed")
 			} finally {
 				this.paymentLoader = false
 			}
@@ -365,7 +366,7 @@ export class PaymentModule {
 					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
 				}
 			} catch (e: any) {
-				toast.error(e.message || 'Payment Failed')
+				toast.error(e.message || 'Checkout Failed')
 			} finally {
 				this.paymentLoader = false
 			}
@@ -414,7 +415,7 @@ export class PaymentModule {
 					toast.error('Something went wrong, payment session could not be created')
 				}
 			} catch (e: any) {
-				toast.error(e.message || 'Payment Failed')
+				toast.error(e.message || 'Checkout Failed')
 			} finally {
 				this.paymentLoader = false
 			}
@@ -427,7 +428,7 @@ export class PaymentModule {
 				})
 				goto(`/checkout/process?pg=COD&order_no=${cp?.order_no}&cart_id=${this.cartState.cart.id}&store_id=${page.data.storeId}`)
 			} catch (e: any) {
-				toast.error(e.message)
+				toast.error(e.message || "Checkout failed")
 			} finally {
 				this.paymentLoader = false
 			}
