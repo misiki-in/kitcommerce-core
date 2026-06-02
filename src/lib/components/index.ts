@@ -2,6 +2,7 @@ export * from './address/schema.ts'
 export * from './auth/index.ts'
 
 export { default as AffirmPayPromo } from './common/affirm-pay-promo.svelte'
+export { default as ColorPalette }  from './common/color-palette.svelte'
 export { default as LoadingDots } from './common/loading-dots.svelte'
 export { default as QrCode } from './common/qr-code.svelte'
 export { default as ThemeProvider } from './common/theme-provider.svelte'
