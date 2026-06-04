@@ -22,7 +22,7 @@ export { load as legalTermsLoadServer } from "./(legal)/terms-and-conditions/loa
 export { load as legalPrivacyPolicyLoadServer } from "./(legal)/privacy-policy/load.server.ts"
 export { load as legalLayoutServer } from "./(legal)/layout.server.ts"
 
-export { load as myLayoutServer } from "./(my)/layout.server.ts"
+export { getLoadWithContext as myLayoutServer } from "./(my)/layout.server.ts"
 export { load as layoutServer } from "./layout.server.ts"
 
 export * from './load-one-page.ts'
