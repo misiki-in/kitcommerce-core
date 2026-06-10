@@ -1,4 +1,4 @@
-import { wishlistService, type Product } from "../services";
+import { wishlistService, type Product } from "$lib/services/index.js";
 
 interface Query {
   productId: string
@@ -8,7 +8,8 @@ interface Query {
 const key = (x: string, y: string) =>
   `${x}-${y}`
 
-const getProductKey = (product: Product) => key(product?.id, product?.variants?.[0]?.id)
+const getVariantId = (product: Product) => product?.variants?.[0]?.id ?? ''
+const getProductKey = (product: Product) => key(product.id, getVariantId(product))
 
 class WishlistState {
   static instance: WishlistState | null = null
@@ -19,8 +20,10 @@ class WishlistState {
 
   addProductsAsQueries = (products: Product[]) => {
     const queries: Query[] = []
-    for (const prod of products)
-      queries.push({ productId: prod?.id, variantId: prod?.variants?.[0]?.id })
+    for (const prod of products) {
+      const variantId = getVariantId(prod)
+      if (variantId) queries.push({ productId: prod.id, variantId })
+    }
     this.queries = [...this.queries, ...queries]
   }
 
@@ -40,9 +43,11 @@ class WishlistState {
   }
 
   toggleWishlist = async (product: Product) => {
+    const variantId = getVariantId(product)
+    if (!variantId) return
     const res = await wishlistService.toggleWishlist({
-      productId: product?.id,
-      variantId: product?.variants?.[0]?.id,
+      productId: product.id,
+      variantId,
     })
     this.isWishlisted[getProductKey(product)] = Boolean(res?.active)
   }

@@ -1,5 +1,5 @@
 import { SearchService } from '$lib/services'
-import type { PageLoad } from '$lib/types/index.ts'
+import type { PageLoad } from '$lib/types/index.js'
 
 export const load: PageLoad = async ({ url, fetch }) => {
 	const searchService = new SearchService(fetch)

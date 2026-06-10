@@ -12,7 +12,7 @@ export * from './gtag.ts'
 export * from './time.ts'
 export * from './stripe.ts'
 export * from './navigator.ts'
-export * from './whatsapp.js'
+export * from './whatsapp.ts'
 export * from './affirm-injector.ts'
 export * from './secure-catalogue.ts'
 

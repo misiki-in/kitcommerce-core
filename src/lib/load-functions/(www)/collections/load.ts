@@ -1,5 +1,5 @@
 import { CollectionService } from '$lib/services'
-import type { PageLoad } from '$lib/types/index.ts'
+import type { PageLoad } from '$lib/types/index.js'
 
 export const load: PageLoad = async ({ fetch, url }) => {
 	const currentPage = +(url.searchParams.get('page') || 1)

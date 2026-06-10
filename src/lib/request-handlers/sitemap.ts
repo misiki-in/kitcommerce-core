@@ -5,7 +5,7 @@ export function redirectToSitemap(redirect: typeof coreRedirect): RequestHandler
   return async ({ fetch, cookies, url }) => {
     const storeId = cookies.get('litekart_store_id')
     const storeService = new StoreService(fetch)
-    const data = await storeService.get(`/api/stores/${storeId}`)
+    const data = await storeService.get<{ sitemap?: string }>(`/api/stores/${storeId}`)
     if (data?.sitemap)
       redirect(302, data.sitemap)
     else

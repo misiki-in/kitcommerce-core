@@ -10,6 +10,7 @@ import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 
 const PRODUCT_STATE_KEY = Symbol('product-state')
+type ProductRecord = Record<string, any>
 
 class ProductState {
   static _instance: ProductState
@@ -30,8 +31,8 @@ class ProductState {
 	}
 	qty = $state(1)
 	isLoading = $state(true)
-	allRatings = $state(null)
-	productsOfSameCategory = $state([])
+	allRatings = $state<any[] | null>(null)
+	productsOfSameCategory = $state<ProductRecord[]>([])
 	isLoadingRatings = $state(false)
 	isLoadingRelatedProducts = $state(false)
 	relatedProducts = $state({})
@@ -73,14 +74,14 @@ class ProductState {
 
 	productOptions: any[] = $state(page.data?.product?.options || [])
 
-	images = $state([])
-	uploadedImages = $state([])
+	images = $state<File[]>([])
+	uploadedImages = $state<string[]>([])
 
 	wishlistPluginEnabled = $derived(page?.data?.store?.plugins?.isWishlist?.active)
 	isIndianPincodesPluginEnabled = $derived(page?.data?.store?.plugins?.isIndianPincodes?.active)
 	wareHousePluginEnabled = $derived(page?.data?.store?.plugins?.warehouse?.active)
 
-	wishlisted = $derived(this.wishlistState.isWishlisted[getProductKey(page.data.product)])
+	wishlisted = $derived(page.data.product ? this.wishlistState.isWishlisted[getProductKey(page.data.product as any)] : false)
 	wishlistLoading = $state(false)
 
 	warehouses = $state<Record<string, unknown>[]>([])
@@ -103,7 +104,7 @@ class ProductState {
 		}
 	}
 
-	onSelect(i) {
+	onSelect(i: number) {
 		this.select = i
 	}
 
@@ -150,7 +151,7 @@ class ProductState {
 		}
 
 		if (matchingProduct?.id) {
-			page.data.product.id = matchingProduct.id
+			if (page.data.product) page.data.product.id = matchingProduct.id
 		}
 
 		if (matchingProduct?.slug) {
@@ -181,10 +182,10 @@ class ProductState {
 
 		this.findAndSelectVariantFromSearchParam()
 
-		browser && (await storeProductToRecentlyViewed({ product: page.data?.product, variant: this.selectedVariant }))
+		if (browser && page.data.product) await storeProductToRecentlyViewed({ product: page.data.product as any, variant: this.selectedVariant })
 
 		this.isLoading = false
-		this.relatedProducts = await productService.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
+		this.relatedProducts = await productService.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId ?? undefined })
 		fireGTagEvent('view_item', { ...page.data.product, qty: 1 })
 	}
 
@@ -203,7 +204,7 @@ class ProductState {
 
 	selectVariant = async ({ option, value }: { option: any; value: any }) => {
 		if (page.data?.product?.variants) {
-			this.selectedVariant = findVariantWithOptionValue(page.data?.product.variants, {
+			this.selectedVariant = findVariantWithOptionValue(page.data?.product.variants as any, {
 				optionId: option.id,
 				value: value.value,
 				selectedVariant: this.selectedVariant
@@ -279,7 +280,7 @@ class ProductState {
 
 		try {
 			const res = await wishlistService.checkWishlist({
-				productId: page.data?.product?.id,
+				productId: page.data?.product?.id ?? '',
 				variantId: this.selectedVariant?.id
 			})
 
@@ -290,9 +291,10 @@ class ProductState {
 	}
 
 	handleWishlistClick = async () => {
+		if (!page.data.product) return
 		if (!this.userState?.user?.userId) {
 			addPendingWishlistAction({
-				productId: page.data?.product?.id,
+				productId: page.data?.product?.id ?? '',
 				variantId: this.selectedVariant?.id || ''
 			})
 
@@ -307,7 +309,7 @@ class ProductState {
 		}
 
 		this.wishlistLoading = true
-    await this.wishlistState.toggleWishlist(page.data.product)
+    await this.wishlistState.toggleWishlist(page.data.product as any)
 		this.wishlistLoading = false
 	}
 
@@ -316,6 +318,7 @@ class ProductState {
 			const variantId = this.selectedVariant?.id || page.data?.product?.id
 			const productId = page.data?.product?.id
 			const qty = this.qty
+			if (!productId || !variantId) return
 
 			this.cartState.createSingleItemCheckoutSession({
 				variantId,
@@ -345,8 +348,8 @@ class ProductState {
 		try {
 			this.isAdding = true
 			await this.cartState.addOrUpdate({
-				productId: page.data?.product?.id,
-				variantId: this.selectedVariant?.id,
+				productId: page.data?.product?.id ?? '',
+				variantId: this.selectedVariant?.id ?? '',
 				qty: this.qty
 			})
 		} catch (e) {
@@ -423,7 +426,7 @@ class ProductState {
 			// Load product ratings
 			this.isLoadingRatings = true
 			try {
-				const ratingsResponse = await reviewService.allReviews({})
+				const ratingsResponse = await reviewService.allReviews({ search: '', sort: '', currentPage: 1 })
 				this.allRatings = ratingsResponse.data
 			} catch (error) {
 				console.error('Error loading ratings:', error)
@@ -499,7 +502,7 @@ class ProductState {
 				this.selectedImage = page.data?.product?.thumbnail || ''
 			}
 			productService
-				.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
+				.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId ?? undefined })
 				.then((data) => {
 					this.relatedProducts = deepCopy(page.data)
 				})
@@ -528,10 +531,11 @@ class ProductState {
 
 		$effect(() => {
 			if (page.data?.product?.pg && page.data?.product?.slug) {
-				const currentProduct = page.data.product.pg.find((p) => p.slug === page.data.product.slug)
+				const product = page.data.product
+				const currentProduct = product.pg?.find((p) => p.slug === product.slug)
 
 				if (currentProduct) {
-					const newSelectedAggregations = {}
+					const newSelectedAggregations: Record<string, string> = {}
 					Object.entries(page.data.product.ag || {}).forEach(([key]) => {
 						if (currentProduct[key]) {
 							newSelectedAggregations[key] = currentProduct[key]

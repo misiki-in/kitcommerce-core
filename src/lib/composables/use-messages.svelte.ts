@@ -109,7 +109,7 @@ export class MessagesModule {
 				if (this.desktopScrollRef) this.scrollToBottom(this.desktopScrollRef)
 				if (this.mobileScrollRef) this.scrollToBottom(this.mobileScrollRef)
 
-				const res = await chatService.save({
+				const res = await (chatService as unknown as { save: (message: Record<string, any>) => Promise<unknown> }).save({
 					img: this.newMessage.img,
 					message: this.newMessage.message,
 					vendorId: this.selectedChat.vendorId,

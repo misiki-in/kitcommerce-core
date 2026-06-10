@@ -4,9 +4,9 @@ import { toast } from 'svelte-sonner'
 import { authService, userService } from '$lib/services/index.js'
 import { showAuthModal } from '$lib/components/auth/auth-utils.js'
 export function parseCookies(cookieString: string): Record<string, string> {
-	return cookieString.split(';').reduce((cookies, cookie) => {
+	return cookieString.split(';').reduce<Record<string, string>>((cookies, cookie) => {
 		const [name, value] = cookie.trim().split('=')
-		cookies[name] = value
+		if (name) cookies[name] = value
 		return cookies
 	}, {})
 }
@@ -58,11 +58,11 @@ class UserState {
 		})
 	}
 
-	async signup({ email, password, firstName, lastName, phone, role, cartId = null, origin }: any) {
+	async signup({ email, password, firstName, lastName, phone, cartId = null, origin, passwordConfirmation = null }: any) {
 		this.loading = true
     this.lastError = null
 		try {
-			const me = await userService.signup({ email, password, firstName, lastName, phone, cartId, origin })
+			const me = await userService.signup({ email, password, passwordConfirmation, firstName, lastName, phone, cartId, origin })
 			this.user = me
       return true
 		} catch (e: any) {
@@ -74,11 +74,11 @@ class UserState {
     }
 	}
 
-	async joinAsVendor({ email, password, firstName, lastName, businessName, phone, role, cartId = null }: any) {
+	async joinAsVendor({ email, password, firstName, lastName, businessName, phone, cartId = null, origin = globalThis.location?.origin ?? '', passwordConfirmation = password }: any) {
 		try {
 			this.loading = true
       this.lastError = null
-			const me = await userService.joinAsVendor({ email, password, businessName, firstName, lastName, phone, role: 'VENDOR', cartId })
+			const me = await userService.joinAsVendor({ email, password, passwordConfirmation, businessName, firstName, lastName, phone, origin, cartId })
 			this.user = me
 			toast.success('Signup successful')
 			goto('/dash')

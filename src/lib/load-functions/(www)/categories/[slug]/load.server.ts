@@ -192,7 +192,7 @@ const categoryDetails = {
 export const load: PageServerLoad = async ({ params }) => {
   try {
     const { slug } = params
-    const category = categoryDetails[slug]
+    const category = categoryDetails[slug as keyof typeof categoryDetails]
 
     // const fetchAllCategories = await CategoryService.fetchAllCategories()
     // console.log("fetchAllCategories: ", fetchAllCategories);
@@ -208,6 +208,8 @@ export const load: PageServerLoad = async ({ params }) => {
     }
   } catch (e) {
     console.error('Error loading category:', e)
-    throw error(e.status || 400, e?.message || 'Error loading category')
+    const status = typeof e === 'object' && e && 'status' in e && typeof e.status === 'number' ? e.status : 400
+    const message = e instanceof Error ? e.message : 'Error loading category'
+    throw error(status, message)
   }
 }

@@ -1,7 +1,22 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { parseHTMLToText } from '$lib/utils/index.ts';
+	import { parseHTMLToText } from '$lib/utils/index.js';
 	import StructuredData from './structured-data.svelte';
+
+	type StructuredOffer = {
+		url: string;
+		priceCurrency: string;
+		price: number;
+		availability: string;
+		shippingDetails?: {
+			shippingDestination?: { name?: string };
+			shippingRate?: { value?: number };
+		};
+		hasMerchantReturnPolicy?: {
+			merchantReturnDays?: number;
+			merchantReturnLink?: string;
+		};
+	}
 
 	let {
 		products
@@ -14,12 +29,7 @@
 			brandName: string;
 			manufacturer: string;
 			material: string;
-			offers: {
-				url: string;
-				priceCurrency: string;
-				price: number;
-				availability: string;
-			};
+			offers: StructuredOffer;
 		}[];
 	} = $props();
 

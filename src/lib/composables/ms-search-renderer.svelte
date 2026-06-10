@@ -33,7 +33,7 @@
 	const autoComplete = async (query: string) => {
 		try {
 			const res = await meilisearchService.searchAutoComplete({ query })
-			searchResults = res?.data
+			searchResults = (res as unknown as { data?: any[] })?.data ?? []
 		} catch (error) {
 			console.error('Search error:', error)
 			searchResults = []

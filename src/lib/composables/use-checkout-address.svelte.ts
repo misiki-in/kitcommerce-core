@@ -569,7 +569,7 @@ export class AddressModule {
     if (!this.userState?.user?.role && !this.cartState?.cart?.shippingAddress) {
       this.openAddressForm(emptyAddress('new'), 'shipping', true)
     } else if (!this.userState.user?.role) {
-      this.openAddressForm({ ...this.cartState.cart.shippingAddress }, 'shipping', true)
+      this.openAddressForm({ ...this.cartState.cart.shippingAddress } as BaseAddress, 'shipping', true)
     } else {
       this.openAddressList('shipping')
     }

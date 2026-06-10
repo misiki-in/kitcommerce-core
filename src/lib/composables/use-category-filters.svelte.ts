@@ -19,7 +19,7 @@ class CategoryFilterState {
   allCategories: CategoryTree[] = $state([])
   topmostCategories: CategoryTree[] = $state([])
 
-  currentCategorySlug = $derived(page.params.slug?.toLowerCase?.() || 'products')
+  currentCategorySlug = $derived(((page.params as Record<string, string | undefined>).slug)?.toLowerCase?.() || 'products')
   currentCategory: CategoryTree | null = $derived.by(() => this.allCategories.find(x => x.slug?.toLowerCase?.() === this.currentCategorySlug) ?? null)
 
   currentParentCategory = $derived.by(() => {

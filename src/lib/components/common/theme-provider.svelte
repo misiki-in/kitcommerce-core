@@ -4,22 +4,24 @@
 
 	function updateThemeVariables() {
 		const root = document.documentElement
+		const store = page.data.store
+		if (!store) return
 
 		// Apply theme colors from settings if available
-		if (page?.data?.store.themePrimaryColor) {
-			root.style.setProperty('--color-theme-1', page?.data?.store.themePrimaryColor)
+		if (store.themePrimaryColor) {
+			root.style.setProperty('--color-theme-1', store.themePrimaryColor)
 		}
 
-		if (page?.data?.store.themeSecondaryColor) {
-			root.style.setProperty('--color-theme-2', page?.data?.store.themeSecondaryColor)
+		if (store.themeSecondaryColor) {
+			root.style.setProperty('--color-theme-2', store.themeSecondaryColor)
 		}
 
-		if (page?.data?.store.themeFontColor) {
-			root.style.setProperty('--color-text', page?.data?.store.themeFontColor)
+		if (store.themeFontColor) {
+			root.style.setProperty('--color-text', store.themeFontColor)
 		}
 
-		if (page?.data?.store.themeFontFamily) {
-			root.style.setProperty('--font-body', page?.data?.store.themeFontFamily)
+		if (store.themeFontFamily) {
+			root.style.setProperty('--font-body', store.themeFontFamily)
 		}
 	}
 

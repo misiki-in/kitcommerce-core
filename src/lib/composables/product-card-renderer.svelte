@@ -6,7 +6,7 @@
 	import type { Product } from '$lib/types'
 	import { toast } from 'svelte-sonner'
 	import { getProductKey, getUserState, getWishlistState } from '$lib/stores/index.js'
-	import { showAuthModal } from '$lib/components/index.ts';
+	import { showAuthModal } from '$lib/components/index.js';
 
 	const cartState = getCartState()
   const userState = getUserState()
@@ -66,12 +66,13 @@
 
 	async function changeQuantity(product: Product, factor: 1 | -1) {
 		try {
+			const variantId = product.variants?.[0]?.id
+			if (!variantId) return
 			loadingForCart = true
 			await cartState.addOrUpdate({
 				qty: factor,
 				productId: product.id,
-				variantId: product?.variants[0]?.id,
-				id: cartState.cart?.lineItems?.find((item) => item.productId === product.id)?.id
+				variantId
 			})
 		} catch (e: any) {
 			toast.error(e?.message || 'Cart update failed')
@@ -80,19 +81,19 @@
 		}
 	}
 
-	async function addToCart(product: Product) {
+	async function addToCart(product: Product): Promise<void> {
 		try {
+			const variantId = product.variants?.[0]?.id
+			if (!variantId) return
 			loadingForCart = true
 			await cartState.addOrUpdate({
 				qty: 1,
 				productId: product.id,
-				variantId: product?.variants[0]?.id
+				variantId
 			})
 			// toast.success('Item added to cart')
-			return true
 		} catch (e: any) {
 			// toast.error(e?.message || 'Cart update failed')
-			return false
 		} finally {
 			loadingForCart = false
 		}

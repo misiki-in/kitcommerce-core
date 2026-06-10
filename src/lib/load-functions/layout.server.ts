@@ -1,5 +1,5 @@
 import { StoreService } from '$lib/services'
-import type { LayoutServerLoad } from '$lib/types/index.ts'
+import type { LayoutServerLoad } from '$lib/types/index.js'
 
 export const load: LayoutServerLoad = async ({ locals, url, cookies, fetch, request }) => {
 	let storeDetails = locals?.storeDetails

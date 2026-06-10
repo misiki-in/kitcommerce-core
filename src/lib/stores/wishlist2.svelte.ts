@@ -7,8 +7,9 @@ interface Query {
 }
 
 const key = (x: string, y: string) => `${x}-${y}`
+const getVariantId = (product: Product) => product?.variants?.[0]?.id ?? ''
 
-export const getProductKey = (product: Product) => key(product?.id, product?.variants?.[0]?.id)
+export const getProductKey = (product: Product) => key(product.id, getVariantId(product))
 
 class WishlistState {
   static instance: WishlistState | null = null
@@ -31,7 +32,7 @@ class WishlistState {
       // intends to fail if user is not logged in
       const res = await wishlistService.fetchWishlist({})
       this.count = res?.data?.length
-      for (const { variant, product } of res?.data) this.isWishlisted[key(product?.id, variant?.id)] = true
+      for (const { variant, product } of res?.data) this.isWishlisted[key(product, variant)] = true
     } catch (e: any) {
       console.error('While fetching wishlist', e)
     } finally {
@@ -71,10 +72,9 @@ class WishlistState {
 
 
   toggleWishlist = async (product: Product) => {
-    return this.toggleWishlistFromIds(
-      product?.id,
-      product?.variants?.[0]?.id
-    )
+    const variantId = getVariantId(product)
+    if (!variantId) return
+    return this.toggleWishlistFromIds(product.id, variantId)
   }
 
   // toggleWishlist = async (product: Product) => {

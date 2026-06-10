@@ -21,7 +21,7 @@ export class NavModule {
 	storeData = $derived(page?.data?.store as StoreData)
 	cartState = getCartState()
 	userState = getUserState()
-	navMenu = $state<Menu[]>([])
+	navMenu = $state<any[]>([])
 	megaMenu = $state<MegaMenuItem[]>([])
 	selectedCategory = $state('')
 	selectedCategory2 = $state('')
@@ -29,7 +29,7 @@ export class NavModule {
 	showSubCategory2 = $state<boolean[]>([])
 	openSidebar = $state(false)
 	scrollY = $state(0)
-	isProductListingPage = $derived(page?.route?.id === '/(www)/products' || page?.route?.id === '/(www)/[slug]')
+	isProductListingPage = $derived(String(page?.route?.id) === '/(www)/products' || String(page?.route?.id) === '/(www)/[slug]')
 	navOpacity = $derived(Math.min(this.scrollY / 100, 0.95))
 	navBackground = $derived(
 		this.isProductListingPage
@@ -52,7 +52,7 @@ export class NavModule {
 		onMount(async () => {
 			try {
 				const response = await menuService.list()
-				const data = response?.data
+				const data = Array.isArray(response) ? response : []
 				// Filter the menu items
 				const headers = data.filter((item: any) => item?.menuId === 'header')
 				if (headers && headers.length > 0) {
@@ -65,7 +65,7 @@ export class NavModule {
 			}
 
 			try {
-				const response = (await categoryService.getMegamenu()) as MegaMenuItem[]
+				const response = (await categoryService.getMegamenu()) as unknown as MegaMenuItem[]
 				this.megaMenu = response
 				this.showSubCategory = Array<boolean>(this.megaMenu.length).fill(false)
 				this.showSubCategory2 = Array<boolean>(this.megaMenu.length).fill(false)

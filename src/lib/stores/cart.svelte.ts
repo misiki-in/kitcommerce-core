@@ -3,7 +3,27 @@ import { toast } from 'svelte-sonner'
 import { cartService } from '$lib/services/index.js'
 import type { Cart } from '$lib/types/index.js'
 
-const initialCart: Cart = {
+type CartStateCart = Cart & {
+	shippingCost?: number | null
+	returnAllowed?: boolean
+	replaceAllowed?: boolean
+	originCountry?: string | null
+	weightUnit?: string
+	dimensionUnit?: string
+	metadata?: Record<string, unknown> | null
+	collectionId?: string | null
+	shippingAddress?: any
+	billingAddress?: any
+	lineItems: Array<Cart['lineItems'][number] & { isSelectedForCheckout?: boolean }>
+}
+
+type CartServiceWithPaymentMethod = typeof cartService & {
+	updateCartPaymentMethod?: (args: { cartId: string; paymentMethod: string }) => Promise<CartStateCart>
+}
+
+const asCart = (cart: unknown): CartStateCart => cart as CartStateCart
+
+const initialCart: CartStateCart = {
 	id: '',
 	lineItems: [],
 	subtotal: 0,
@@ -18,6 +38,20 @@ const initialCart: Cart = {
 	storeId: null,
 	couponCode: null,
 	discountAmount: 0,
+	couponAppliedDate: null,
+	paymentId: null,
+	paymentMethod: null,
+	paymentAuthorizedAt: null,
+	needAddress: true,
+	isCodAvailable: false,
+	type: '',
+	completedAt: null,
+	idempotencyKey: null,
+	shippingCharges: 0,
+	shippingMethod: null,
+	qty: 0,
+	codCharges: 0,
+	tax: 0,
 	savingAmount: 0,
 	shippingCost: null,
 	returnAllowed: false,
@@ -45,7 +79,7 @@ interface UpdateCartParams {
 }
 
 interface UpdateEmailParams {
-	email: string
+	email?: string
 	phone?: string
 }
 
@@ -76,7 +110,7 @@ interface CreateSingleItemCheckoutParams {
 	qty: number
 }
 export class Cart2State {
-	cart = $state<Cart>(initialCart)
+	cart = $state<CartStateCart>(initialCart)
 	isUpdatingCart = $state<boolean>(true)
 	updatingItem = $state<Record<string, boolean>>({})
 	isOpen = $state<boolean>(false)
@@ -88,8 +122,11 @@ export class Cart2State {
 		try {
 			const cartId = this.cart?.id
 			if (!cartId) return
-			const c = await cartService.updateCartPaymentMethod({ cartId, paymentMethod: code })
-			this.cart = c
+			const service = cartService as CartServiceWithPaymentMethod
+			const c = service.updateCartPaymentMethod
+				? await service.updateCartPaymentMethod({ cartId, paymentMethod: code })
+				: await cartService.updateCart2({ cartId, paymentMethod: code })
+			this.cart = asCart(c)
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Failed to save payment method')
 		}
@@ -110,7 +147,7 @@ export class Cart2State {
 						try {
 							const c = await cartService.getCartByCartId(cartId)
 							// console.log('🚀 ~ CartState ~ fetch ~ c:', c)
-							if (!c.hasOwnProperty('message')) this.cart = c
+							if (!c.hasOwnProperty('message')) this.cart = asCart(c)
 						} catch (e) {}
 					}
 					res()
@@ -132,7 +169,7 @@ export class Cart2State {
 				try {
 					const c = await cartService.refereshCart()
 					// console.log('🚀 ~ CartState ~ fetch ~ c:', c)
-					this.cart = c
+					this.cart = asCart(c)
 				} catch (e) {}
 			}
 		} catch (e) {
@@ -174,7 +211,7 @@ export class Cart2State {
 				variantId: variantId
 			})
 			// console.log('🚀 ~ CartState ~ add ~ c:', c)
-			this.cart = c
+			this.cart = asCart(c)
 			this.addToCartMessage = 'Proceed to checkout'
 			this.showCheckout = true
 			setTimeout(() => {
@@ -205,7 +242,7 @@ export class Cart2State {
 				isSelectedForCheckout
 			})
 			// console.log('🚀 ~ CartState ~ add ~ c:', c)
-			this.cart = c
+			this.cart = asCart(c)
 			// this.addToCartMessage = 'Added to cart'
 			this.addToCartMessage = 'Proceed to checkout'
 			this.showCheckout = true
@@ -241,7 +278,7 @@ export class Cart2State {
 			this.isUpdatingCart = true
 			const c = await cartService.updateCart2({ email, phone })
 			// console.log('🚀 ~ CartState ~ add ~ c:', c)
-			this.cart = c
+			this.cart = asCart(c)
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Update email failed')
 			throw e instanceof Error ? e.message : String(e)
@@ -255,6 +292,7 @@ export class Cart2State {
 		try {
 			this.isUpdatingCart = true
 			const cartId = this.retrieveCartId()
+			if (!cartId) return initialCart
 			const c = await cartService.applyCoupon({ cartId, couponCode })
 			// const couponData = await couponService.getCoupon(couponCode);
 			// const currentUsage = couponData?.used || 0;
@@ -263,7 +301,7 @@ export class Cart2State {
 			this.cart = c
 			return c
 		} catch (e: unknown) {
-			toast.error(e?.message || 'Apply coupon failed')
+			toast.error(e instanceof Error ? e.message : 'Apply coupon failed')
 			throw e instanceof Error ? e.message : String(e)
 		} finally {
 			this.isUpdatingCart = false
@@ -274,7 +312,7 @@ export class Cart2State {
 		try {
 			this.isUpdatingCart = true
 			const c = await cartService.removeCoupon()
-			this.cart = c
+			this.cart = asCart(c)
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Remove coupon failed')
 			throw e instanceof Error ? e.message : String(e)
@@ -295,7 +333,7 @@ export class Cart2State {
 			})
 			// console.log('🚀 ~ CartState ~ add ~ c:', c) // {  ...c }
 
-			const cart = await cartService.getCartByCartId(c.id)
+			const cart = await cartService.getCartByCartId(asCart(c).id)
 			this.cart = { ...cart }
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Update shipping address failed')
@@ -335,7 +373,7 @@ export class Cart2State {
 			this.isUpdatingCart = true
 			const c = await cartService.removeCart({ cartId, lineId })
 			// console.log('🚀 ~ CartState ~ removed:', c)
-			this.cart = c
+			this.cart = asCart(c)
 		} catch (e: unknown) {
 			// console.log(e)
 			toast.error(e instanceof Error ? e.message : 'Remove item failed')
@@ -349,7 +387,6 @@ export class Cart2State {
 	async clear() {
 		try {
 			this.isUpdatingCart = true
-			this.cart = null
 			localStorage.removeItem('cart_id')
 			// console.log('🚀 ~ CartState ~ removed:', c)
 			this.cart = initialCart
@@ -392,7 +429,7 @@ export class Cart2State {
 				lineId: null
 			})
 
-			this.cart = cart
+			this.cart = asCart(cart)
 		} catch (error: unknown) {
 			console.log('🚀 ~ CartState ~ createSingleItemCheckoutSession ~ error:', error)
 			toast.error(error instanceof Error ? error.message : 'Create checkout session failed')
@@ -424,7 +461,7 @@ export class Cart2State {
 			const prev_cart_id = localStorage.getItem('prev_cart_id')
 			if (prev_cart_id) {
 				const cart = await cartService.getCartByCartId(prev_cart_id)
-				this.cart = cart
+				this.cart = asCart(cart)
 				localStorage.setItem('cart_id', prev_cart_id)
 				localStorage.removeItem('prev_cart_id')
 			}

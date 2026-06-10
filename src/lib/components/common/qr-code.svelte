@@ -1,7 +1,7 @@
 <script lang="ts">
-	export let base64Data = '' // Your base64 data prop
-	let canvas: HTMLCanvasElement
-	let error: string | null = null
+	let { base64Data = '' }: { base64Data?: string } = $props()
+	let canvas = $state<HTMLCanvasElement | undefined>()
+	let error = $state<string | null>(null)
 
 	const drawQRCode = () => {
 		if (!base64Data) {
@@ -14,13 +14,18 @@
 		}
 
 		const ctx = canvas.getContext('2d')
+		if (!ctx) {
+			error = 'Canvas context not available'
+			return
+		}
 		const img = new Image()
+		const target = canvas
 
 		img.src = base64Data
 
 		img.onload = () => {
-			canvas.width = img.width
-			canvas.height = img.height
+			target.width = img.width
+			target.height = img.height
 			ctx.drawImage(img, 0, 0)
 			error = null // Clear error on success
 		}
@@ -31,9 +36,9 @@
 	}
 
 	// Reactively draw when base64Data or canvas changes
-	$: if (base64Data && canvas) {
-		drawQRCode()
-	}
+	$effect(() => {
+		if (base64Data && canvas) drawQRCode()
+	})
 </script>
 
 <div class="inline-block bg-white">

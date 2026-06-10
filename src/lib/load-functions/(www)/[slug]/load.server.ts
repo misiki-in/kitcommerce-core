@@ -3,7 +3,7 @@ import type { PageServerLoad, StoreData } from '$lib/types/index.js'
 import { checkSecuredCatalogue } from '$lib/utils/index.js'
 
 export const load: PageServerLoad = async ({ cookies, url, params, request, parent, fetch }) => {
-	const { store }: { store: StoreData | {} } = await parent()
+	const { store } = (await parent()) as { store?: Partial<StoreData> }
 
 	if (store?.plugins?.isSecureCatalogue?.active) {
 		checkSecuredCatalogue(!!cookies.get('connect.sid'), request.headers.get('referer'), url)

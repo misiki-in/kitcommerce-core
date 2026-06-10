@@ -1,7 +1,8 @@
 import { redirect as coreRedirect } from '@sveltejs/kit';
+import type { PageServerLoad } from '$lib/types/index.js'
 
 export function getLoadWithContext(redirect: typeof coreRedirect) {
-  return async ({ url, cookies }) => {
+  return async ({ url, cookies }: Parameters<PageServerLoad>[0]) => {
     const sid = cookies.get('connect.sid')
     if (!sid) {
       const searchParams = new URLSearchParams()

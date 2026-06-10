@@ -40,7 +40,8 @@ export class settingState {
 	listSettings = async () => {
 		try {
 			const storeId = this.retrieveStoreId()
-			const storeDetails: any = await storeService.getStore(storeId)
+			if (!storeId) return
+			const storeDetails: any = await storeService.getStoreByIdOrDomain({ storeId })
 			this.selectedStore = {
 				name: storeDetails.name,
 				description: storeDetails.description,

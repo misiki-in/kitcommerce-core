@@ -1,6 +1,6 @@
 import { ProductService } from '$lib/services'
 import type { Product } from '$lib/types'
-import type { PageLoad } from '$lib/types/index.ts'
+import type { PageLoad } from '$lib/types/index.js'
 import { redirect } from '@sveltejs/kit'
 
 function transformProductOptions(options: Product['options']) {
@@ -17,7 +17,7 @@ function transformProductOptions(options: Product['options']) {
 				added.add(v.value)
 				return v
 			})
-			?.filter((v) => v)
+			?.filter((v): v is NonNullable<typeof v> => Boolean(v))
 
 		return option
 	})
@@ -28,7 +28,7 @@ export const load: PageLoad = async ({ fetch, params }) => {
 	try {
 		// Load the main product data first
 		const productService = new ProductService(fetch)
-		const product: Product = await productService.getOne(slug)
+		const product = (await productService.getOne(slug)) as unknown as Product
 
 		if (product.options?.length) {
 			product.options = transformProductOptions(product.options)

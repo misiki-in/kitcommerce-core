@@ -3,6 +3,7 @@
 	import { injectAffirm } from '$lib/utils'
 	import { onMount } from 'svelte'
 	import { toast } from 'svelte-sonner'
+	import type { PaymentMethod } from '$lib/types'
 
 	interface Props {
 		pageType: 'homepage' | 'landing' | 'search' | 'category' | 'product' | 'cart' | 'payment' | 'banner' | 'marketplace'
@@ -15,17 +16,22 @@
 		color?: 'black' | 'white' | null
 		logoType?: 'text' | 'symbol' | null
 	}
+	type AffirmPaymentMethod = PaymentMethod & {
+		apiKey?: string
+		isTest?: boolean
+	}
+
 	const { amount, pageType, promoId = null, class: klass, logoType = null, sku = null, brand = null, category = null, color = null }: Props = $props()
 
   async function loadAffirm() {
 		try {
 			const allPaymentMethods = await paymentMethodService.list({})
-			const listOfPaymentMethods = allPaymentMethods.data || []
+			const listOfPaymentMethods = (allPaymentMethods.data || []) as AffirmPaymentMethod[]
 
 			const affirmPaymentMethod = listOfPaymentMethods.find((f) => f?.name?.toUpperCase?.() === 'AFFIRMPAY') || null
 			if (affirmPaymentMethod) {
 				// Should only proceed with Affirm initialization if country is USA
-				injectAffirm(affirmPaymentMethod.apiKey, affirmPaymentMethod.isTest)
+				injectAffirm(affirmPaymentMethod.apiKey ?? '', Boolean(affirmPaymentMethod.isTest))
 			}
 		} catch (e: any) {
 			toast.error(e.message || 'Failed to load affirm prequalify')

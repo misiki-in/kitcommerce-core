@@ -3,7 +3,7 @@ import type { PageServerLoad } from '$lib/types/index.js';
 import { redirect as coreRedirect } from '@sveltejs/kit';
 
 export function getLoadWithContext(redirect: typeof coreRedirect) {
-	return async ({ url, fetch }) => {
+	return async ({ url, fetch }: Parameters<PageServerLoad>[0]) => {
 		const paymentSessionId = url.searchParams.get('payment_session_id');
 		const cart_id = url.searchParams.get('cart_id');
 		const order_no = url.searchParams.get('order_no');
@@ -15,10 +15,10 @@ export function getLoadWithContext(redirect: typeof coreRedirect) {
 			if (pg_name?.toUpperCase?.() === 'STRIPE') {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.checkoutStripeCapture({
-					order_no,
+					order_no: order_no ?? '',
 					pg: pg_name,
-					payment_session_id: paymentSessionId,
-					storeId
+					payment_session_id: paymentSessionId ?? '',
+					storeId: storeId ?? ''
 				});
 				console.log(`🚀 ~ payment processed.........: ${order_no}`);
 			} else if (pg_name?.toUpperCase?.() === 'CASHFREE') {

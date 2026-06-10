@@ -3,12 +3,14 @@
  */
 import { env } from '$env/dynamic/public'
 import { loadStripe } from '@stripe/stripe-js'
+import type { Stripe } from '@stripe/stripe-js'
 // import env from '$env/static/public'
 
-let stripePromise
+let stripePromise: Promise<Stripe | null> | undefined
 
 const getStripe = () => {
-	stripePromise = loadStripe(env.STRIPE_PUBLISHABLE_KEY)
+	const publicEnv = env as Record<string, string | undefined>
+	stripePromise = loadStripe(publicEnv.PUBLIC_STRIPE_PUBLISHABLE_KEY ?? publicEnv.STRIPE_PUBLISHABLE_KEY ?? '')
 	return stripePromise
 }
 

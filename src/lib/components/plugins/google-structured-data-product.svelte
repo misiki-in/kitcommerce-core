@@ -1,13 +1,40 @@
 <script lang="ts">
 	import StructuredData from './structured-data.svelte'
-	import type { Product } from '@misiki/litekart-connector'
   import { page } from '$app/state';
 	import { parseHTMLToText } from '$lib/utils/index.js';
+
+	type StructuredProduct = {
+		name?: string
+		image?: string | string[]
+		description?: string | null
+		sku?: string | null
+		brandName?: string | null
+		aggregateRating?: {
+			reviewRating?: number
+			reviewCount?: number
+		}
+		url?: string
+		priceCurrency?: string
+		price?: number
+		availability?: string
+		priceValidUntil?: string | null
+		reviews?: Array<{
+			author?: string
+			datePublished?: string
+			reviewBody?: string
+			name?: string
+			reviewRating?: {
+				bestRating?: string
+				ratingValue?: string
+				worstRating?: string
+			}
+		}>
+	}
 
 	const {
 		product
 	}: {
-		product: Product
+		product: StructuredProduct
 	} = $props()
 
 	const _100DaysFromNow = new Date(Date.now() + 100 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
@@ -20,7 +47,7 @@
 				'@type': 'Product',
 				name: product?.name,
 				image: product?.image,
-				description: parseHTMLToText(product?.description),
+				description: parseHTMLToText(product?.description ?? ''),
 				sku: product?.sku,
 				brand: {
 					'@type': 'Brand',
@@ -40,7 +67,7 @@
 					availability: product?.availability,
 					priceValidUntil: product?.priceValidUntil || _100DaysFromNow
 				},
-				review: product?.reviews?.map?.((r: any) => {
+				review: product?.reviews?.map?.((r) => {
 					return {
 						'@type': 'Review',
 						author: r?.author,

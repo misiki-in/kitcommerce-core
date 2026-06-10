@@ -15,7 +15,7 @@
 		loading: boolean;
 		showPincode: boolean;
 		hasSingleWarehouse: boolean;
-    selectedWarehouse: any;
+		selectedWarehouse: Warehouse | null;
 
 		checkPincode: () => void;
 		toggleShowPincode: () => void;
@@ -24,11 +24,19 @@
 	let showPincode = $state(false);
 	let resultText = $state('');
 	let loading = $state(false);
-  let selectedWarehouse = $state(null)
+	type Warehouse = {
+		id: string;
+		lat: number;
+		lng: number;
+		leadTime: number;
+		[key: string]: any;
+	}
+
+  let selectedWarehouse = $state<Warehouse | null>(null)
 
 	const productState = useProductState();
 
-	const warehouses = $derived(productState?.warehouses || []);
+	const warehouses = $derived((productState?.warehouses || []) as Warehouse[]);
 	const hasSingleWarehouse = $derived(warehouses.length === 1);
 
 	$effect(() => {
@@ -53,7 +61,7 @@
 			const res = await fetch(
 				`https://nominatim.openstreetmap.org/search?postalcode=${pincode}&format=json`
 			);
-			const data = await res.json();
+			const data = await res.json() as Array<{ lat?: string; lon?: string }>;
 
 			const smallest = {
 				distance: Infinity,
@@ -63,8 +71,8 @@
 
 			for (const result of data) {
 				if (result.lat && result?.lon) {
-					const userLat = data[0].lat;
-					const userLng = data[0].lon;
+					const userLat = Number(data[0].lat);
+					const userLng = Number(data[0].lon);
 
 					console.log(warehouses);
 					console.log(userLat, userLng);
@@ -83,7 +91,7 @@
 
 			if (smallest.leadTime > -1) {
 				resultText = `Available in your area. Ships in ${smallest.leadTime} business days`;
-        selectedWarehouse = warehouses.find(x => x.id == smallest.id)
+        selectedWarehouse = warehouses.find(x => x.id == smallest.id) ?? null
 			} else {
 				resultText = 'Sorry, we do not deliver to your area.';
         selectedWarehouse = null

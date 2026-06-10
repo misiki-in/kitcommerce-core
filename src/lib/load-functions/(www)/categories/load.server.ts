@@ -87,14 +87,30 @@ export const load: PageServerLoad = async ({ locals, url, fetch }) => {
 		}
 	} catch (e) {
 		console.error('Error loading categories:', e)
-		throw error(400, e?.message || 'Error loading categories')
+		throw error(400, e instanceof Error ? e.message : 'Error loading categories')
 	}
 }
 
+type SourceCategory = {
+	id: string
+	name: string
+	slug?: string | null
+	thumbnail?: string | null
+	parentCategoryId?: string | null
+}
+
+type TransformedCategory = {
+	id: string
+	name: string
+	slug: string
+	img: string
+	children: Array<{ name: string; slug: string }>
+}
+
 // Helper function to transform categories
-function transformCategories(categories) {
+function transformCategories(categories: SourceCategory[]) {
 	// Create a map to store categories by ID
-	const categoryMap = {}
+	const categoryMap: Record<string, TransformedCategory> = {}
 
 	// First pass: create basic category objects and store in map
 	for (const cat of categories) {
@@ -108,7 +124,7 @@ function transformCategories(categories) {
 	}
 
 	// Second pass: organize into parent-child relationships
-	const rootCategories = []
+	const rootCategories: TransformedCategory[] = []
 
 	categories.forEach((cat) => {
 		if (cat.parentCategoryId && categoryMap[cat.parentCategoryId]) {

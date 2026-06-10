@@ -315,7 +315,7 @@ export class PaymentModule {
 			try {
 				const pp: any = await checkoutService.checkoutPhonepe({
 					cartId: this.cartState.cart.id,
-					email: this.cartState.cart.email,
+					email: this.cartState.cart.email ?? '',
 					phone: '8249028220',
 					origin: page.url.origin
 				})
@@ -452,11 +452,12 @@ export class PaymentModule {
 	getShippingRates = async (cartId: string) => {
 		try {
 			const res = await checkoutService.getShippingRates({ cartId })
+			const shippingRatesResponse = res as unknown as { data?: Array<{ id: string }> }
 			this.shippingRates = res || {}
 
       // only one shipping rate and shipping rate not selected
-      if (!this.cartState.cart?.shippingRateId && res?.data?.length === 1) {
-        this.handleShippingRateChange(res?.data?.[0])
+      if (!this.cartState.cart?.shippingRateId && shippingRatesResponse?.data?.length === 1) {
+        this.handleShippingRateChange(shippingRatesResponse.data[0])
       }
 		} catch (error) {
 			console.log(error)

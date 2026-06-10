@@ -27,7 +27,7 @@
 
 	async function getMegaMenu() {
 		try {
-			menuItems = await page?.data?.store.megamenu
+			menuItems = page.data.store?.megamenu ?? []
 		} catch (e: any) {
 			toast.error(e.message)
 		} finally {

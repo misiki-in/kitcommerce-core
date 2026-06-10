@@ -41,7 +41,7 @@
 		try {
 			const res = await couponService.listCoupons({ page: 1 })
 			if (res?.data?.length) {
-				coupons = res.data
+				coupons = res.data as unknown as Coupon[]
 				show = true
 			}
 		} catch (error) {
