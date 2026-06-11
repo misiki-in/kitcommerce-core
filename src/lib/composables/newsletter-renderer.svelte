@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { toast } from 'svelte-sonner'
 	import { getUserState } from '@misiki/kitcommerce-core/stores'
-	import { storeService } from '@misiki/litekart-connector'
+	import { storeService } from '$lib/services/index.js'
 	import { onMount, type Snippet } from 'svelte'
   import { z } from 'zod'
 

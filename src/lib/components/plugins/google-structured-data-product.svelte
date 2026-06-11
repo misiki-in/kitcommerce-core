@@ -1,6 +1,6 @@
 <script lang="ts">
 	import StructuredData from './structured-data.svelte'
-	import type { Product } from '@misiki/litekart-connector'
+	import type { Product } from '$lib/services/index.js'
   import { page } from '$app/state';
 	import { parseHTMLToText } from '$lib/utils/index.js';
 

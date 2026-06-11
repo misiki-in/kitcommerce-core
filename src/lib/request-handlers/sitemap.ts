@@ -1,4 +1,4 @@
-import { StoreService } from '@misiki/litekart-connector'
+import { StoreService } from '$lib/services/index.js'
 import { error, redirect as coreRedirect, type RequestHandler } from '@sveltejs/kit'
 
 export function redirectToSitemap(redirect: typeof coreRedirect): RequestHandler {
