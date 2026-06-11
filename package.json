@@ -85,6 +85,7 @@
 		"bits-ui": "^2.16.3",
 		"embla-carousel-svelte": "^8.6.0",
 		"fuse.js": "^7.1.0",
+		"openapi-typescript": "^7.13.0",
 		"paneforge": "^0.0.6",
 		"prettier": "^3.8.1",
 		"prettier-plugin-svelte": "^3.4.1",
@@ -105,6 +106,7 @@
 		"svelte"
 	],
 	"dependencies": {
-		"jsdom": "^29.0.2"
+		"jsdom": "^29.0.2",
+		"openapi-fetch": "^0.17.0"
 	}
 }
