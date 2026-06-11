@@ -1,6 +1,6 @@
-import type { PaginatedResponse, Order } from './../types'
+import type { PaginatedResponse, Order } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * OrderService provides functionality for working with specific resources

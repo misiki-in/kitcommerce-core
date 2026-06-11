@@ -1,6 +1,6 @@
-import type { Page, PaginatedResponse } from './../types'
+import type { Page, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * PageService provides functionality for working with specific resources

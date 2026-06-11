@@ -1,5 +1,5 @@
-import { Upload } from '../types'
-import { BaseService} from './base.service'
+import type { Upload } from '../types/index.js'
+import { BaseService} from './base.service.js'
 
 export class UploadService extends BaseService {
   private static instance:UploadService 

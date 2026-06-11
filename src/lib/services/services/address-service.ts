@@ -1,6 +1,5 @@
-import type { Address } from '../types/address-types'
-import type { PaginatedResponse } from '../types/pagination-types'
-import { BaseService } from './base.service'
+import type { Address } from '../types/address-types.js'
+import { BaseService } from './base.service.js'
 
 /**
  * Parameters for listing addresses with pagination and filtering
@@ -114,8 +113,17 @@ export class AddressService extends BaseService {
    * // Fetch a specific address
    * const address = await addressService.fetchAddress('123');
    */
-  async fetchAddress(id: string): Promise<Address> {
-    return this.get(`/api/address/${id}`) as Promise<Address>
+  async fetchAddress(id: string) {
+
+    const res = await this.client.GET(`/api/address/{id}`, {
+      params: {
+        path: {
+          id,
+        }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+    //return this.get(`/api/address/${id}`) as Promise<Address>
   }
 
   /**
@@ -157,8 +165,14 @@ export class AddressService extends BaseService {
    *   isResidential: true
    * });
    */
-  async saveAddress(address: CreateAddressParams): Promise<Address> {
-    return this.post<Address>('/api/address/me', address)
+  async saveAddress(address: CreateAddressParams) {
+    const res = await this.client.POST(`/api/address/me`, {
+      body: {
+        ...address,
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+    //return this.post<Address>('/api/address/me', address)
   }
 
   /**
@@ -191,8 +205,18 @@ export class AddressService extends BaseService {
    *   zip: '54321'
    * });
    */
-  async editAddress(id: string, address: UpdateAddressParams): Promise<Address> {
-    return this.put<Address>(`/api/address/me/${id}`, address)
+  async editAddress(id: string, address: UpdateAddressParams) {
+    const res = await this.client.PATCH('/api/address/{id}', {
+      body: address,
+      params: {
+        path: {
+          id
+        },
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
+    //return this.put<Address>(`/api/address/me/${id}`, address)
   }
 
   /**
@@ -217,8 +241,14 @@ export class AddressService extends BaseService {
    * // Delete an address
    * await addressService.deleteAddress('123');
    */
-  async deleteAddress(id: string): Promise<void> {
-    await this.delete<void>(`/api/address/${id}`)
+  async deleteAddress(id: string) {
+    const res = await this.client.DELETE(`/api/address/{id}`, {
+      params: {
+        path: { id },
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+    //await this.delete<void>(`/api/address/${id}`)
   }
 }
 

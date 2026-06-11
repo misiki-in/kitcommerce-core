@@ -1,5 +1,5 @@
-import type { PaginatedResponse, Product } from '../types'
-import { BaseService } from './base.service'
+import type { PaginatedResponse, Product } from '../types/index.js'
+import { BaseService } from './base.service.js'
 
 /**
  * ProductService provides functionality for accessing and managing products

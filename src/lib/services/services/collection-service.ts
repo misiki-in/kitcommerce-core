@@ -1,6 +1,6 @@
-import type { Collection, PaginatedResponse } from './../types'
+import type { Collection, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * CollectionService provides functionality for working with specific resources

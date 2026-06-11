@@ -1,7 +1,7 @@
-import type { Address, Cart } from './../types'
+import type { Address, Cart } from './../types/index.js'
 const REGION_ID = ''
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * CartService provides functionality for managing shopping carts

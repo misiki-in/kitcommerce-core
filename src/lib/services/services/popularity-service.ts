@@ -1,4 +1,4 @@
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * PopularityService provides functionality for tracking product popularity

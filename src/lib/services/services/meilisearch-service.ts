@@ -1,8 +1,8 @@
-import type { Init } from '../types'
-import { MsSearchParams } from '../types/product-search-types'
-import { MeilisearchResponse } from '../types/product-search-types'
+import type { Init } from '../types/index.js'
+import type { MsSearchParams } from '../types/product-search-types.js'
+import type { MeilisearchResponse } from '../types/product-search-types.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * MeilisearchService provides direct access to Meilisearch functionality

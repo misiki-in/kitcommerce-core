@@ -1,5 +1,5 @@
-import type { Blog, PaginatedResponse } from './../types'
-import { BaseService } from './base.service'
+import type { Blog, PaginatedResponse } from './../types/index.js'
+import { BaseService } from './base.service.js'
 
 /**
  * BlogService provides functionality for working with specific resources

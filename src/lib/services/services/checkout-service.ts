@@ -1,6 +1,6 @@
-import type { Cart, Checkout } from './../types'
+import type { Cart, Checkout } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * CheckoutService provides functionality for managing checkout processes

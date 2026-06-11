@@ -1,6 +1,6 @@
-import type { Enquiry } from './../types'
+import type { Enquiry } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * EnquiryService provides functionality for working with specific resources

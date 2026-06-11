@@ -1,6 +1,6 @@
-import { ProductSearchResult } from '../types/product-search-types'
-import { BaseService } from './base.service'
-import { MeilisearchService } from './meilisearch-service'
+import type { ProductSearchResult } from '../types/product-search-types.js'
+import { BaseService } from './base.service.js'
+import { MeilisearchService } from './meilisearch-service.js'
 
 /**
  * SearchService provides a high-level API for product search operations

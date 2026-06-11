@@ -1,5 +1,5 @@
-import type { User } from './../types'
-import { BaseService } from './base.service'
+import type { User } from './../types/index.js'
+import { BaseService } from './base.service.js'
 
 /**
  * UserService provides functionality for user account management

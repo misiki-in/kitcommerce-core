@@ -1,6 +1,6 @@
-import type { User } from './../types'
+import type { User } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * ProfileService provides functionality for working with specific resources

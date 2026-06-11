@@ -1,6 +1,6 @@
-import type { Feedback, PaginatedResponse } from './../types'
+import type { Feedback, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * FeedbackService provides functionality for working with specific resources

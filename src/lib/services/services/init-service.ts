@@ -1,6 +1,6 @@
-import type { Init } from './../types'
+import type { Init } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * InitService provides functionality for working with specific resources

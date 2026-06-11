@@ -1,6 +1,6 @@
-import type { Deal, PaginatedResponse } from './../types'
+import type { Deal, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * DealService provides functionality for working with specific resources

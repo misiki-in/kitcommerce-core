@@ -1,4 +1,4 @@
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * Interface representing the store details returned by the API

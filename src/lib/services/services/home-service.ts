@@ -1,6 +1,6 @@
-import type { Home } from './../types'
+import type { Home } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * HomeService provides functionality for working with specific resources

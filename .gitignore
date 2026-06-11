@@ -1,4 +1,5 @@
 node_modules
+schema.d.ts
 
 # Output
 .output

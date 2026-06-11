@@ -1,4 +1,4 @@
-import { BaseService } from "../base.service";
+import { BaseService } from "../base.service.js";
 
 export class VarniCustomDesignService extends BaseService {
   private static instance: VarniCustomDesignService

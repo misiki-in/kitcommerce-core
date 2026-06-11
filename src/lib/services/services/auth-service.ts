@@ -1,5 +1,5 @@
-import type { User, verifyEmail } from '../types'
-import { BaseService } from './base.service'
+import type { User, verifyEmail } from '../types/index.js'
+import { BaseService } from './base.service.js'
 
 /**
  * AuthService provides functionality for user authentication and profile management

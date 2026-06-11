@@ -1,6 +1,6 @@
-import type { Gallery, PaginatedResponse } from './../types'
+import type { Gallery, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * GalleryService provides functionality for working with specific resources

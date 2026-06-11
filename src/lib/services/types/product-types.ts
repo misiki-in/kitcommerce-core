@@ -1,4 +1,4 @@
-import { Variant } from './product-variant-types'
+import type { Variant } from './product-variant-types.js'
 
 export type Product = {
 	id: string

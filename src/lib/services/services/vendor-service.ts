@@ -1,6 +1,6 @@
-import type { PaginatedResponse, Product, Vendor } from './../types'
+import type { PaginatedResponse, Product, Vendor } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * VendorService provides functionality for working with specific resources

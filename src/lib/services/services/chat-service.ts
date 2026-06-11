@@ -1,4 +1,4 @@
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * ChatService provides functionality for working with specific resources

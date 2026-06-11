@@ -1,6 +1,6 @@
-import type { Reels, PaginatedResponse } from './../types'
+import type { Reels, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * ReelsService provides functionality for working with specific resources

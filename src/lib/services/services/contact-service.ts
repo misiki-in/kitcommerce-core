@@ -1,6 +1,6 @@
-import type { Contact } from './../types'
+import type { Contact } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * ContactService provides functionality for managing contact requests

@@ -1,6 +1,6 @@
-import type { PaymentMethod, PaginatedResponse } from './../types'
+import type { PaymentMethod, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * PaymentMethodService provides functionality for working with specific resources

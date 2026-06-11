@@ -1,6 +1,6 @@
-import type { Region } from './../types'
+import type { Region } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * RegionService provides functionality for working with specific resources

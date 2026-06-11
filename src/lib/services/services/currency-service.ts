@@ -1,6 +1,6 @@
-import type { Currency, PaginatedResponse } from './../types'
+import type { Currency, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * CurrencyService provides functionality for working with specific resources

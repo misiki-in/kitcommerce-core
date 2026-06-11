@@ -1,5 +1,5 @@
-import type { Banner, PaginatedResponse } from './../types'
-import { BaseService } from './base.service'
+import type { Banner, PaginatedResponse } from './../types/index.js'
+import { BaseService } from './base.service.js'
 
 /**
  * BannerService provides functionality for working with specific resources

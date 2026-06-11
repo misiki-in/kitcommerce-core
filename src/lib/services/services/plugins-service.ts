@@ -1,6 +1,6 @@
-import type { Plugins, PaginatedResponse } from './../types'
+import type { Plugins, PaginatedResponse } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * PluginService provides functionality for working with specific resources

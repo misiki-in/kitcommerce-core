@@ -1,6 +1,6 @@
-import type { PaginatedResponse, Wishlist } from './../types'
+import type { PaginatedResponse, Wishlist } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * WishlistService provides functionality for working with specific resources

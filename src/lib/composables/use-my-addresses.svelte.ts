@@ -1,5 +1,5 @@
 import { page } from '$app/state'
-import { addressService, type Address, type PaginatedResponse } from '$lib/services/index.js'
+import { addressService, type From, type Address } from '$lib/services/index.js'
 import { getUserState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
 import { showAuthModal } from '$lib/components/index.js'
@@ -9,7 +9,7 @@ export class MyAddressesModule {
 
 	userState = getUserState()
 	loading = $state(false)
-	addresses = $state<PaginatedResponse<Address> | null>(null)
+	addresses = $state<From<typeof addressService.list> | null>(null)
 	error = $state(null)
 	showAddressFormModal = $state(false)
 	isEditing = $state(false)

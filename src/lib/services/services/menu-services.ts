@@ -1,6 +1,6 @@
-import type { Menu } from './../types'
+import type { Menu } from './../types/index.js'
 
-import { BaseService } from './base.service'
+import { BaseService } from './base.service.js'
 
 /**
  * MenuService provides functionality for working with specific resources
