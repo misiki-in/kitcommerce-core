@@ -1320,7 +1320,20 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Email verification details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email: string;
+                        /** @example token_123 */
+                        token: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Email verified successfully */
                 200: {
@@ -1329,14 +1342,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            id?: string;
-                            phone?: string | null;
-                            avatar?: string | null;
-                            firstName?: string | null;
-                            lastName?: string | null;
-                            timeDiff?: number | null;
-                            role?: string | null;
-                            storeId?: string | null;
+                            message: string;
                         };
                     };
                 };
@@ -1367,9 +1373,16 @@ export interface paths {
                              *         {
                              *           "code": "invalid_type",
                              *           "path": [
-                             *             "fieldName"
+                             *             "email"
                              *           ],
-                             *           "message": "Expected string, received undefined"
+                             *           "message": "Invalid input: expected string, received undefined"
+                             *         },
+                             *         {
+                             *           "code": "invalid_type",
+                             *           "path": [
+                             *             "token"
+                             *           ],
+                             *           "message": "Invalid input: expected string, received undefined"
                              *         }
                              *       ]
                              *     }
@@ -1413,7 +1426,20 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Email verification details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email: string;
+                        /** @example token_123 */
+                        token: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Email verified successfully */
                 200: {
@@ -1422,14 +1448,7 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            id?: string;
-                            phone?: string | null;
-                            avatar?: string | null;
-                            firstName?: string | null;
-                            lastName?: string | null;
-                            timeDiff?: number | null;
-                            role?: string | null;
-                            storeId?: string | null;
+                            message: string;
                         };
                     };
                 };
@@ -1460,9 +1479,16 @@ export interface paths {
                              *         {
                              *           "code": "invalid_type",
                              *           "path": [
-                             *             "fieldName"
+                             *             "email"
                              *           ],
-                             *           "message": "Expected string, received undefined"
+                             *           "message": "Invalid input: expected string, received undefined"
+                             *         },
+                             *         {
+                             *           "code": "invalid_type",
+                             *           "path": [
+                             *             "token"
+                             *           ],
+                             *           "message": "Invalid input: expected string, received undefined"
                              *         }
                              *       ]
                              *     }
@@ -1588,7 +1614,17 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description OTP verification details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example 9876543210 */
+                        phone: string;
+                        /** @example 1234 */
+                        otp: string;
+                    };
+                };
+            };
             responses: {
                 /** @description OTP verified successfully */
                 200: {
@@ -1635,9 +1671,16 @@ export interface paths {
                              *         {
                              *           "code": "invalid_type",
                              *           "path": [
-                             *             "fieldName"
+                             *             "phone"
                              *           ],
-                             *           "message": "Expected string, received undefined"
+                             *           "message": "Invalid input: expected string, received undefined"
+                             *         },
+                             *         {
+                             *           "code": "invalid_type",
+                             *           "path": [
+                             *             "otp"
+                             *           ],
+                             *           "message": "Invalid input: expected string, received undefined"
                              *         }
                              *       ]
                              *     }
@@ -2175,7 +2218,7 @@ export interface paths {
         put?: never;
         /**
          * Forgot password
-         * @description Initiates the password reset process by sending a verification code to the user's registered phone number.
+         * @description Initiates the password reset process by sending a reset link to the user's registered email address.
          */
         post: {
             parameters: {
@@ -2184,7 +2227,20 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Email and Referrer for password reset */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email: string;
+                        /** @example https://litekart.in */
+                        referrer: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Password reset verification code sent */
                 200: {
@@ -2208,7 +2264,7 @@ export interface paths {
                         };
                     };
                 };
-                /** @description Invalid phone number format */
+                /** @description Invalid email or referrer format */
                 422: {
                     headers: {
                         [name: string]: unknown;
@@ -2224,7 +2280,14 @@ export interface paths {
                              *         {
                              *           "code": "invalid_type",
                              *           "path": [
-                             *             "phone"
+                             *             "email"
+                             *           ],
+                             *           "message": "Invalid input: expected string, received undefined"
+                             *         },
+                             *         {
+                             *           "code": "invalid_type",
+                             *           "path": [
+                             *             "referrer"
                              *           ],
                              *           "message": "Invalid input: expected string, received undefined"
                              *         }
@@ -2581,7 +2644,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         phone: string;
-                        otp: number;
+                        otp: string;
                     };
                 };
             };
@@ -2640,7 +2703,7 @@ export interface paths {
                              *           "path": [
                              *             "otp"
                              *           ],
-                             *           "message": "Invalid input: expected number, received undefined"
+                             *           "message": "Invalid input: expected string, received undefined"
                              *         }
                              *       ]
                              *     }
@@ -11226,7 +11289,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/carts/:cartId/line-items": {
+    "/api/carts/{id}/line-items": {
         parameters: {
             query?: never;
             header?: never;
@@ -11243,7 +11306,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             /** @description Line item details */
@@ -11887,7 +11952,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cart/apply-coupon/:cartId": {
+    "/api/cart/apply-coupon/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -11904,7 +11969,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             /** @description Coupon code and cart details */
@@ -12037,7 +12104,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/shipping-zone-and-rate/:cartId": {
+    "/api/shipping-zone-and-rate/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -12052,7 +12119,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -12094,7 +12163,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/shipping-rates/:cartId": {
+    "/api/shipping-rates/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -12109,7 +12178,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -12243,7 +12314,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/cart/remove-coupon/:cartId": {
+    "/api/cart/remove-coupon/{id}": {
         parameters: {
             query?: never;
             header?: never;
@@ -12260,7 +12331,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             /** @description Coupon code and cart details */
@@ -12412,7 +12485,8 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string | null;
+                    cartId: string | null;
+                    lineItemId: string | null;
                 };
                 cookie?: never;
             };
@@ -12492,7 +12566,9 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    id: string | null;
+                };
                 cookie?: never;
             };
             requestBody?: never;

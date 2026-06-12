@@ -37,10 +37,10 @@ export class CartService extends BaseService {
    * // Fetch current cart data
    * const cart = await cartService.fetchCartData();
    */
-  async fetchCartData() {
+  /*async fetchCartData() {
     const res = await this.client.GET(`/api/cart`)
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   /**
    * Refreshes the cart data from the server
@@ -54,9 +54,9 @@ export class CartService extends BaseService {
    */
   async refereshCart() {
     const cartId = localStorage.getItem('cart_id') || null
-    const res = await this.client.GET(`/api/carts/refresh/{cartId}`, {
+    const res = await this.client.GET(`/api/carts/refresh/{id}`, {
       params: {
-        path: { cartId: cartId as string }
+        path: { id: cartId as string }
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
@@ -130,7 +130,8 @@ export class CartService extends BaseService {
           qty
         }
       })
-      const cartRes = this.formatSDKResponse<any>(res)
+      const cartRes = this.formatSDKResponse<typeof res.data>(res)
+      if (!cartRes?.id) throw 'Failed to create cart'
 
       // console.log(cartRes)
       cartId = cartRes?.id
@@ -139,21 +140,22 @@ export class CartService extends BaseService {
     let res: any = {}
     if (body.qty === -9999999) {
       const deleteRes = await this.client.DELETE(
-        `/api/carts/{id}/line-items/{lineId}`,
+        `/api/carts/{cartId}/line-items/{lineItemId}`,
         {
           params: {
-            path: { id: cartId as string, lineId: lineId as string }
+            path: { cartId: cartId, lineItemId: lineId }
           }
         }
       )
       res = this.formatSDKResponse<any>(deleteRes)
     } else {
       if (lineId) {
+        // Route changed as POST /api/carts/{id}/line-items/{lineId} not found
         const postRes = await this.client.POST(
-          `/api/carts/{id}/line-items/{lineId}`,
+          `/api/carts/{id}/line-items`,
           {
             params: {
-              path: { id: cartId as string, lineId: lineId as string }
+              path: { id: cartId }
             },
             body
           }
@@ -162,7 +164,7 @@ export class CartService extends BaseService {
       } else {
         const postRes = await this.client.POST(`/api/carts/{id}/line-items`, {
           params: {
-            path: { id: cartId as string },
+            path: { id: cartId },
           },
           body
         })
@@ -194,10 +196,9 @@ export class CartService extends BaseService {
   }) {
     // console.log('🚀 ~ addToCartService= ~ productId variantId qty lineId:', lineId)
     if (cartId === undefined || cartId === 'undefined') {
-      cartId = localStorage.getItem('cart_id') || null
+      cartId = localStorage.getItem('cart_id') || ''
     }
 
-    let res: any = {}
     if (!cartId) {
       const postRes = await this.client.POST('/api/carts', {
         body: {
@@ -211,28 +212,27 @@ export class CartService extends BaseService {
 
     if (lineId) {
       const deleteRes = await this.client.DELETE(
-        `/api/carts/{id}/line-items/{lineId}`,
+        `/api/carts/{cartId}/line-items/{lineItemId}`,
         {
           params: {
-            path: { id: cartId as string, lineId: lineId as string }
+            path: { cartId, lineItemId: lineId }
           }
         }
       )
-      res = this.formatSDKResponse<any>(deleteRes)
+      if (!cartId)
+        return this.formatSDKResponse<typeof deleteRes.data>(deleteRes)
     }
+
     if (cartId) {
-      const postRes = await this.client.POST(`/api/carts/{id}`, {
+      const postRes = await this.client.GET(`/api/carts/{id}`, {
         params: {
           path: { id: cartId as string }
         },
-        body: {
-          customer_id: res?.id
-        }
       })
-      res = this.formatSDKResponse<any>(postRes)
+      return this.formatSDKResponse<typeof postRes.data>(postRes)
     }
 
-    return res || {}
+    return {}
   }
 
   async applyCoupon({
@@ -242,9 +242,9 @@ export class CartService extends BaseService {
     cartId: string
     couponCode: string
   }) {
-    const res = await this.client.POST(`/api/cart/apply-coupon/{cartId}`, {
+    const res = await this.client.POST(`/api/cart/apply-coupon/{id}`, {
       params: {
-        path: { cartId }
+        path: { id: cartId }
       },
       body: {
         couponCode
@@ -255,9 +255,9 @@ export class CartService extends BaseService {
 
   async removeCoupon() {
     const cartId = localStorage.getItem('cart_id') || null
-    const res = await this.client.POST(`/api/cart/remove-coupon/{cartId}`, {
+    const res = await this.client.POST(`/api/cart/remove-coupon/{id}`, {
       params: {
-        path: { cartId: cartId as string }
+        path: { id: cartId as string }
       },
       body: {}
     })
@@ -306,7 +306,7 @@ export class CartService extends BaseService {
       const postRes = await this.client.POST('/api/address', {
         body: body.shipping_address
       })
-      address_data = this.formatSDKResponse<Address>(postRes)
+      address_data = this.formatSDKResponse<typeof postRes.data>(postRes)
       delete body.shipping_address
       body.shippingAddressId = address_data?.id
     }
@@ -316,8 +316,8 @@ export class CartService extends BaseService {
           shippingAddress?.id === billingAddress?.id
             ? 'new'
             : shippingAddress
-            ? billingAddress?.id
-            : 'new',
+              ? billingAddress?.id
+              : 'new',
         firstName: billingAddress?.firstName,
         lastName: billingAddress?.lastName,
         address_1: billingAddress?.address_1,
@@ -333,7 +333,7 @@ export class CartService extends BaseService {
       const postRes = await this.client.POST('/api/address', {
         body: body.billing_address
       })
-      address_data = this.formatSDKResponse<Address>(postRes)
+      address_data = this.formatSDKResponse<typeof postRes.data>(postRes)
       delete body.billing_address
       // console.log('🚀 ~ CartService ~ updateCart2 ~ address_data:', address_data)
       body.billingAddressId = address_data?.id
@@ -348,16 +348,16 @@ export class CartService extends BaseService {
         },
         body
       })
-      const res = this.formatSDKResponse<Cart>(patchRes)
+      const res = this.formatSDKResponse<typeof patchRes.data>(patchRes)
 
-      // Use type assertion to avoid TypeScript error
-      ;(res as any).shipping_address = address_data
+        // Use type assertion to avoid TypeScript error
+        ; (res as any).shipping_address = address_data
 
       return res || {}
     }
   }
 
-  async completeCart(cart_id: string) {
+  /*async completeCart(cart_id: string) {
     const res = await this.client.POST(`/api/carts/{id}/complete`, {
       params: {
         path: { id: cart_id }
@@ -367,7 +367,7 @@ export class CartService extends BaseService {
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   async updateCart({
     qty,
@@ -382,14 +382,13 @@ export class CartService extends BaseService {
       cartId = localStorage.getItem('cart_id') || null
     }
 
-    let res: any = {}
     if (!cartId) {
       const postRes = await this.client.POST('/api/carts', {
         body: {
           region_id: REGION_ID
         }
       })
-      const cartRes = this.formatSDKResponse<Cart>(postRes)
+      const cartRes = this.formatSDKResponse<typeof postRes.data>(postRes)
       cartId = cartRes?.id
     }
     localStorage.setItem('cart_id', cartId)
@@ -407,14 +406,14 @@ export class CartService extends BaseService {
           isSelectedForCheckout
         }
       })
-      res = this.formatSDKResponse<Cart>(postRes)
+      return this.formatSDKResponse<typeof postRes.data>(postRes)
     }
     // console.log(res)
     // if (cartId) {
     // 	await postKitcommerceApi(`carts/${cartId}`, { customer_id: res?.id })
     // }
 
-    return res || {}
+    return {}
     // return this.post<Cart>(`/api/carts/${cartId}/line-items`, { qty: qty, id: lineId, productId, variantId })
   }
 

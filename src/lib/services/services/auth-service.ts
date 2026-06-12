@@ -498,7 +498,7 @@ export class AuthService extends BaseService {
    *   avatar: 'https://example.com/avatar.jpg'
    * });
    */
-  async updateProfile({
+  /*async updateProfile({
     id,
     firstName,
     lastName,
@@ -526,7 +526,7 @@ export class AuthService extends BaseService {
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 }
 
 // Use singleton instance

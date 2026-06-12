@@ -1,6 +1,5 @@
 export * from './address-service.js'
 export * from './auth-service.js'
-export * from './autocomplete-service.js'
 export * from './banner-service.js'
 export * from './blog-service.js'
 export * from './cart-service.js'

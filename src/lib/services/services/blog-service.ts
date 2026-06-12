@@ -47,7 +47,7 @@ export class BlogService extends BaseService {
     const res = await this.client.GET(`/api/blogs`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }

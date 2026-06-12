@@ -1,4 +1,3 @@
-import type { Banner, PaginatedResponse } from './../types/index.js'
 import { BaseService } from './base.service.js'
 
 /**
