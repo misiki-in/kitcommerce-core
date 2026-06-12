@@ -43,9 +43,17 @@ export class FeedbackService extends BaseService {
  * const result = await feedbackService.listFeedbacks({ page: 1 });
  */
   async listFeedbacks({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<Feedback[]>(
-      `/api/feedbacks?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/feedbacks`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

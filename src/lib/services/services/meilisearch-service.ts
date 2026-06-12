@@ -101,9 +101,12 @@ export class MeilisearchService extends BaseService {
     addParamGroup(attributeParams)
     addParamGroup(optionParams)
 
-    return this.get<MeilisearchResponse>(
-      `/api/ms/products?${searchParams?.toString()}`
-    )
+    const res = await this.client.GET(`/api/ms/products`, {
+      params: {
+        query: Object.fromEntries(searchParams.entries())
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -127,11 +130,12 @@ export class MeilisearchService extends BaseService {
     query: string
   }): Promise<MeilisearchResponse> {
     const { query } = params
-    const searchParams = new URLSearchParams()
-    searchParams.append('search', query)
-    return this.get<MeilisearchResponse>(
-      `/api/ms-autocomplete/products?${searchParams?.toString()}`
-    )
+    const res = await this.client.GET(`/api/ms-autocomplete/products`, {
+      params: {
+        query: { search: query }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

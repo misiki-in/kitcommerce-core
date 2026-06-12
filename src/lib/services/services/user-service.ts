@@ -36,7 +36,8 @@ export class UserService extends BaseService {
    * const currentUser = await userService.getMe();
    */
   async getMe() {
-    return this.get<User>('/api/users/me')
+    const res = await this.client.GET(`/api/users/me`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -51,7 +52,12 @@ export class UserService extends BaseService {
    * const user = await userService.getUser('123');
    */
   async getUser(id: string) {
-    return this.get<User>(`/api/users/${id}`)
+    const res = await this.client.GET(`/api/users/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -101,15 +107,18 @@ export class UserService extends BaseService {
     origin: string
   }) {
     try {
-      return this.post<User>('/api/auth/signup', {
-        firstName,
-        lastName,
-        phone,
-        email,
-        password,
-        cartId,
-        origin
+      const res = await this.client.POST('/api/auth/signup', {
+        body: {
+          firstName,
+          lastName,
+          phone,
+          email,
+          password,
+          cartId,
+          origin
+        }
       })
+      return this.formatSDKResponse<typeof res.data>(res)
     } catch (e: unknown) {
       const errorMessage = e instanceof Error ? e.message : 'Failed to signup'
       throw new Error(errorMessage)
@@ -142,7 +151,10 @@ export class UserService extends BaseService {
     password: string
     cartId?: string | null
   }) {
-    return this.post<User>('/api/auth/login', { email, password })
+    const res = await this.client.POST('/api/auth/login', {
+      body: { email, password }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -168,10 +180,13 @@ export class UserService extends BaseService {
     email: string
     referrer: string
   }) {
-    return this.post<User>('/api/auth/forgot-password', {
-      email,
-      referrer
+    const res = await this.client.POST('/api/auth/forgot-password', {
+      body: {
+        email,
+        referrer
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -185,7 +200,8 @@ export class UserService extends BaseService {
    * await userService.logout();
    */
   async logout() {
-    return this.delete('/api/auth/logout')
+    const res = await this.client.DELETE('/api/auth/logout')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -226,13 +242,19 @@ export class UserService extends BaseService {
     phone: string
     avatar?: string
   }) {
-    return this.put(`/api/admin/users/${id}`, {
-      firstName,
-      lastName,
-      email,
-      phone,
-      avatar
+    const res = await this.client.PUT(`/api/admin/users/{id}`, {
+      params: {
+        path: { id }
+      },
+      body: {
+        firstName,
+        lastName,
+        email,
+        phone,
+        avatar
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async joinAsVendor({
@@ -256,20 +278,26 @@ export class UserService extends BaseService {
     cartId?: string | null
     origin: string
   }) {
-    return this.post<User>('/api/auth/join-as-vendor', {
-      firstName,
-      lastName,
-      businessName,
-      phone,
-      email,
-      password,
-      cartId,
-      origin
+    const res = await this.client.POST('/api/auth/join-as-vendor', {
+      body: {
+        firstName,
+        lastName,
+        businessName,
+        phone,
+        email,
+        password,
+        cartId,
+        origin
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async changePassword(body: { old: string; password: string }) {
-    return this.post<User>('/api/auth/change-password', body)
+    const res = await this.client.POST('/api/auth/change-password', {
+      body
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async resetPassword({
@@ -281,11 +309,14 @@ export class UserService extends BaseService {
     token: string
     password: string
   }) {
-    return this.post<User>('/api/auth/reset-password', {
-      userId,
-      token,
-      password
+    const res = await this.client.POST('/api/auth/reset-password', {
+      body: {
+        userId,
+        token,
+        password
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async getOtp({
@@ -303,24 +334,32 @@ export class UserService extends BaseService {
     password: string
     passwordConfirmation: string
   }) {
-    return this.post<{ otp: string }>('/api/auth/get-otp', {
-      firstName,
-      lastName,
-      phone,
-      email,
-      password,
-      passwordConfirmation
+    const res = await this.client.POST('/api/auth/get-otp', {
+      body: {
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+        passwordConfirmation
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async verifyOtp({ phone, otp }: { phone: string; otp: string }) {
-    return this.post<User>('/api/auth/verify-otp', { phone, otp })
+    const res = await this.client.POST('/api/auth/verify-otp', {
+      body: { phone, otp }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async checkEmail(email: string) {
     try {
-      const res = await this.post('/api/users/check-email', { email })
-      return res
+      const res = await this.client.POST('/api/users/check-email', {
+        body: { email }
+      })
+      return this.formatSDKResponse<typeof res.data>(res)
     } catch (e: unknown) {
       const error = e as { message?: string }
       throw new Error(error?.message || 'Failed to check email')
@@ -328,7 +367,12 @@ export class UserService extends BaseService {
   }
 
   async deleteUser(id: string) {
-    return this.delete(`/api/delete/user/${id}`)
+    const res = await this.client.DELETE(`/api/delete/user/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

@@ -40,7 +40,8 @@ export class SettingService extends BaseService {
  * const setting = await settingService.fetchSetting('123');
  */
   async fetchSetting() {
-    return this.get<Setting[]>('/api/settings')
+    const res = await this.client.GET('/api/settings')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -58,11 +59,20 @@ export class SettingService extends BaseService {
  */
 
   async saveSettings(setting: Omit<Setting, 'id'>) {
-    return this.post<Setting>('/api/settings', setting)
+    const res = await this.client.POST('/api/settings', {
+      body: setting
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async updateSettings(id: string, setting: Partial<Setting>) {
-    return this.patch<Setting>(`/api/settings/${id}`, setting)
+    const res = await this.client.PATCH('/api/settings/{id}', {
+      params: {
+        path: { id }
+      },
+      body: setting
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

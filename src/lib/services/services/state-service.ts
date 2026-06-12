@@ -43,7 +43,8 @@ export class StateService extends BaseService {
  * const result = await stateService.list({ page: 1 });
  */
   async list() {
-    return this.get<State[]>('/api/states')
+    const res = await this.client.GET(`/api/states`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

@@ -43,9 +43,17 @@ export class PaymentMethodService extends BaseService {
  * const result = await paymentmethodService.list({ page: 1 });
  */
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<PaymentMethod>>(
-      `/api/payment-methods?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/payment-methods`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

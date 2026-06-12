@@ -41,7 +41,9 @@ export class ChatService extends BaseService {
  * const result = await chatService.list({ page: 1 });
  */
 	async list() {
-		return this.get<Record<string, any>[]>('/api/chats')
+		const res = await this.client.GET(`/api/chats`)
+
+		return this.formatSDKResponse<typeof res.data>(res)
 	}
 }
 

@@ -53,7 +53,11 @@ export class ContactService extends BaseService {
     email: string
     message: string
   }) {
-    return this.post<Contact>('/api/contact-us', { name, email, message })
+    const res = await this.client.POST(`/api/contact-us`, {
+      body: { name, email, message }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

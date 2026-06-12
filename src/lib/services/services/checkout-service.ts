@@ -49,10 +49,13 @@ export class CheckoutService extends BaseService {
     cartId: string
     origin: string
   }) {
-    return this.post('/api/checkout/razorpay', {
-      cartId,
-      origin
-    }) as Promise<Cart>
+    const res = await this.client.POST('/api/checkout/razorpay', {
+      body: {
+        cartId,
+        origin
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -72,7 +75,10 @@ export class CheckoutService extends BaseService {
    * });
    */
   async checkoutCOD({ cartId, origin }: { cartId: string; origin: string }) {
-    return this.post('/api/checkout/cod', { cartId, origin }) as Promise<Cart>
+    const res = await this.client.POST('/api/checkout/cod', {
+      body: { cartId, origin }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -92,7 +98,10 @@ export class CheckoutService extends BaseService {
    * });
    */
   async checkoutPOS({ cartId, origin }: { cartId: string; origin: string }) {
-    return this.post('/api/checkout/pos', { cartId, origin }) as Promise<Cart>
+    const res = await this.client.POST('/api/checkout/pos', {
+      body: { cartId, origin }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -118,10 +127,13 @@ export class CheckoutService extends BaseService {
     razorpay_order_id: string
     razorpay_payment_id: string
   }) {
-    return this.post('/api/checkout/razorpay-capture', {
-      razorpay_order_id,
-      razorpay_payment_id
+    const res = await this.client.POST('/api/checkout/razorpay-capture', {
+      body: {
+        razorpay_order_id,
+        razorpay_payment_id
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -155,7 +167,10 @@ export class CheckoutService extends BaseService {
     phone: string
     origin: string
   }) {
-    return this.post('/api/checkout/phonepe', { cartId, email, phone, origin })
+    const res = await this.client.POST('/api/checkout/phonepe', {
+      body: { cartId, email, phone, origin }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -173,7 +188,12 @@ export class CheckoutService extends BaseService {
    * });
    */
   async getShippingRates({ cartId }: { cartId: string }) {
-    return this.get(`/api/shipping-rates/${cartId}`) as Promise<Checkout>
+    const res = await this.client.GET(`/api/shipping-rates/{cartId}`, {
+      params: {
+        path: { cartId }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async capturePhonepePayment({
@@ -183,10 +203,13 @@ export class CheckoutService extends BaseService {
     phonepe_order_id: string
     phonepe_payment_id: string
   }) {
-    return this.post('/api/checkout/phonepe-capture', {
-      phonepe_order_id,
-      phonepe_payment_id
+    const res = await this.client.POST('/api/checkout/phonepe-capture', {
+      body: {
+        phonepe_order_id,
+        phonepe_payment_id
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   async checkoutPaypal({
     cartId,
@@ -197,14 +220,20 @@ export class CheckoutService extends BaseService {
     origin: string
     return_url: string
   }) {
-    return this.post('/api/checkout/paypal', {
-      cartId,
-      origin,
-      return_url
+    const res = await this.client.POST('/api/checkout/paypal', {
+      body: {
+        cartId,
+        origin,
+        return_url
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   async checkoutStripe({ cartId, origin }: { cartId: string; origin: string }) {
-    return this.post('/api/checkout/stripe', { cartId, origin })
+    const res = await this.client.POST('/api/checkout/stripe', {
+      body: { cartId, origin }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   async checkoutStripeCapture({
     order_no,
@@ -217,12 +246,15 @@ export class CheckoutService extends BaseService {
     payment_session_id: string
     storeId: string
   }) {
-    return this.post('/api/checkout/stripe-capture', {
-      order_no,
-      pg,
-      payment_session_id,
-      storeId
+    const res = await this.client.POST('/api/checkout/stripe-capture', {
+      body: {
+        order_no,
+        pg,
+        payment_session_id,
+        storeId
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async createAffirmPayOrder({
@@ -238,13 +270,16 @@ export class CheckoutService extends BaseService {
     storeId: string
     paymentMethodId: string
   }) {
-    return this.post('/api/affirm-checkout/create-order', {
-      cartId,
-      addressId,
-      origin,
-      storeId,
-      paymentMethodId
+    const res = await this.client.POST('/api/affirm-checkout/create-order', {
+      body: {
+        cartId,
+        addressId,
+        origin,
+        storeId,
+        paymentMethodId
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async cancelAffirmOrder({
@@ -256,11 +291,14 @@ export class CheckoutService extends BaseService {
     storeId: string
     origin: string
   }) {
-    return this.post('/api/checkout/affirm/cancel-order', {
-      orderId,
-      storeId,
-      origin
+    const res = await this.client.POST('/api/checkout/affirm/cancel-order', {
+      body: {
+        orderId,
+        storeId,
+        origin
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async confirmAffirmOrder({
@@ -274,12 +312,15 @@ export class CheckoutService extends BaseService {
     storeId: string
     origin: string
   }) {
-    return this.post('/api/checkout/affirm/confirm-order', {
-      affirmToken,
-      orderId,
-      storeId,
-      origin
+    const res = await this.client.POST('/api/checkout/affirm/confirm-order', {
+      body: {
+        affirmToken,
+        orderId,
+        storeId,
+        origin
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

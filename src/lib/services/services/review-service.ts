@@ -50,9 +50,17 @@ export class ReviewService extends BaseService {
     sort: string
     currentPage: number
   }) {
-    return this.get<PaginatedResponse<Feedback>>(
-      `/api/reviews/me?product_id=${productId}&q=${search}&sort=${sort}&page=${currentPage}`
-    )
+    const res = await this.client.GET(`/api/reviews/me`, {
+      params: {
+        query: {
+          product_id: productId,
+          q: search,
+          sort,
+          page: currentPage
+        }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   async allReviews({
     search = '',
@@ -63,7 +71,8 @@ export class ReviewService extends BaseService {
     sort: string
     currentPage: number
   }) {
-    return this.get<PaginatedResponse<Feedback>>('/api/products/all-ratings')
+    const res = await this.client.GET('/api/products/all-ratings')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -79,9 +88,12 @@ export class ReviewService extends BaseService {
  */
 
   async fetchProducrReviews(productId: string) {
-    return this.get<PaginatedResponse<Feedback>>(
-      `/api/reviews?product-id=${productId}`
-    )
+    const res = await this.client.GET(`/api/reviews`, {
+      params: {
+        query: { 'product-id': productId }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -99,7 +111,10 @@ export class ReviewService extends BaseService {
  */
 
   async saveReview(review: Omit<Feedback, 'id'>) {
-    return this.post<Feedback>('/api/reviews', review)
+    const res = await this.client.POST('/api/reviews', {
+      body: review
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

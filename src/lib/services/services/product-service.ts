@@ -41,9 +41,17 @@ export class ProductService extends BaseService {
    */
   async listFeaturedProducts({ page = 1, sort = '-createdAt' }) {
     const search = '' // "Featured"
-    return this.get(
-      `/api/products/featured?page=${page}&search=${search}&sort=${sort}`
-    ) as Promise<PaginatedResponse<[Product]>>
+    const res = await this.client.GET(`/api/products/featured`, {
+      params: {
+        query: {
+          page,
+          search,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -65,9 +73,17 @@ export class ProductService extends BaseService {
    */
   async listTrendingProducts({ page = 1, search = '', sort = '-createdAt' }) {
     const q = 'Trending'
-    return this.get(
-      `/api/products?page=${page}&search=${search}&sort=${sort}`
-    ) as Promise<PaginatedResponse<[Product]>>
+    const res = await this.client.GET(`/api/products`, {
+      params: {
+        query: {
+          page,
+          search,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -91,9 +107,17 @@ export class ProductService extends BaseService {
     categoryId = '',
     sort = '-createdAt'
   }) {
-    return this.get(
-      `/api/products?page=${page}&categories=${categoryId}&sort=${sort}`
-    ) as Promise<PaginatedResponse<[Product]>>
+    const res = await this.client.GET(`/api/products`, {
+      params: {
+        query: {
+          page,
+          categories: categoryId,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -114,9 +138,17 @@ export class ProductService extends BaseService {
    * });
    */
   async list({ page = 1, search = '', sort = '-createdAt' }) {
-    return this.get(
-      `/api/products?page=${page}&search=${search}&sort=${sort}`
-    ) as Promise<PaginatedResponse<[Product]>>
+    const res = await this.client.GET(`/api/products`, {
+      params: {
+        query: {
+          page,
+          search,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -131,9 +163,13 @@ export class ProductService extends BaseService {
    * const product = await productService.getOne('red-running-shoes');
    */
   async getOne(slug: string) {
-    return this.get(`/api/products/${slug}`) as Promise<
-      PaginatedResponse<Product>
-    >
+    const res = await this.client.GET(`/api/products/{id}`, {
+      params: {
+        path: { id: slug }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -171,13 +207,17 @@ export class ProductService extends BaseService {
     rating: number
     uploadedImages: string[]
   }) {
-    return this.post('/api/products/ratings-and-reviews', {
-      productId,
-      variantId,
-      review,
-      rating,
-      uploadedImages
+    const res = await this.client.POST('/api/products/ratings-and-reviews', {
+      body: {
+        productId,
+        variantId,
+        review,
+        rating,
+        uploadedImages
+      }
     })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -192,8 +232,8 @@ export class ProductService extends BaseService {
    */
   async fetchReels() {
     try {
-      const res = await this.get('api/reels')
-      return res
+      const res = await this.client.GET('/api/reels')
+      return this.formatSDKResponse<typeof res.data>(res)
     } catch (e: unknown) {
       const error = e as {
         status?: string | number

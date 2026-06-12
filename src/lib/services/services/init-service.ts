@@ -40,7 +40,9 @@ export class InitService extends BaseService {
  * const init = await initService.fetchInit('123');
  */
   async fetchInit() {
-    return this.get<Init[]>('/api/init')
+    const res = await this.client.GET(`/api/init`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

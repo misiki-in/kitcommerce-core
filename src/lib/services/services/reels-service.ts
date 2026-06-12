@@ -43,7 +43,9 @@ export class ReelsService extends BaseService {
  * const result = await reelsService.list({ page: 1 });
  */
   async list() {
-    return this.get<PaginatedResponse<Reels>>('/api/reels')
+    const res = await this.client.GET(`/api/reels`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

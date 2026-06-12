@@ -43,9 +43,17 @@ export class PageService extends BaseService {
  * const result = await pageService.list({ page: 1 });
  */
   async list({ page = 1, search = '', sort = '-createdAt' }) {
-    return this.get<Page[]>(
-      `/api/pages?page=${page}&search=${search}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/pages`, {
+      params: {
+        query: {
+          page,
+          search,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -64,9 +72,16 @@ export class PageService extends BaseService {
  */
 
   async listLatestPages({}) {
-    return this.get<PaginatedResponse<Page>>(
-      '/api/pages?sort=-updatedAt&limit=10'
-    )
+    const res = await this.client.GET(`/api/pages`, {
+      params: {
+        query: {
+          sort: '-updatedAt',
+          limit: 10
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -82,7 +97,13 @@ export class PageService extends BaseService {
  */
 
   async getOne(id: string) {
-    return this.get<Page>(`/api/pages/${id}`)
+    const res = await this.client.GET(`/api/pages/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

@@ -43,9 +43,17 @@ export class FaqService extends BaseService {
  * const result = await faqService.listFaqs({ page: 1 });
  */
   async listFaqs({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<Faq>>(
-      `/api/faqs?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/faqs`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

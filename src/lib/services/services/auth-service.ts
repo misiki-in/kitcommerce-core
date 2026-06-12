@@ -38,7 +38,9 @@ export class AuthService extends BaseService {
    * const currentUser = await authService.getMe();
    */
   async getMe() {
-    return this.get('/api/admin/users/me') as Promise<User>
+    const res = await this.client.GET(`/api/users/me`)
+    return this.formatSDKResponse<typeof res.data>(res)
+    //return this.get('/api/admin/users/me') as Promise<User>
   }
 
   /**
@@ -52,9 +54,14 @@ export class AuthService extends BaseService {
    * // Example usage
    * const user = await authService.getUser('123');
    */
-  async getUser(id: string): Promise<User> {
-    return this.get<User>('/api/users/' + id)
-  }
+  /*async getUser(id: string) {
+    const res = await this.client.GET(`/api/users/{id}`, {
+      params: {
+        path: { id },
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+  }*/
 
   /**
    * Verifies a user's email with the provided token
@@ -69,10 +76,17 @@ export class AuthService extends BaseService {
    * const result = await authService.verifyEmail('user@example.com', 'verification-token');
    */
   async verifyEmail(email: string, token: string) {
-    return this.post('/api/auth/verify-email', {
+    const res = await this.client.POST(`/api/auth/verify-email`, {
+      body: {
+        email,
+        token,
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+    /*return this.post('/api/auth/verify-email', {
       email,
       token
-    }) as Promise<verifyEmail>
+    }) as Promise<verifyEmail>*/
   }
 
   /**
@@ -117,14 +131,25 @@ export class AuthService extends BaseService {
     passwordConfirmation: string
     cartId?: string | null
   }) {
-    return this.post('/api/auth/signup', {
+    const res = await this.client.POST(`/api/auth/signup`, {
+      body: {
+        firstName,
+        lastName,
+        phone,
+        email,
+        password,
+        cartId
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+    /*return this.post('/api/auth/signup', {
       firstName,
       lastName,
       phone,
       email,
       password,
       cartId
-    }) as Promise<User>
+    }) as Promise<User>*/
   }
 
   /**
@@ -177,7 +202,22 @@ export class AuthService extends BaseService {
     role: string
     origin: string
   }) {
-    return this.post('/api/auth/join-as-vendor', {
+    const res = await this.client.POST(`/api/auth/join-as-vendor`, {
+      body: {
+        firstName,
+        lastName,
+        businessName,
+        phone,
+        email,
+        password,
+        cartId,
+        role,
+        origin
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
+
+    /*return this.post('/api/auth/join-as-vendor', {
       firstName,
       lastName,
       businessName,
@@ -187,7 +227,7 @@ export class AuthService extends BaseService {
       cartId,
       role,
       origin
-    }) as Promise<User>
+    }) as Promise<User>*/
   }
 
   /**
@@ -233,15 +273,18 @@ export class AuthService extends BaseService {
     password: string
     origin: string
   }) {
-    return this.post('/api/auth/join-as-admin', {
-      firstName,
-      lastName,
-      businessName,
-      phone,
-      email,
-      password,
-      origin
-    }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/join-as-admin`, {
+      body: {
+        firstName,
+        lastName,
+        businessName,
+        phone,
+        email,
+        password,
+        origin
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -270,11 +313,14 @@ export class AuthService extends BaseService {
     password: string
     cartId?: string | null
   }) {
-    return this.post('/api/auth/login', {
-      email,
-      password,
-      cartId
-    }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/login`, {
+      body: {
+        email,
+        password,
+        cartId
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -300,10 +346,13 @@ export class AuthService extends BaseService {
     email: string
     referrer: string
   }) {
-    return this.post('/api/auth/forgot-password', {
-      email,
-      referrer
-    }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/forgot-password`, {
+      body: {
+        email,
+        referrer
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -323,7 +372,10 @@ export class AuthService extends BaseService {
    * });
    */
   async changePassword(body: { old: string; password: string }) {
-    return this.post('/api/admin/auth/change-password', body) as Promise<User>
+    const res = await this.client.POST(`/api/auth/change-password`, {
+      body,
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -353,11 +405,14 @@ export class AuthService extends BaseService {
     token: string
     password: string
   }) {
-    return this.post('/api/auth/reset-password', {
-      userId,
-      token,
-      password
-    }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/reset-password`, {
+      body: {
+        userId,
+        token,
+        password
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -375,7 +430,10 @@ export class AuthService extends BaseService {
    * });
    */
   async getOtp({ phone }: { phone: string }) {
-    return this.post('/api/auth/get-otp', { phone }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/get-otp`, {
+      body: { phone },
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -395,7 +453,10 @@ export class AuthService extends BaseService {
    * });
    */
   async verifyOtp({ phone, otp }: { phone: string; otp: string }) {
-    return this.post('/api/auth/verify-otp', { phone, otp }) as Promise<User>
+    const res = await this.client.POST(`/api/auth/verify-otp`, {
+      body: { phone, otp }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -409,7 +470,8 @@ export class AuthService extends BaseService {
    * await authService.logout();
    */
   async logout() {
-    return this.delete('/api/auth/logout')
+    const res = await this.client.DELETE(`/api/auth/logout`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -451,13 +513,19 @@ export class AuthService extends BaseService {
     phone: string
     avatar?: string
   }) {
-    return this.put('/api/users/' + id, {
-      firstName,
-      lastName,
-      email,
-      phone,
-      avatar
-    }) as Promise<User>
+    const res = await this.client.PUT(`/api/users/{id}`, {
+      params: {
+        path: { id },
+      },
+      body: {
+        firstName,
+        lastName,
+        email,
+        phone,
+        avatar
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

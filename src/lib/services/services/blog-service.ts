@@ -44,9 +44,17 @@ export class BlogService extends BaseService {
  */
 
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<Blog>>(
-      `/api/blogs?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/blogs`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -62,7 +70,13 @@ export class BlogService extends BaseService {
  */
 
   async getOne(id: string) {
-    return this.get<Blog>(`/api/blogs/${id}`)
+    const res = await this.client.GET(`/api/blogs/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

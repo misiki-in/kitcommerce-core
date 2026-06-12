@@ -44,7 +44,8 @@ export class BannerService extends BaseService {
  */
 
   async list() {
-    return this.get<PaginatedResponse<Banner>>('/api/banners')
+    const res = await this.client.GET(`/api/banners`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -60,7 +61,8 @@ export class BannerService extends BaseService {
  */
 
   async fetchBannersGroup() {
-    return this.get<PaginatedResponse<Banner>>('/api/banners')
+    const res = await this.client.GET(`/api/banners`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

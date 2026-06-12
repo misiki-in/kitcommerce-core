@@ -43,9 +43,17 @@ export class CollectionService extends BaseService {
  * const result = await collectionService.list({ page: 1 });
  */
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get(
-      `/api/collections?page=${page}&q=${q}&sort=${sort}`
-    ) as Promise<PaginatedResponse<Collection>>
+    const res = await this.client.GET(`/api/collections`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -61,7 +69,13 @@ export class CollectionService extends BaseService {
  */
 
   async getOne(id: string) {
-    return this.get(`/api/collections/${id}`) as Promise<Collection>
+    const res = await this.client.GET(`/api/collections/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -77,7 +91,9 @@ export class CollectionService extends BaseService {
  */
 
   async getAllRatings() {
-    return this.get('/api/collections/all-ratings') as Promise<Collection>
+    const res = await this.client.GET(`/api/collections/all-ratings`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

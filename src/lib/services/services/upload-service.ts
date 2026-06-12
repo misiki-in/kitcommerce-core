@@ -28,9 +28,11 @@ export class UploadService extends BaseService {
     formData.append('file', file)
     formData.append('folder', folderName)
     formData.append('type', type)
-    const res1 = await fetch(`/api/upload`, { method: 'POST', body: formData })
-    const res = await res1.json()
-    return res?.url
+    const res = await this.client.POST(`/api/upload`, {
+      body: formData as any
+    })
+    const data = this.formatSDKResponse<any>(res)
+    return data?.url
   }
 
    async uploadMultipleToS3({
@@ -61,16 +63,22 @@ export class UploadService extends BaseService {
       })
     )
 
-    const res: any = await this.post(`/api/upload/multiple`, {
-      files: fileData,
-      folder: folderName,
-      type: type
+    const res = await this.client.POST(`/api/upload/multiple`, {
+      body: {
+        files: fileData,
+        folder: folderName,
+        type: type
+      }
     })
-    return res?.urls
+    const data = this.formatSDKResponse<any>(res)
+    return data?.urls
   }
-   async deleteFromS3({ url }: { url: string }): Promise<void> {
+  async deleteFromS3({ url }: { url: string }): Promise<void> {
     // console.log('url', url)
-    await this.post(`/api/upload/delete`, { url })
+    const res = await this.client.POST(`/api/upload/delete`, {
+      body: { url }
+    })
+    this.formatSDKResponse<any>(res)
     return
   }
 }

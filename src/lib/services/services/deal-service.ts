@@ -40,7 +40,9 @@ export class DealService extends BaseService {
  * const deal = await dealService.fetchDeals('123');
  */
   async fetchDeals() {
-    return this.get<PaginatedResponse<Deal>>('/api/products')
+    const res = await this.client.GET(`/api/products`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

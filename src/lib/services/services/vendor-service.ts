@@ -43,12 +43,21 @@ export class VendorService extends BaseService {
  * });
  */
   async save(data: Partial<Vendor>) {
-    return this.post('/api/vendors', data) as Promise<Vendor>
+    const res = await this.client.POST('/api/vendors', {
+      body: data
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Update vendor details by ID
   async update(data: Partial<Vendor> & { id: string }) {
-    return this.patch(`/api/vendors/${data.id}`, data) as Promise<Vendor>
+    const res = await this.client.PATCH('/api/vendors/{id}', {
+      params: {
+        path: { id: data.id }
+      },
+      body: data
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // List vendors with optional pagination and query
@@ -67,9 +76,16 @@ export class VendorService extends BaseService {
  * const result = await vendorService.list({ page: 1 });
  */
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get(`/api/vendors?page=${page}&q=${q}&sort=${sort}`) as Promise<
-      PaginatedResponse<Vendor>
-    >
+    const res = await this.client.GET(`/api/vendors`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Get vendor details by ID
@@ -85,7 +101,12 @@ export class VendorService extends BaseService {
  * const vendor = await vendorService.getVendor('123');
  */
   async getVendor(id: string) {
-    return this.get(`/api/vendors/${id}`) as Promise<Vendor>
+    const res = await this.client.GET(`/api/vendors/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Fetch current vendor's details
@@ -101,7 +122,8 @@ export class VendorService extends BaseService {
  * const vendor = await vendorService.fetchMyVendorDetails('123');
  */
   async fetchMyVendorDetails() {
-    return this.get('/api/vendors/me') as Promise<Vendor>
+    const res = await this.client.GET('/api/vendors/me')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Fetch vendor dashboard summary data
@@ -117,7 +139,8 @@ export class VendorService extends BaseService {
  * const vendor = await vendorService.fetchDashboard('123');
  */
   async fetchDashboard() {
-    return this.get('/api/dashboard/summary') as Promise<Vendor>
+    const res = await this.client.GET('/api/dashboard/summary')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Fetch all products of a specific vendor by vendor ID
@@ -133,7 +156,14 @@ export class VendorService extends BaseService {
  * const vendor = await vendorService.fetchProductsOfVendor('123');
  */
   async fetchProductsOfVendor(vendorId: string) {
-    return this.get(`/api/products?vendor_id=${vendorId}`) as Promise<Product[]>
+    const res = await this.client.GET(`/api/products`, {
+      params: {
+        query: {
+          vendor_id: vendorId
+        }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   // Fetch all products of a specific vendor by vendor ID
@@ -149,9 +179,14 @@ export class VendorService extends BaseService {
  * const vendor = await vendorService.getAllVendorRatings('123');
  */
   async getAllVendorRatings(vendorId: string) {
-    return this.get(
-      `/api/vendors/all-ratings?vendor_id=${vendorId}`
-    ) as Promise<Product[]>
+    const res = await this.client.GET(`/api/vendors/all-ratings`, {
+      params: {
+        query: {
+          vendor_id: vendorId
+        }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

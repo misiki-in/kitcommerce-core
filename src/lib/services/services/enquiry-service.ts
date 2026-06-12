@@ -54,13 +54,17 @@ export class EnquiryService extends BaseService {
     message: string
     productId: string
   }) {
-    return this.post<Enquiry>('/api/enquiry', {
-      name,
-      email,
-      phone,
-      message,
-      productId
+    const res = await this.client.POST(`/api/enquiry`, {
+      body: {
+        name,
+        email,
+        phone,
+        message,
+        productId
+      }
     })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

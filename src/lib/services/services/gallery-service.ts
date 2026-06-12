@@ -40,7 +40,9 @@ export class GalleryService extends BaseService {
  * const gallery = await galleryService.fetchGallery('123');
  */
   async fetchGallery() {
-    return this.get<Gallery[]>('/api/gallery')
+    const res = await this.client.GET(`/api/gallery`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

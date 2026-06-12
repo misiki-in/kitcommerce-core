@@ -43,7 +43,9 @@ export class MenuService extends BaseService {
  * const result = await menuService.list({ page: 1 });
  */
   async list() {
-    return this.get<Menu[]>('/api/menu')
+    const res = await this.client.GET(`/api/menu`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

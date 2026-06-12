@@ -43,7 +43,9 @@ export class CountryService extends BaseService {
  * const result = await countryService.list({ page: 1 });
  */
   async list() {
-    return this.get<Country[]>('/api/countries/all')
+    const res = await this.client.GET(`/api/countries/all`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

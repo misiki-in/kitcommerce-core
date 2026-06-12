@@ -42,7 +42,9 @@ export class DemoRequestService extends BaseService {
  * });
  */
   async saveScheduleDemo() {
-    return this.get<Demo>('/api/schedule-demo')
+    const res = await this.client.GET(`/api/schedule-demo`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

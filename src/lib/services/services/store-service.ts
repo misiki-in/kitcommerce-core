@@ -93,14 +93,16 @@ export class StoreService extends BaseService {
       throw new Error('Either storeId or domain must be provided')
     }
 
-    let url = '/api/stores/public-details?'
-    if (storeId) {
-      url += `store_id=${encodeURIComponent(storeId)}`
-    } else if (domain) {
-      url += `domain=${encodeURIComponent(domain)}`
-    }
+    const res = await this.client.GET(`/api/stores/public-details`, {
+      params: {
+        query: {
+          store_id: storeId,
+          domain: domain
+        }
+      }
+    })
 
-    return this.get<StoreDetails>(url)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

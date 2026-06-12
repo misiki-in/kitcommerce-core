@@ -40,9 +40,17 @@ export class CategoryService extends BaseService {
  * const category = await categoryService.fetchFooterCategories('123');
  */
   async fetchFooterCategories({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get(
-      `/api/categories?page=${page}&q=${q}&sort=${sort}`
-    ) as Promise<PaginatedResponse<Category>>
+    const res = await this.client.GET(`/api/categories`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   /**
  * Fetches a single Category by ID
@@ -56,9 +64,13 @@ export class CategoryService extends BaseService {
  * const category = await categoryService.fetchFeaturedCategories('123');
  */
   async fetchFeaturedCategories({ limit = 100 }) {
-    return this.get(`/api/categories/featured?limit=${limit}`) as Promise<
-      PaginatedResponse<Category>
-    >
+    const res = await this.client.GET(`/api/categories/featured`, {
+      params: {
+        query: { limit }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -74,7 +86,13 @@ export class CategoryService extends BaseService {
  */
 
   async fetchCategory(id: string) {
-    return this.get(`/api/product-categories?handle=${id}`) as Promise<Category>
+    const res = await this.client.GET(`/api/product-categories`, {
+      params: {
+        query: { handle: id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -90,7 +108,9 @@ export class CategoryService extends BaseService {
  */
 
   async fetchAllCategories() {
-    return this.get('/api/categories') as Promise<PaginatedResponse<Category>>
+    const res = await this.client.GET(`/api/categories`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -106,9 +126,13 @@ export class CategoryService extends BaseService {
  */
 
   async fetchAllProductsOfCategories(id: string) {
-    return this.get(`/api/product-categories?handle=${id}`) as Promise<
-      PaginatedResponse<Category>
-    >
+    const res = await this.client.GET(`/api/product-categories`, {
+      params: {
+        query: { handle: id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -124,9 +148,9 @@ export class CategoryService extends BaseService {
  */
 
   async getMegamenu() {
-    return this.get('/api/categories/megamenu') as Promise<
-      PaginatedResponse<Category>
-    >
+    const res = await this.client.GET(`/api/categories/megamenu`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

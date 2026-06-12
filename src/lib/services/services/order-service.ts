@@ -43,9 +43,17 @@ export class OrderService extends BaseService {
  * const result = await orderService.list({ page: 1 });
  */
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get(`/api/orders?page=${page}&q=${q}&sort=${sort}`) as Promise<
-      PaginatedResponse<Order>
-    >
+    const res = await this.client.GET(`/api/orders`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -70,9 +78,16 @@ export class OrderService extends BaseService {
     orderNo: string | null
     cartId: string | null
   }) {
-    return this.get(
-      `/api/orders/list-by-parent?order_no=${orderNo}&cart_id=${cartId}`
-    ) as Promise<PaginatedResponse<Order>>
+    const res = await this.client.GET(`/api/orders/list-by-parent`, {
+      params: {
+        query: {
+          order_no: orderNo as any,
+          cart_id: cartId as any
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -88,7 +103,13 @@ export class OrderService extends BaseService {
  */
 
   async fetchOrder(id: string) {
-    return this.get(`/api/orders/${id}`) as Promise<Order>
+    const res = await this.client.GET(`/api/orders/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -104,7 +125,13 @@ export class OrderService extends BaseService {
  */
 
   async getOrder(orderNo: string) {
-    return this.get(`/api/orders/${orderNo}`) as Promise<Order>
+    const res = await this.client.GET(`/api/orders/{id}`, {
+      params: {
+        path: { id: orderNo }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -120,13 +147,23 @@ export class OrderService extends BaseService {
  */
 
   async fetchTrackOrder(id: string) {
-    return this.get(`/api/orders/list-by-parent?id=${id}`) as Promise<
-      PaginatedResponse<Order>
-    >
+    const res = await this.client.GET(`/api/orders/list-by-parent`, {
+      params: {
+        query: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async paySuccessPageHit(orderId: string) {
-    return this.get(`/api/orders/${orderId}`) as Promise<Order>
+    const res = await this.client.GET(`/api/orders/{id}`, {
+      params: {
+        path: { id: orderId }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async codCheckout({
@@ -137,9 +174,16 @@ export class OrderService extends BaseService {
     paymentProviderId,
     prescription
   }: any) {
-    return this.post<Order>(`/api/carts/${cartId}/payment-sessions`, {
-      provider_id: paymentProviderId
+    const res = await this.client.POST(`/api/carts/{id}/payment-sessions`, {
+      params: {
+        path: { id: cartId }
+      },
+      body: {
+        provider_id: paymentProviderId
+      }
     })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async cashfreeCheckout({
@@ -148,7 +192,9 @@ export class OrderService extends BaseService {
     prescription,
     origin
   }: any) {
-    return this.get('/api/orders/me') as Promise<Order>
+    const res = await this.client.GET('/api/orders/me')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async razorpayCheckout({
@@ -157,15 +203,21 @@ export class OrderService extends BaseService {
     prescription,
     origin
   }: any) {
-    return this.get('/api/orders/me') as Promise<Order>
+    const res = await this.client.GET('/api/orders/me')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async stripeCheckout({ address, paymentMethod, prescription, origin }: any) {
-    return this.get('/api/orders/me') as Promise<Order>
+    const res = await this.client.GET('/api/orders/me')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async razorCapture({ rpPaymentId, rpOrderId, origin }: any) {
-    return this.get('/api/orders/me') as Promise<Order>
+    const res = await this.client.GET('/api/orders/me')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -184,9 +236,9 @@ export class OrderService extends BaseService {
  */
 
   async listPublic() {
-    return this.get('/api/orders/public/list') as Promise<
-      PaginatedResponse<Order>
-    >
+    const res = await this.client.GET('/api/orders/public/list')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -202,25 +254,37 @@ export class OrderService extends BaseService {
  */
 
   async getOrderByEmailAndOTP({ email, otp }: { email: string; otp: string }) {
-    return this.get(
-      `/api/orders-public/list?otp=${otp}&email=${email}&sort=-createdAt`
-    ) as Promise<PaginatedResponse<Order>>
+    const res = await this.client.GET(`/api/orders-public/list`, {
+      params: {
+        query: {
+          otp,
+          email,
+          sort: '-createdAt'
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async buyAgain() {
-    return this.get('/api/orders/buy-again') as Promise<
-      PaginatedResponse<Order>
-    >
+    const res = await this.client.GET('/api/orders/buy-again')
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async submitReview({ rating, review, productId, variantId, uploadedImages }: any) {
-		return this.post<any>(`/api/products/ratings-and-reviews`, {
-			rating,
-			review,
-			productId,
-			variantId,
-			uploadedImages
-		})
+    const res = await this.client.POST(`/api/products/ratings-and-reviews`, {
+      body: {
+        rating,
+        review,
+        productId,
+        variantId,
+        uploadedImages
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
 	}
 }
 

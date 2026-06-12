@@ -43,15 +43,31 @@ export class CouponService extends BaseService {
  * const result = await couponService.listCoupons({ page: 1 });
  */
   async listCoupons({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<Coupon>>(
-      `/api/coupons?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/coupons`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async searchCoupons({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<Coupon>>(
-      `/api/coupons?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/coupons`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -67,7 +83,13 @@ export class CouponService extends BaseService {
  */
 
   async getCoupon(id: string) {
-    return this.get<Coupon>(`/api/coupons/${id}`)
+    const res = await this.client.GET(`/api/coupons/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -85,15 +107,32 @@ export class CouponService extends BaseService {
  */
 
   async createCoupon(coupons: Omit<Coupon, 'id'>) {
-    return this.post<Coupon>('/api/coupons', coupons)
+    const res = await this.client.POST(`/api/coupons`, {
+      body: coupons
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async patchCoupon(id: string, coupons: Partial<Coupon>) {
-    return this.put<Coupon>(`/api/coupons/${id}`, coupons)
+    const res = await this.client.PUT(`/api/coupons/{id}`, {
+      params: {
+        path: { id }
+      },
+      body: coupons
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async deleteCoupon(id: string) {
-    return this.delete<Coupon>(`/api/coupons/${id}`)
+    const res = await this.client.DELETE(`/api/coupons/{id}`, {
+      params: {
+        path: { id }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

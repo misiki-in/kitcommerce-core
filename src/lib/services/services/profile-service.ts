@@ -40,7 +40,8 @@ export class ProfileService extends BaseService {
  * const profile = await profileService.getOne('123');
  */
   async getOne() {
-    return this.get<User>('/api/users/me')
+    const res = await this.client.GET('/api/users/me')
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -58,7 +59,10 @@ export class ProfileService extends BaseService {
  */
 
   async save(blog: Omit<User, 'id'>) {
-    return this.patch<User>('/api/users', blog)
+    const res = await this.client.PATCH('/api/users', {
+      body: blog
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

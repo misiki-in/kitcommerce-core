@@ -43,9 +43,17 @@ export class PopularSearchService extends BaseService {
  * const result = await popularsearchService.listPopularSearch({ page: 1 });
  */
   async listPopularSearch({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<PopularSearch>>(
-      `/api/popular-search?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/popular-search`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

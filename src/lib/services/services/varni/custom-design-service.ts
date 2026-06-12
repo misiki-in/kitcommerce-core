@@ -21,7 +21,10 @@ export class VarniCustomDesignService extends BaseService {
     timeline: string
     img: string
   }) {
-    return this.post('/api/varni-custom-design', formDetails)
+    const res = await this.client.POST('/api/varni-custom-design', {
+      body: formDetails
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

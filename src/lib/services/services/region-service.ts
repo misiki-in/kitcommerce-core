@@ -40,7 +40,8 @@ export class RegionService extends BaseService {
  * const region = await regionService.getRegionByRegionId('123');
  */
   async getRegionByRegionId(id: string) {
-    return this.get<Region>('/api/settings')
+    const res = await this.client.GET(`/api/settings`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

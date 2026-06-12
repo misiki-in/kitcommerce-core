@@ -44,9 +44,17 @@ export class AutocompleteService extends BaseService {
  */
 
 	async list({ page = 1, q = '', sort = '-createdAt' }) {
-		return this.get<PaginatedResponse<AutoComplete>>(
-			`/api/autocomplete?page=${page}&q=${q}&sort=${sort}`
-		)
+		const res = await this.client.GET(`/api/autocomplete`, {
+			params: {
+				query: {
+					page,
+					q,
+					sort
+				}
+			}
+		})
+
+		return this.formatSDKResponse<typeof res.data>(res)
 	}
 }
 

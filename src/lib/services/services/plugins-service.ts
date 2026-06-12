@@ -43,9 +43,17 @@ export class PluginService extends BaseService {
  * const result = await pluginService.list({ page: 1 });
  */
   async list({ page = 1, q = '', sort = '-createdAt' }) {
-    return this.get<PaginatedResponse<Plugins>>(
-      `/api/plugins?page=${page}&q=${q}&sort=${sort}`
-    )
+    const res = await this.client.GET(`/api/plugins`, {
+      params: {
+        query: {
+          page,
+          q,
+          sort
+        }
+      }
+    })
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

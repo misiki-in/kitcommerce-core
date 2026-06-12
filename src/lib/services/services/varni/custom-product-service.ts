@@ -21,19 +21,28 @@ export class VarniCustomProductService extends BaseService {
     style: string;
     word: string;
   }) {
-    return this.post('varni/check-customized-product-combinations', args)
+    const res = await this.client.POST('/varni/check-customized-product-combinations', {
+      body: args
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async createCustomOrderChat(productId: string) {
-    return this.post('custom-order-chats/create-chat', { productId })
+    const res = await this.client.POST('/custom-order-chats/create-chat', {
+      body: { productId }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   async sendMessageToCustomOrderChat(chatId: string, vendor: string, message: string) {
-    return this.post('custom-order-chats', {
-      chatId,
-      vendor,
-      message
+    const res = await this.client.POST('/custom-order-chats', {
+      body: {
+        chatId,
+        vendor,
+        message
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

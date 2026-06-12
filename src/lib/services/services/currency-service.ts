@@ -43,7 +43,9 @@ export class CurrencyService extends BaseService {
  * const result = await currencyService.listCurrencies({ page: 1 });
  */
   async listCurrencies() {
-    return this.get<PaginatedResponse<Currency>>('/api/currencies')
+    const res = await this.client.GET(`/api/currencies`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

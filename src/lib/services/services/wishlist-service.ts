@@ -41,7 +41,8 @@ export class WishlistService extends BaseService {
    * const wishlist = await wishlistService.fetchWishlist({ page: 1 });
    */
   async fetchWishlist({ q = '', sort = '', page = 1 }) {
-    return this.get<PaginatedResponse<Wishlist>>('/api/wishlists/me')
+    const res = await this.client.GET(`/api/wishlists/me`)
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -67,9 +68,12 @@ export class WishlistService extends BaseService {
     productId: string
     variantId: string
   }) {
-    return this.get<boolean>(
-      `/api/wishlists/me/check?productId=${productId}&variantId=${variantId}`
-    )
+    const res = await this.client.GET(`/api/wishlists/me/check`, {
+      params: {
+        query: { productId, variantId }
+      }
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 
   /**
@@ -81,8 +85,11 @@ export class WishlistService extends BaseService {
    *   variantId: '456'
    * }]);
    */
-  async checkWishlistInBulk(ids: { productId: string, variantId: string }[]) {
-    return this.post<{ productId: string, variantId: string, exists: boolean }[]>('/api/wishlists/me/bulk-check', ids)
+  async checkWishlistInBulk(ids: { productId: string; variantId: string }[]) {
+    const res = await this.client.POST(`/api/wishlists/me/bulk-check`, {
+      body: ids
+    })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
   /**
    * Toggles a product's presence in the user's wishlist
@@ -109,10 +116,13 @@ export class WishlistService extends BaseService {
     productId: string
     variantId: string
   }) {
-    return this.post<Wishlist>('/api/wishlists/me/toggle', {
-      productId,
-      variantId
+    const res = await this.client.POST(`/api/wishlists/me/toggle`, {
+      body: {
+        productId,
+        variantId
+      }
     })
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 

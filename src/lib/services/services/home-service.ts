@@ -40,7 +40,9 @@ export class HomeService extends BaseService {
  * const home = await homeService.getHome('123');
  */
   async getHome() {
-    return this.get<Home[]>('/api/home')
+    const res = await this.client.GET(`/api/home`)
+
+    return this.formatSDKResponse<typeof res.data>(res)
   }
 }
 
