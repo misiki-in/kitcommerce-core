@@ -88,7 +88,7 @@ export class StoreService extends BaseService {
   async getStoreByIdOrDomain({
     storeId,
     domain
-  }: GetStoreParams): Promise<StoreDetails> {
+  }: GetStoreParams) {
     if (!storeId && !domain) {
       throw new Error('Either storeId or domain must be provided')
     }

@@ -46,7 +46,7 @@ export class OrderService extends BaseService {
     const res = await this.client.GET(`/api/orders`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }
@@ -146,10 +146,13 @@ export class OrderService extends BaseService {
  * const order = await orderService.fetchTrackOrder('123');
  */
 
-  async fetchTrackOrder(id: string) {
+  async fetchTrackOrder(id: string, page = 1) {
     const res = await this.client.GET(`/api/orders/list-by-parent`, {
       params: {
-        query: { id }
+        query: {
+          page: String(page),
+          order_no: id,
+        }
       }
     })
 
@@ -166,6 +169,7 @@ export class OrderService extends BaseService {
     return this.formatSDKResponse<typeof res.data>(res)
   }
 
+  /*
   async codCheckout({
     address,
     cartId,
@@ -185,6 +189,7 @@ export class OrderService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 
   async cashfreeCheckout({
     address,

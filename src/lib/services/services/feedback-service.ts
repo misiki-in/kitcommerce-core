@@ -42,7 +42,7 @@ export class FeedbackService extends BaseService {
  * // Example usage
  * const result = await feedbackService.listFeedbacks({ page: 1 });
  */
-  async listFeedbacks({ page = 1, q = '', sort = '-createdAt' }) {
+  /*async listFeedbacks({ page = 1, q = '', sort = '-createdAt' }) {
     const res = await this.client.GET(`/api/feedbacks`, {
       params: {
         query: {
@@ -54,7 +54,7 @@ export class FeedbackService extends BaseService {
     })
 
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 }
 
 // // Use singleton instance

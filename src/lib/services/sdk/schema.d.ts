@@ -50,7 +50,11 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    q?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -848,7 +852,48 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description The user updates */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        id?: string;
+                        storeId?: string | null;
+                        userId?: string | null;
+                        phone?: string | null;
+                        email?: string | null;
+                        status?: string | null;
+                        avatar?: string | null;
+                        verifiedAt?: string | null;
+                        currentSignInAt?: string | null;
+                        currentSignInIp?: string | null;
+                        firstName?: string | null;
+                        lastName?: string | null;
+                        ipCity?: string | null;
+                        ipCountry?: string | null;
+                        ipLatitude?: number | null;
+                        ipLongitude?: number | null;
+                        ipRegion?: string | null;
+                        ipTimezone?: string | null;
+                        isApproved?: boolean | null;
+                        isDeleted?: boolean | null;
+                        lastSignInAt?: string | null;
+                        lastSignInIp?: string | null;
+                        lastSignIn?: string | null;
+                        otp?: string | null;
+                        otpAttempt?: number | null;
+                        otpTime?: string | null;
+                        timeDiff?: number | null;
+                        password?: string | null;
+                        isEmailVerified?: boolean | null;
+                        isPhoneVerified?: boolean | null;
+                        role?: string | null;
+                        signInCount?: number | null;
+                        userAuthToken?: string | null;
+                        createdAt?: string;
+                        updatedAt?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description The updated user */
                 200: {
@@ -923,7 +968,14 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: number;
+                    /** @description Search query for category name */
+                    q?: string;
+                    /** @description Sort field */
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -993,7 +1045,14 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Page number for pagination */
+                    page?: number;
+                    /** @description Search query for category name */
+                    q?: string;
+                    /** @description Sort field */
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1061,7 +1120,12 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Limit the number of categories returned */
+                    limit?: number;
+                    /** @description Filter categories for home page */
+                    home?: boolean | null;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -1075,9 +1139,9 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            pageSize: number;
-                            page: number;
-                            count: number;
+                            pageSize?: number;
+                            page?: number;
+                            count?: number;
                             data: {
                                 id?: string;
                                 isActive?: boolean | null;
@@ -10001,7 +10065,23 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: number;
+                    q?: string;
+                    sort?: string;
+                    vendors?: string;
+                    categories?: string;
+                    priceFrom?: number | null;
+                    priceTo?: number | null;
+                    made_in?: string;
+                    discountPercentage?: number | null;
+                    attributeName?: string;
+                    attributeValue?: string;
+                    optionName?: string;
+                    optionValue?: string;
+                    page_size?: number;
+                    skus?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -10113,7 +10193,11 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: number;
+                    sort?: string;
+                    page_size?: number;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -10225,7 +10309,9 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    categoryId?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -10316,7 +10402,11 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: number;
+                    search?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -10710,7 +10800,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: number;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -10897,7 +10990,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/products/sku/{id}": {
+    "/api/products/sku/{sku}": {
         parameters: {
             query?: never;
             header?: never;
@@ -10913,7 +11006,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
-                    id: string | null;
+                    sku: string;
                 };
                 cookie?: never;
             };
@@ -11023,9 +11116,9 @@ export interface paths {
                              *         {
                              *           "code": "invalid_type",
                              *           "path": [
-                             *             "fieldName"
+                             *             "sku"
                              *           ],
-                             *           "message": "Expected string, received undefined"
+                             *           "message": "Invalid input: expected string, received undefined"
                              *         }
                              *       ]
                              *     }
@@ -12255,7 +12348,9 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query: {
+                    name: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -12688,7 +12783,11 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    q?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -13088,7 +13187,19 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Contact us form data */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example John Doe */
+                        name: string;
+                        /** @example john@example.com */
+                        email: string;
+                        /** @example Hello, I have a question. */
+                        message: string;
+                    };
+                };
+            };
             responses: {
                 /** @description The sent email */
                 200: {
@@ -13212,7 +13323,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -13527,7 +13641,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query: {
+                    page?: string;
+                    order_no: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -13672,7 +13789,13 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    sort?: string;
+                    otp?: string;
+                    email?: string;
+                    phone?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -13817,7 +13940,11 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    q?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -14180,7 +14307,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -15662,7 +15792,19 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description PhonePe checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        product_id?: string;
+                        address?: unknown;
+                        qty?: number;
+                        instructions?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description PhonePe payment session successfully created */
                 200: {
@@ -15786,7 +15928,10 @@ export interface paths {
          */
         post: {
             parameters: {
-                query?: never;
+                query: {
+                    order_no: string;
+                    payment_id: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -15920,7 +16065,15 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Razorpay checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Razorpay payment session successfully created */
                 200: {
@@ -16004,7 +16157,19 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Razorpay payment capture details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example order_9A76xd8686s8D8 */
+                        razorpay_order_id: string;
+                        /** @example pay_29S98s9283s2D3 */
+                        razorpay_payment_id: string;
+                        /** @example sig_9A76xd8686s8D8 */
+                        razorpay_signature?: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Razorpay payment successfully captured */
                 200: {
@@ -16155,7 +16320,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Stripe checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Stripe payment session successfully created */
                 200: {
@@ -16216,7 +16396,21 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Stripe payment capture details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example 1001 */
+                        order_no: string;
+                        /** @example stripe */
+                        pg: string;
+                        /** @example pi_123456789 */
+                        paymentReferenceId: string;
+                        /** @example store_123 */
+                        storeId: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Stripe payment successfully captured */
                 200: {
@@ -16356,7 +16550,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description COD checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description COD payment session successfully created */
                 200: {
@@ -16485,7 +16694,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description POS checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description POS payment session successfully created */
                 200: {
@@ -16614,7 +16838,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description AffirmPay checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description AffirmPay order successfully created */
                 200: {
@@ -16743,7 +16982,17 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description AffirmPay order confirmation details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example affirm_token_123 */
+                        affirmToken: string;
+                        /** @example 1001 */
+                        orderId: string;
+                    };
+                };
+            };
             responses: {
                 /** @description AffirmPay order successfully confirmed */
                 200: {
@@ -16872,7 +17121,15 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description AffirmPay order cancellation details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example 1001 */
+                        order_id: string;
+                    };
+                };
+            };
             responses: {
                 /** @description AffirmPay order successfully cancelled */
                 200: {
@@ -17001,7 +17258,24 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Paypal checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                        /** @example https://example.com/success */
+                        return_url: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Paypal order successfully created */
                 200: {
@@ -17123,7 +17397,17 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query: {
+                    order_no: string;
+                    pg: string;
+                    token: string;
+                    PayerID?: string;
+                    paymentId?: string;
+                    return_url: string;
+                    store_id: string;
+                    failed?: string;
+                    cancel_url?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -17375,7 +17659,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Fastlane checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Create Fastlane order. */
                 200: {
@@ -17684,7 +17983,22 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Cashfree checkout details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example cart_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        cartId: string;
+                        /**
+                         * Format: email
+                         * @example user@example.com
+                         */
+                        email?: string;
+                        /** @example https://example.com */
+                        origin: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Cashfree payment session successfully created */
                 200: {
@@ -17774,7 +18088,15 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description Cashfree payment capture details */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example 1001 */
+                        order_no: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Cashfree payment successfully captured */
                 200: {
@@ -17972,9 +18294,7 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path: {
-                    id: string | null;
-                };
+                path?: never;
                 cookie?: never;
             };
             requestBody?: never;
@@ -18118,7 +18438,10 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    store_id?: string;
+                    domain?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -19435,7 +19758,11 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    search?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -19940,7 +20267,9 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -20003,7 +20332,9 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -35187,7 +35518,11 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    search?: string;
+                    sort?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -35332,7 +35667,10 @@ export interface paths {
         };
         get: {
             parameters: {
-                query?: never;
+                query: {
+                    productId: string;
+                    variantId: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -35419,7 +35757,17 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description The list of product and variant IDs to check */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example prod_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        productId: string;
+                        /** @example var_01J9ERPBCDSEC5PPBSN1Q7FRXN */
+                        variantId: string;
+                    }[];
+                };
+            };
             responses: {
                 /** @description The list of wishlist check results */
                 200: {
@@ -35728,7 +36076,15 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            /** @description S3 URL of the file to delete */
+            requestBody: {
+                content: {
+                    "application/json": {
+                        /** @example https://bucket.s3.region.amazonaws.com/folder/file.jpg */
+                        url: string;
+                    };
+                };
+            };
             responses: {
                 /** @description Successfully deleted file */
                 200: {
@@ -36513,7 +36869,18 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    search?: string;
+                    limit?: string;
+                    price?: string;
+                    keywords?: string;
+                    tags?: string;
+                    originCountry?: string;
+                    categories?: string;
+                    sort?: string;
+                    groupedSku?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -36527,78 +36894,19 @@ export interface paths {
                     };
                     content: {
                         "application/json": {
-                            pageSize: number;
+                            hits: unknown[];
+                            query: string;
+                            processingTimeMs: number;
+                            hitsPerPage: number;
                             page: number;
-                            count: number;
-                            data: {
-                                id: string;
-                                active: boolean | null;
-                                /** @enum {string|null} */
-                                status: "draft" | "proposed" | "published" | "rejected" | null;
-                                type: string | null;
-                                categoryId: string | null;
-                                currency: string | null;
-                                instructions: string | null;
-                                description: string | null;
-                                hsnCode: string | null;
-                                images: string | null;
-                                thumbnail: string | null;
-                                keywords: string | null;
-                                link: string | null;
-                                metaTitle: string | null;
-                                metaDescription: string | null;
-                                title: string;
-                                subtitle: string | null;
-                                popularity: number | null;
-                                rank: number | null;
-                                slug: string | null;
-                                expiryDate: string | null;
-                                weight: number | null;
-                                mfgDate: string | null;
-                                mrp: number | null;
-                                price: number | null;
-                                costPerItem: number | null;
-                                sku: string | null;
-                                stock: number | null;
-                                minimumOrderQuantity: number | null;
-                                maximumOrderQuantity: number | null;
-                                packSize: number | null;
-                                caseSize: number | null;
-                                ondc: string | null;
-                                googleProductCategory: string | null;
-                                googleProductType: string | null;
-                                allowBackorder: boolean;
-                                manageInventory: boolean;
-                                shippingWeight: number | null;
-                                shippingHeight: number | null;
-                                shippingLen: number | null;
-                                shippingWidth: number | null;
-                                height: number | null;
-                                width: number | null;
-                                barcode: string | null;
-                                qrcode: string | null;
-                                shippingCost: number | null;
-                                returnAllowed: boolean | null;
-                                replaceAllowed: boolean | null;
-                                allowReviews: boolean | null;
-                                len: number | null;
-                                productTags: string | null;
-                                originCountry: string | null;
-                                weightUnit: string | null;
-                                dimensionUnit: string | null;
-                                collectionId: string | null;
-                                styleCode: string | null;
-                                isCustomizable: boolean | null;
-                                migrationId: string | null;
-                                vendorId: string | null;
-                                storeId: string;
-                                userId: string | null;
-                                groupedSku: string | null;
-                                remoteSku: string | null;
-                                createdAt: string;
-                                updatedAt: string;
-                                deletedAt: string | null;
-                            }[];
+                            totalPages: number;
+                            totalHits: number;
+                            facetDistribution?: unknown;
+                            facetStats?: unknown;
+                            allfacetDistribution?: unknown;
+                            allfacetStats?: unknown;
+                            categoryHierarchy?: unknown;
+                            categories?: unknown;
                         };
                     };
                 };
@@ -36625,7 +36933,11 @@ export interface paths {
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    page?: string;
+                    search?: string;
+                    limit?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;

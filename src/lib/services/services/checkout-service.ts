@@ -1,5 +1,3 @@
-import type { Cart, Checkout } from './../types/index.js'
-
 import { BaseService } from './base.service.js'
 
 /**
@@ -188,9 +186,9 @@ export class CheckoutService extends BaseService {
    * });
    */
   async getShippingRates({ cartId }: { cartId: string }) {
-    const res = await this.client.GET(`/api/shipping-rates/{cartId}`, {
+    const res = await this.client.GET(`/api/shipping-rates/{id}`, {
       params: {
-        path: { cartId }
+        path: { id: cartId }
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
@@ -198,16 +196,24 @@ export class CheckoutService extends BaseService {
 
   async capturePhonepePayment({
     phonepe_order_id,
-    phonepe_payment_id
+    phonepe_payment_id,
+    order_no,
   }: {
     phonepe_order_id: string
     phonepe_payment_id: string
+    order_no: string,
   }) {
     const res = await this.client.POST('/api/checkout/phonepe-capture', {
+      params: {
+        query: {
+          order_no,
+          payment_id: phonepe_payment_id,
+        },
+      },
       body: {
         phonepe_order_id,
         phonepe_payment_id
-      }
+      } as any
     })
     return this.formatSDKResponse<typeof res.data>(res)
   }
@@ -250,7 +256,7 @@ export class CheckoutService extends BaseService {
       body: {
         order_no,
         pg,
-        payment_session_id,
+        paymentReferenceId: payment_session_id,
         storeId
       }
     })
@@ -293,7 +299,7 @@ export class CheckoutService extends BaseService {
   }) {
     const res = await this.client.POST('/api/checkout/affirm/cancel-order', {
       body: {
-        orderId,
+        order_id: orderId,
         storeId,
         origin
       }

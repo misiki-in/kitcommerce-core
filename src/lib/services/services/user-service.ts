@@ -51,14 +51,14 @@ export class UserService extends BaseService {
    * // Get a specific user
    * const user = await userService.getUser('123');
    */
-  async getUser(id: string) {
+  /*async getUser(id: string) {
     const res = await this.client.GET(`/api/users/{id}`, {
       params: {
         path: { id }
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   /**
    * Registers a new user account
@@ -242,7 +242,7 @@ export class UserService extends BaseService {
     phone: string
     avatar?: string
   }) {
-    const res = await this.client.PUT(`/api/admin/users/{id}`, {
+    /*const res = await this.client.PUT(`/api/admin/users/{id}`, {
       params: {
         path: { id }
       },
@@ -255,6 +255,7 @@ export class UserService extends BaseService {
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
+    */
   }
 
   async joinAsVendor({
@@ -366,12 +367,8 @@ export class UserService extends BaseService {
     }
   }
 
-  async deleteUser(id: string) {
-    const res = await this.client.DELETE(`/api/delete/user/{id}`, {
-      params: {
-        path: { id }
-      }
-    })
+  async deleteUser() {
+    const res = await this.client.DELETE(`/api/delete/user/{id}`)
     return this.formatSDKResponse<typeof res.data>(res)
   }
 }

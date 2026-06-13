@@ -1,5 +1,3 @@
-import type { Collection, PaginatedResponse } from './../types/index.js'
-
 import { BaseService } from './base.service.js'
 
 /**
@@ -68,6 +66,7 @@ export class CollectionService extends BaseService {
  * const collection = await collectionService.getOne('123');
  */
 
+ /*
   async getOne(id: string) {
     const res = await this.client.GET(`/api/collections/{id}`, {
       params: {
@@ -77,6 +76,7 @@ export class CollectionService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 
   /**
  * Fetches a single Collection by ID
@@ -90,11 +90,14 @@ export class CollectionService extends BaseService {
  * const collection = await collectionService.getAllRatings('123');
  */
 
+ /*
   async getAllRatings() {
-    const res = await this.client.GET(`/api/collections/all-ratings`)
+    const res = await this.client.GET(`/api/collections`, {
+    })
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 }
 
 // // Use singleton instance

@@ -86,9 +86,9 @@ export class CategoryService extends BaseService {
  */
 
   async fetchCategory(id: string) {
-    const res = await this.client.GET(`/api/product-categories`, {
+    const res = await this.client.GET(`/api/categories/{id}`, {
       params: {
-        query: { handle: id }
+        path: { id }
       }
     })
 
@@ -125,7 +125,7 @@ export class CategoryService extends BaseService {
  * const category = await categoryService.fetchAllProductsOfCategories('123');
  */
 
-  async fetchAllProductsOfCategories(id: string) {
+  /*async fetchAllProductsOfCategories(id: string) {
     const res = await this.client.GET(`/api/product-categories`, {
       params: {
         query: { handle: id }
@@ -133,7 +133,7 @@ export class CategoryService extends BaseService {
     })
 
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   /**
  * Fetches a single Category by ID

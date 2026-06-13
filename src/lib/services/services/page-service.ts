@@ -46,7 +46,7 @@ export class PageService extends BaseService {
     const res = await this.client.GET(`/api/pages`, {
       params: {
         query: {
-          page,
+          page: String(page),
           search,
           sort
         }

@@ -46,7 +46,7 @@ export class PaymentMethodService extends BaseService {
     const res = await this.client.GET(`/api/payment-methods`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }

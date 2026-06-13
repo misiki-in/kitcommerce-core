@@ -46,7 +46,7 @@ export class FaqService extends BaseService {
     const res = await this.client.GET(`/api/faqs`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }

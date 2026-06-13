@@ -46,13 +46,15 @@ export class EnquiryService extends BaseService {
     email,
     phone,
     message,
-    productId
+    productId,
+    storeId,
   }: {
     name: string
     email: string
     phone: string
     message: string
     productId: string
+    storeId: string
   }) {
     const res = await this.client.POST(`/api/enquiry`, {
       body: {
@@ -60,7 +62,8 @@ export class EnquiryService extends BaseService {
         email,
         phone,
         message,
-        productId
+        productId,
+        storeId,
       }
     })
 

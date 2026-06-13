@@ -46,7 +46,7 @@ export class CouponService extends BaseService {
     const res = await this.client.GET(`/api/coupons`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }
@@ -60,7 +60,7 @@ export class CouponService extends BaseService {
     const res = await this.client.GET(`/api/coupons`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }
@@ -82,6 +82,7 @@ export class CouponService extends BaseService {
  * const coupon = await couponService.getCoupon('123');
  */
 
+ /*
   async getCoupon(id: string) {
     const res = await this.client.GET(`/api/coupons/{id}`, {
       params: {
@@ -91,6 +92,7 @@ export class CouponService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 
   /**
  * Creates a new Coupon
@@ -106,6 +108,7 @@ export class CouponService extends BaseService {
  * });
  */
 
+ /*
   async createCoupon(coupons: Omit<Coupon, 'id'>) {
     const res = await this.client.POST(`/api/coupons`, {
       body: coupons
@@ -113,7 +116,9 @@ export class CouponService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 
+  /*
   async patchCoupon(id: string, coupons: Partial<Coupon>) {
     const res = await this.client.PUT(`/api/coupons/{id}`, {
       params: {
@@ -124,7 +129,9 @@ export class CouponService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 
+  /*
   async deleteCoupon(id: string) {
     const res = await this.client.DELETE(`/api/coupons/{id}`, {
       params: {
@@ -134,6 +141,7 @@ export class CouponService extends BaseService {
 
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 }
 
 // // Use singleton instance

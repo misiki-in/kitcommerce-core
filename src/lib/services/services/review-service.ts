@@ -39,7 +39,7 @@ export class ReviewService extends BaseService {
  * // Example usage
  * const review = await reviewService.fetchReviews('123');
  */
-  async fetchReviews({
+  /*async fetchReviews({
     productId,
     search = '',
     sort = '-createdAt',
@@ -61,7 +61,7 @@ export class ReviewService extends BaseService {
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
   async allReviews({
     search = '',
     sort = '-createdAt',
@@ -87,14 +87,14 @@ export class ReviewService extends BaseService {
  * const review = await reviewService.fetchProducrReviews('123');
  */
 
-  async fetchProducrReviews(productId: string) {
+  /*async fetchProducrReviews(productId: string) {
     const res = await this.client.GET(`/api/reviews`, {
       params: {
         query: { 'product-id': productId }
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   /**
  * Creates a new Review
@@ -110,12 +110,14 @@ export class ReviewService extends BaseService {
  * });
  */
 
+ /*
   async saveReview(review: Omit<Feedback, 'id'>) {
     const res = await this.client.POST('/api/reviews', {
       body: review
     })
     return this.formatSDKResponse<typeof res.data>(res)
   }
+  */
 }
 
 // Use singleton instance

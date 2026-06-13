@@ -42,7 +42,7 @@ export class VendorService extends BaseService {
  *   // required fields
  * });
  */
-  async save(data: Partial<Vendor>) {
+  async save(data: Vendor) {
     const res = await this.client.POST('/api/vendors', {
       body: data
     })
@@ -79,7 +79,7 @@ export class VendorService extends BaseService {
     const res = await this.client.GET(`/api/vendors`, {
       params: {
         query: {
-          page,
+          page: String(page),
           q,
           sort
         }
@@ -138,10 +138,10 @@ export class VendorService extends BaseService {
  * // Example usage
  * const vendor = await vendorService.fetchDashboard('123');
  */
-  async fetchDashboard() {
+  /*async fetchDashboard() {
     const res = await this.client.GET('/api/dashboard/summary')
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 
   // Fetch all products of a specific vendor by vendor ID
   /**
@@ -159,7 +159,7 @@ export class VendorService extends BaseService {
     const res = await this.client.GET(`/api/products`, {
       params: {
         query: {
-          vendor_id: vendorId
+          vendors: vendorId
         }
       }
     })
@@ -178,7 +178,7 @@ export class VendorService extends BaseService {
  * // Example usage
  * const vendor = await vendorService.getAllVendorRatings('123');
  */
-  async getAllVendorRatings(vendorId: string) {
+ /* async getAllVendorRatings(vendorId: string) {
     const res = await this.client.GET(`/api/vendors/all-ratings`, {
       params: {
         query: {
@@ -187,7 +187,7 @@ export class VendorService extends BaseService {
       }
     })
     return this.formatSDKResponse<typeof res.data>(res)
-  }
+  }*/
 }
 
 // Use singleton instance

@@ -45,7 +45,7 @@ export class MeilisearchService extends BaseService {
    *   categories: "footwear"
    * });
    */
-  async search(params: MsSearchParams): Promise<MeilisearchResponse> {
+  async search(params: MsSearchParams) {
     const {
       query,
       categories,
@@ -128,7 +128,7 @@ export class MeilisearchService extends BaseService {
    */
   async searchAutoComplete(params: {
     query: string
-  }): Promise<MeilisearchResponse> {
+  }) {
     const { query } = params
     const res = await this.client.GET(`/api/ms-autocomplete/products`, {
       params: {

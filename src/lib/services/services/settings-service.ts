@@ -39,7 +39,7 @@ export class SettingService extends BaseService {
  * // Example usage
  * const setting = await settingService.fetchSetting('123');
  */
-  async fetchSetting() {
+  async fetchSetting(id: string) {
     const res = await this.client.GET('/api/settings')
     return this.formatSDKResponse<typeof res.data>(res)
   }
