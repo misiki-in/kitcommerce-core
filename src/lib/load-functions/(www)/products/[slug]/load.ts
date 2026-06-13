@@ -1,6 +1,6 @@
-import { ProductService } from '$lib/services'
-import type { Product } from '$lib/types'
-import type { PageLoad } from '$lib/types/index.ts'
+import { ProductService } from '$lib/services/index.js'
+import type { Product } from '$lib/types/index.js'
+import type { PageLoad } from '$lib/types/index.js'
 import { redirect } from '@sveltejs/kit'
 
 function transformProductOptions(options: Product['options']) {
@@ -28,7 +28,9 @@ export const load: PageLoad = async ({ fetch, params }) => {
 	try {
 		// Load the main product data first
 		const productService = new ProductService(fetch)
-		const product: Product = await productService.getOne(slug)
+		const product = await productService.getOne(slug)
+
+    if (!product) throw 'Product not found'
 
 		if (product.options?.length) {
 			product.options = transformProductOptions(product.options)

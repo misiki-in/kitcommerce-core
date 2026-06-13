@@ -1,44 +1,6 @@
-export type Cart = {
-	// Primary fields
-	id: string
-	email: string | null
-	phone: string | null
-	lineItems: CartLineItem[]
-	// References
-	billingAddressId: string | null
-	shippingAddressId: string | null
-	regionId: string | null
-	userId: string | null
-	salesChannelId: string | null
-	storeId: string | null
+import type { cartService, From } from "../index.ts"
 
-	// Payment and discount related
-	couponCode: string | null
-	discountAmount: number
-	couponAppliedDate: string | null
-	paymentId: string | null
-	paymentMethod: string | null
-	paymentAuthorizedAt: string | null
-
-	// Cart configuration
-	needAddress: boolean
-	isCodAvailable: boolean
-	type: string
-	completedAt: string | null
-	idempotencyKey: string | null
-
-	// Shipping related
-	shippingCharges: number
-	shippingMethod: string | null
-
-	// Quantity and monetary values
-	qty: number
-	subtotal: number
-	codCharges: number
-	tax: number
-	total: number
-	savingAmount: number
-}
+export type Cart = From<typeof cartService.getCartByCartId>
 
 export type CartLineItem = {
 	id: string

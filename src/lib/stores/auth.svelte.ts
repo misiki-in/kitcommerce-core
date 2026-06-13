@@ -3,12 +3,13 @@ import { getContext, onMount, setContext } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { authService, userService } from '$lib/services/index.js'
 import { showAuthModal } from '$lib/components/auth/auth-utils.js'
+import { page } from '$app/state'
 export function parseCookies(cookieString: string): Record<string, string> {
 	return cookieString.split(';').reduce((cookies, cookie) => {
 		const [name, value] = cookie.trim().split('=')
 		cookies[name] = value
 		return cookies
-	}, {})
+	}, {} as Record<string, string>)
 }
 
 const initialUser = { user_id: '0', items: [], subtotal: 0, total: 0 }
@@ -78,7 +79,7 @@ class UserState {
 		try {
 			this.loading = true
       this.lastError = null
-			const me = await userService.joinAsVendor({ email, password, businessName, firstName, lastName, phone, role: 'VENDOR', cartId })
+			const me = await userService.joinAsVendor({ email, password, businessName, firstName, lastName, phone, cartId, origin: page.url.origin })
 			this.user = me
 			toast.success('Signup successful')
 			goto('/dash')

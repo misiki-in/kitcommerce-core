@@ -93,7 +93,6 @@ export class UserService extends BaseService {
     phone,
     email,
     password,
-    passwordConfirmation,
     cartId = null,
     origin
   }: {
@@ -102,7 +101,6 @@ export class UserService extends BaseService {
     phone: string
     email: string
     password: string
-    passwordConfirmation: string | null
     cartId?: string | null
     origin: string
   }) {
@@ -265,7 +263,6 @@ export class UserService extends BaseService {
     phone,
     email,
     password,
-    passwordConfirmation,
     cartId = null,
     origin
   }: {
@@ -275,7 +272,6 @@ export class UserService extends BaseService {
     phone: string
     email: string
     password: string
-    passwordConfirmation: string
     cartId?: string | null
     origin: string
   }) {

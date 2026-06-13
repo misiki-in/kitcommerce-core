@@ -1,4 +1,3 @@
-import type { PaginatedResponse, Product } from '../types/index.js'
 import { BaseService } from './base.service.js'
 
 /**

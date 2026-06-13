@@ -26,10 +26,10 @@ export class BaseService {
     })
   }
 
-  formatSDKResponse<T>(res: any): T {
+  formatSDKResponse<T>(res: any): Exclude<T, undefined> {
     if (res.error)
       throw res.error
-    return res.data as T
+    return res.data as Exclude<T, undefined>
   }
 
   /**

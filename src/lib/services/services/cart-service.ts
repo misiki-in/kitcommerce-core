@@ -259,7 +259,6 @@ export class CartService extends BaseService {
       params: {
         path: { id: cartId as string }
       },
-      body: {}
     })
     return this.formatSDKResponse<typeof res.data>(res)
   }
