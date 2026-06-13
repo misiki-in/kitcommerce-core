@@ -1,4 +1,4 @@
-import { PageService } from '$lib/services'
+import { PageService } from '$lib/services/index.js'
 import type { PageServerLoad } from '$lib/types/index.js'
 
 export const load: PageServerLoad = async ({ parent, fetch }) => {

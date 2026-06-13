@@ -1,6 +1,7 @@
+import type { LayoutServerLoad } from '$lib/types/load-functions.js';
 import { redirect as coreRedirect } from '@sveltejs/kit';
 
-export function getLoadWithContext(redirect: typeof coreRedirect) {
+export function getLoadWithContext(redirect: typeof coreRedirect): LayoutServerLoad {
   return async ({ url, cookies }) => {
     const sid = cookies.get('connect.sid')
     if (!sid) {

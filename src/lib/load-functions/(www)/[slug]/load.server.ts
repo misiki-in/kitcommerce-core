@@ -1,4 +1,4 @@
-import { MeilisearchService } from '$lib/services'
+import { MeilisearchService } from '$lib/services/index.js'
 import type { PageServerLoad, StoreData } from '$lib/types/index.js'
 import { checkSecuredCatalogue } from '$lib/utils/index.js'
 

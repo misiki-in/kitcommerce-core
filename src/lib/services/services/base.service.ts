@@ -22,7 +22,7 @@ export class BaseService {
     // Use provided fetch or global fetch as fallback
     this._fetch = fetchFn || fetch
     this.client = createClientSDK({
-      fetch: fetchFn,
+      fetch: fetchFn || window.fetch,
     })
   }
 
