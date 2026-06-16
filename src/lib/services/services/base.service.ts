@@ -18,12 +18,16 @@ export class BaseService {
    *
    * @param {typeof fetch} [fetchFn] - Optional custom fetch implementation
    */
-  constructor(fetchFn?: typeof fetch) {
+  constructor(fetchFn?: typeof fetch, baseURL?: string) {
     // Use provided fetch or global fetch as fallback
     this._fetch = fetchFn || fetch
-    this.client = createClientSDK({
-      fetch: fetchFn || window.fetch,
-    })
+    console.log("BaseService called for", baseURL)
+    this.client = createClientSDK(
+      {
+        fetch: fetchFn || globalThis.fetch,
+      },
+      baseURL,
+    )
   }
 
   formatSDKResponse<T>(res: any): Exclude<T, undefined> {
