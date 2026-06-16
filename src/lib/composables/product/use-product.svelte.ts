@@ -63,11 +63,12 @@ class ProductState {
 
 	trustBadgesPlugin = $derived(page.data?.store?.plugins?.trustBadges)
 
-	productImagesArray = $state(
-		page.data?.product?.images?.split(',').map((i) => {
-			return i.trim()
-		}) || []
-	)
+	productImagesArray = $derived.by(() => {
+		if (this.selectedVariant?.images) return this.selectedVariant.images.split(',').map((i: string) => i.trim())
+    else if (page.data.product.images)
+		  return page.data.product.images.split(',').map((i: string) => i.trim())
+    return []
+  })
 
 	carouselImages = $state(this.productImagesArray)
 
@@ -90,6 +91,13 @@ class ProductState {
 		this.isAdding ||
 		(!page.data?.product?.manageInventory ? false : this.anyVariantStockThere ? !this.selectedVariant?.stock : !page.data?.product.stock)
   )
+
+  title = $derived.by(() => {
+    if (this.selectedVariant?.title && this.selectedVariant?.title !== 'default')
+      return this.selectedVariant.title
+    else
+      return page.data?.product?.title
+  })
 
 	refreshOptions = () => {
 		if (page.data?.product?.options?.length) {
@@ -157,15 +165,16 @@ class ProductState {
 			await goto(`/products/${matchingProduct.slug}?variant_id=${matchingProduct.variantId}`, { replaceState: true })
 
 			setTimeout(() => {
+        // productImagesArray is not a derived property
 				if (page.data?.product?.images) {
-					this.productImagesArray = []
+					//this.productImagesArray = []
 					// carouselImages = [];
 
 					// const newImagesArray = page.data.product.images.split(",").map(i => i.trim());
-					const newImagesArray = page.data.product.images.split(',').map((i) => i.trim())
-					this.productImagesArray = newImagesArray
+					//const newImagesArray = page.data.product.images.split(',').map((i) => i.trim())
+					//this.productImagesArray = newImagesArray
 					// carouselImages = newImagesArray;
-					this.selectedImage = page.data.product.thumbnail || ''
+					//this.selectedImage = page.data.product.thumbnail || ''
 
 					this.currentIndex = 0
 					if (this.carouselApi) {
@@ -492,12 +501,16 @@ class ProductState {
 		})
 
 		$effect(() => {
+      // productImagesArray is not derived property
+      /*
 			if (page.data?.product?.images) {
+
 				this.productImagesArray = page.data?.product?.images?.split(',').map((i) => {
 					return i.trim()
 				})
 				this.selectedImage = page.data?.product?.thumbnail || ''
 			}
+      */
 			productService
 				.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
 				.then((data) => {
