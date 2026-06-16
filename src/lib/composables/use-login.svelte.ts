@@ -1,4 +1,5 @@
 import { goto, replaceState } from '$app/navigation'
+import { page } from '$app/state'
 import { env } from '$env/dynamic/public'
 import { authService } from '$lib/services/index.js'
 import { getUserState, getCartState, getWishlistState } from '$lib/stores/index.js'
@@ -30,10 +31,11 @@ export class LoginModule {
   wishlistState = getWishlistState()
 	cartState = getCartState()
 
-	identifier = $state(env.PUBLIC_LOGIN_TYPE === 'PHONE' ? '' : '')
+  loginType = $derived(page.data.store?.loginType || env.PUBLIC_LOGIN_TYPE)
+	identifier = $state(this.loginType === 'PHONE' ? '' : '')
 	password = $state('')
 	isLoading = $state(false)
-	isPhoneNumber = $state(env.PUBLIC_LOGIN_TYPE === 'PHONE' || env.PUBLIC_LOGIN_TYPE === 'BOTH')
+	isPhoneNumber = $state(this.loginType === 'PHONE' || this.loginType === 'BOTH')
 	otp = $state('')
 	showOtp = $state(false)
 	step = $state(1)
