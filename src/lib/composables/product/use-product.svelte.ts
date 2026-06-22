@@ -432,8 +432,8 @@ class ProductState {
 			// Load product ratings
 			this.isLoadingRatings = true
 			try {
-				const ratingsResponse = await reviewService.allReviews({})
-				this.allRatings = ratingsResponse.data
+				//const ratingsResponse = await reviewService.allReviews({})
+				this.allRatings = page.data.product?.ratings//ratingsResponse.data
 			} catch (error) {
 				console.error('Error loading ratings:', error)
 			} finally {
