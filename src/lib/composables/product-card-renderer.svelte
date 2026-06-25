@@ -42,7 +42,6 @@
 	}
 
 	async function toggleWishlist() {
-    console.log("new")
 	  loadingForWishlist = true
 		try {
 		  if (!userState?.user?.userId) {
