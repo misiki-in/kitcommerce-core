@@ -9,7 +9,7 @@
       },
       "devDependencies": {
         "@internationalized/date": "^3.7.0",
-        "@misiki/litekart-connector": "^2.0.26",
+        "@misiki/litekart-connector": "^2.0.28",
         "@stripe/stripe-js": "^9.0.0",
         "@sveltejs/adapter-auto": "^7.0.0",
         "@sveltejs/package": "^2.5.7",
@@ -137,7 +137,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@misiki/litekart-connector": ["@misiki/litekart-connector@2.0.26", "", {}, "sha512-rPlKtuS6VvbN+cYlHfGxFY/u4UfDtGndlOdayhuw6YWEDR5oGWqJXXHH912RZD5Uh98bLxo11bcFUAxiWZXCjg=="],
+    "@misiki/litekart-connector": ["@misiki/litekart-connector@2.0.29", "", {}, "sha512-ADY5L+hvWpZndbMb5G8rkly25hA5/oCawh+V+EeoViqeAH2sgfhFh21AYjwuC4HG8M01vji3JtJu7OVE2Shr4g=="],
 
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 
