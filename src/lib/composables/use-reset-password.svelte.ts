@@ -27,7 +27,7 @@ export class ResetPasswordModule {
 					return
 				}
 			} catch (e: any) {
-				console.log('This is error:', e)
+				console.error('Mount failed', e)
 			}
 		})
 	}

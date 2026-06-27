@@ -23,7 +23,7 @@ export class OrderTrackingModule {
 					toast.error('Order not found')
 				}
 			} catch (error) {
-				console.log(error)
+				console.error('Mount failed', error)
 			} finally {
 				this.loading = false
 			}

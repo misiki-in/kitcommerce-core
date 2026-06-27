@@ -293,8 +293,8 @@ class ProductState {
 			})
 
 			return res
-		} catch (error) {
-			console.log(error)
+		} catch (error: any) {
+			console.error('checkIfWishlisted', error)
 		}
 	}
 
@@ -421,7 +421,7 @@ class ProductState {
 						this.wishlisted = val || false
 					})
 					.catch((err) => {
-						console.log(err)
+						console.error('$effect to check ifWishlisted', err)
 					})
 			}
 		})
@@ -517,7 +517,7 @@ class ProductState {
 					this.relatedProducts = deepCopy(page.data)
 				})
 				.catch((err) => {
-					console.log(err)
+					console.error('list related products', err)
 				})
 
 			// if (carousel) {

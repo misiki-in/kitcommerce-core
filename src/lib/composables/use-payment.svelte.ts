@@ -117,7 +117,7 @@ export class PaymentModule {
 
 	constructor() {
 		onMount(async () => {
-      console.log('PaymentModule mounted, fetching payment methods...')
+      //console.log('PaymentModule mounted, fetching payment methods...')
 			if (browser) {
         this.loadingForPaymentMethods = true
 				const allPaymentMethods: any = await paymentMethodService.list({})
@@ -331,7 +331,7 @@ export class PaymentModule {
 				}
 			} catch (e: any) {
         toast.error(e?.message || "Checkout failed")
-				console.log(e)
+				console.error('PHONEPE checkout', e)
 			} finally {
 				this.paymentLoader = false
 			}
@@ -396,16 +396,16 @@ export class PaymentModule {
 					}
 					cashfree.checkout(checkoutOptions).then((result: any) => {
 						if (result.error) {
-							console.log("User has closed the popup or there is some payment error, Check for Payment Status");
-							console.log(result.error);
+							console.error("User has closed the popup or there is some payment error, Check for Payment Status");
+							console.error('cashfree checkout', result.error);
 							toast.error(result.error.message || 'Payment closed or failed');
 						}
 						if (result.redirect) {
 							console.log("Payment will be redirected");
 						}
 						if (result.paymentDetails) {
-							console.log("Payment has been completed, Check for Payment Status");
-							console.log(result.paymentDetails.paymentMessage);
+							// console.log("Payment has been completed, Check for Payment Status");
+							// console.log(result.paymentDetails.paymentMessage);
 							const cartId = this.cartState.cart.id
 							const orderNo = cf.order_no || cf.order_id || ''
 							goto(`/checkout/process?pg=cashfree&order_no=${orderNo}&cart_id=${cartId}`)
@@ -459,7 +459,7 @@ export class PaymentModule {
         this.handleShippingRateChange(res?.data?.[0])
       }
 		} catch (error) {
-			console.log(error)
+			console.error('getShippingRates', error)
 		}
 	}
 

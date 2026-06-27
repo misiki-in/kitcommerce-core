@@ -363,7 +363,7 @@ export class AddressModule {
           this.addresses = [this.cartState.cart?.shippingAddress, ...this.addresses]
         }
       } catch (e) {
-        console.log(e)
+        console.error("Mount failed", e)
 
         toast.error((e as any)?.message)
       }
