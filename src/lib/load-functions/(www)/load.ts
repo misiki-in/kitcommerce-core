@@ -1,5 +1,5 @@
-import { PageService } from '$lib/services'
-import type { PageLoad } from '$lib/types/index.ts'
+import { PageService } from '$lib/services/index.js'
+import type { PageLoad } from '$lib/types/index.js'
 
 export const load: PageLoad = async ({ fetch }) => {
 	try {
@@ -7,7 +7,7 @@ export const load: PageLoad = async ({ fetch }) => {
 		const page = await pageService.getOne('home')
 		return { page }
 	} catch (e) {
-		console.log(e)
+		console.error('Home page load', e)
 		return { page: {} }
 	}
 	// let productsRes = []

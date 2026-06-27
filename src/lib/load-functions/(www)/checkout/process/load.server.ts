@@ -1,8 +1,8 @@
-import { CheckoutService } from '$lib/services';
-import type { PageServerLoad } from '$lib/types/index.js';
+import { CheckoutService } from '$lib/services/index.js';
+import type { PageLoad } from '$lib/types/load-functions.js';
 import { redirect as coreRedirect } from '@sveltejs/kit';
 
-export function getLoadWithContext(redirect: typeof coreRedirect) {
+export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 	return async ({ url, fetch }) => {
 		const paymentSessionId = url.searchParams.get('payment_session_id');
 		const cart_id = url.searchParams.get('cart_id');
@@ -20,18 +20,18 @@ export function getLoadWithContext(redirect: typeof coreRedirect) {
 					payment_session_id: paymentSessionId,
 					storeId
 				});
-				console.log(`🚀 ~ payment processed.........: ${order_no}`);
+				console.log(`Stripe payment processed`, order_no);
 			} else if (pg_name?.toUpperCase?.() === 'CASHFREE') {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.captureCashfreePayment({
 					order_no: order_no || ''
 				});
-				console.log(`🚀 ~ Cashfree payment processed: ${order_no}`);
+				console.log(`Cashfree payment processed: ${order_no}`);
 			}
 			failed = false;
 		} catch (e) {
 			failed = true;
-			console.log('Payment process error::: eeeeeeeeeeeee', e);
+			console.error('Payment process', e);
 		}
 		redirect(
 			307,

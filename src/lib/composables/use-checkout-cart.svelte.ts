@@ -135,7 +135,7 @@ export class CartModule {
 
       return res?.active || false
     } catch (error) {
-      console.log(error)
+      console.error('addToWishlist', error)
     }
   }
 
@@ -148,7 +148,7 @@ export class CartModule {
 
       return res
     } catch (error) {
-      console.log(error)
+      console.error('checkIfInWishlist', error)
     }
   }
 
@@ -172,7 +172,7 @@ export class CartModule {
         this.removeItem(null, item)
       }
     } catch (error) {
-      console.log(error)
+      console.error('moveToWishlist', error)
     } 
     setTimeout(() => {
       delete this.isMovingToWishlist[item.productId]

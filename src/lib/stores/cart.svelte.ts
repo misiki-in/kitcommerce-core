@@ -394,7 +394,7 @@ export class Cart2State {
 
 			this.cart = cart
 		} catch (error: unknown) {
-			console.log('🚀 ~ CartState ~ createSingleItemCheckoutSession ~ error:', error)
+			console.error('CartState ~ createSingleItemCheckoutSession:', error)
 			toast.error(error instanceof Error ? error.message : 'Create checkout session failed')
 		} finally {
 			this.isUpdatingCart = false
@@ -411,7 +411,7 @@ export class Cart2State {
 			}
 			this.cart = initialCart
 		} catch (error: unknown) {
-			console.log('🚀 ~ CartState ~ resetSingleCartSession ~ error:', error)
+			console.error('CartState ~ resetSingleCartSession:', error)
 			toast.error(error instanceof Error ? error.message : 'Error resetting cart')
 		} finally {
 			this.isUpdatingCart = false
@@ -429,7 +429,7 @@ export class Cart2State {
 				localStorage.removeItem('prev_cart_id')
 			}
 		} catch (error: unknown) {
-			console.log('🚀 ~ CartState ~ restorePrevCart ~ error:', error)
+			console.error('CartState ~ restorePrevCart:', error)
 			toast.error(error instanceof Error ? error.message : 'Error restoring cart')
 		} finally {
 			this.isUpdatingCart = false

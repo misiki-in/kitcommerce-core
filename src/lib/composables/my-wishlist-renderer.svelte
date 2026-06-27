@@ -63,7 +63,7 @@
 			toast.success('Product removed from wishlist')
 		} catch (error: any) {
 			toast.error(error.message || 'Remove operation failed')
-			console.log(error)
+			console.error("removeFromWishlist", error)
 		}
 		wishlistItems = wishlistItems.filter((item) => item?.productId !== productId)
 	}

@@ -58,7 +58,7 @@ export class NavModule {
 				if (headers && headers.length > 0) {
 					this.navMenu = headers[0]?.items || []
 				} else {
-					console.log('Header menu not found in response')
+					console.error('Header menu not found in response')
 				}
 			} catch (error) {
 				console.error('Error fetching menu:', error)

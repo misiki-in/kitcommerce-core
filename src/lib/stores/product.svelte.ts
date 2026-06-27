@@ -13,7 +13,7 @@ export class ProductState {
 		try {
 			const cartId = this.retrieveCartId()
 		} catch (e) {
-			console.log(`Error startPaymentSession: ${e}`)
+			console.error(`startPaymentSession:`, e)
 		}
 	}
 
@@ -21,7 +21,7 @@ export class ProductState {
 		try {
 			const cartId = this.retrieveCartId()
 		} catch (e) {
-			console.log(`Error setPaymentSession: ${e}`)
+			console.error(`setPaymentSession:`, e)
 		}
 	}
 
@@ -30,7 +30,7 @@ export class ProductState {
 			const cartId = this.retrieveCartId()
 			localStorage.clear()
 		} catch (e) {
-			console.log(`Error completeCartCheckout: ${e}`)
+			console.error(`completeCartCheckout:`, e)
 			throw e
 		}
 	}
