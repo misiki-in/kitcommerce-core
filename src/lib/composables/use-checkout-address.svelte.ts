@@ -114,6 +114,8 @@ export class AddressModule {
 
   loadingForSaveToCart = $state(false)
 
+  disableProceedToPayment = $derived(!(this.isPhoneOk && this.isEmailOk && this.cartState.cart.shippingAddress && !this.editAddress))
+
   constructor() {
     $effect(() => {
       if (this.cartState?.cart?.shippingAddressId && this.cartState?.cart?.billingAddressId) {
