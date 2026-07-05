@@ -335,6 +335,7 @@ export class AddressModule {
     this.openAddressForm({ ...address }, this.currentAddressType, true)
   }
 
+  handleSelectAddress = async (address: any) => {
     this.currentAddress = { ...address }
 
     this.saveAddressToCart()
