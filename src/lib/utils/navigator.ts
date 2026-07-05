@@ -25,7 +25,6 @@ export class SerialNavigator {
   isNavigating = false
 
   getCurrentURL = () => {
-    //console.log("requested")
     const promise = new Promise<URL>((res) => {
       this.requestResolvers.push(res)
     })
@@ -48,13 +47,11 @@ export class SerialNavigator {
 
   // only the last GotoOption will be used for navigation
   goto = async (url: URL, options?: GotoOptions) => {
-    //console.log("gotox", url)
     this.currentURL = url
     if (!this.requestResolvers.length)
       await wait(500)
     if (!this.requestResolvers.length) {
       this.isNavigating = true
-      //console.log("going to", url)
       await goto(new URL(url.toString()), options)
       this.currentURL = page.url
       this.isNavigating = false

@@ -23,7 +23,6 @@
 	})
 
 	$effect(() => {
-		// let plugin = page?.data?.store?.plugins?.trustPilot
 		let d = page?.data?.store?.plugins?.trustPilot?.domain
 		let tId = page?.data?.store?.plugins?.trustPilot?.templateId
 		let bUId = page?.data?.store?.plugins?.trustPilot?.businessUnitId

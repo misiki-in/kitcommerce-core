@@ -8,7 +8,6 @@
 	onMount(() => {
     if (!browser) return
 
-		// $effect(() => {
 		if (store?.plugins?.tawkTo?.active && browser) {
 			// Clean up existing scripts to avoid duplicates
 			const existingLoader = document.querySelector(
@@ -68,9 +67,7 @@
 			document.head.appendChild(loaderScript);
 			document.head.appendChild(configScript);
 		}
-		// })
 
-		// $effect(() => {
 		if (store?.plugins?.tidio?.active && browser) {
 			// Clean up existing script to avoid duplicates
 			const existingScript = document.querySelector('script[src="//code.tidio.co/"]');
@@ -82,9 +79,7 @@
 			tidioScript.async = true;
 			document.body.appendChild(tidioScript);
 		}
-		// })
 
-		// $effect(() => {
 		if (store?.plugins?.plausible?.active && browser) {
 			// Clean up existing script to avoid duplicates
 			const existingScript = document.querySelector('script[src*="/js/script.js"]');
@@ -102,9 +97,7 @@
 			);
 			document.body.appendChild(plausibleScript);
 		}
-		// })
 
-		// $effect(() => {
 		if (store?.plugins?.umami?.active && browser) {
 			// Clean up existing script to avoid duplicates
 			const existingScript = document.querySelector('script[src*="/script.js"]');
@@ -121,6 +114,5 @@
 			);
 			document.body.appendChild(umamiScript);
 		}
-		// })
 	});
 </script>

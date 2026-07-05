@@ -52,9 +52,7 @@
 		// 	.regex(/^(\+?\d{1,3}[- ]?)?\d{10}$/, 'Please enter a valid 10-digit phone number')
 		// 	.refine((val) => {
 		// 		// Remove any non-digit characters
-		// 		const digits = val.replace(/\D/g, '')
 		// 		// Check if it's exactly 10 digits or if it starts with country code
-		// 		return digits.length === 10 || (digits.length > 9 && digits.length <= 17)
 		// 	}, 'Phone number must be 10 digits'),
 		password: z
 			.string()

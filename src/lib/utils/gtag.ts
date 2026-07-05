@@ -84,8 +84,6 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 		})
 	}
 
-	// if (event_name === 'remove_from_cart') {
-	//     items = {
 	//         item_id: data.sku ? data.sku : data._id,
 	//         item_name: data.name,
 	//         affiliation: data.vendor?.BusinessName,
@@ -95,8 +93,6 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 	//         quantity: data.qty,
 	//         currency: page?.data?.store?.currency?.code,
 	//         index: 0
-	//     }
-	// }
 	if (gtag) {
 		switch (event_name) {
 			case 'add_to_cart':
@@ -243,7 +239,6 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 			default:
 				// @ts-ignore
 				gtag('event', event_name, data)
-				// console.log('event_name', event_name, data)
 				break
 		}
 	}
