@@ -20,13 +20,13 @@ export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 					payment_session_id: paymentSessionId,
 					storeId
 				});
-				console.log(`Stripe payment processed`, order_no);
+				
 			} else if (pg_name?.toUpperCase?.() === 'CASHFREE') {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.captureCashfreePayment({
 					order_no: order_no || ''
 				});
-				console.log(`Cashfree payment processed: ${order_no}`);
+				
 			}
 			failed = false;
 		} catch (e) {

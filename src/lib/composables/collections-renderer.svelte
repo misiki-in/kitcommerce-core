@@ -21,7 +21,6 @@
 	const getCollectionData = async () => {
 		let response = await collectionService.list({})
 		collectionData = response?.data
-		// console.log('Collection data:', $state.snapshot(collectionData))
 	}
 
 	onMount(() => {

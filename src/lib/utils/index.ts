@@ -322,8 +322,5 @@ export const formatPlural = (text: string, count: number) => count === 1 ? text:
 
 export function parseHTMLToText(html: string): string {
   return html
-  /*
-  const root = parse(html)
-  return root.textContent || root.innerHTML
-  */
+  
 }

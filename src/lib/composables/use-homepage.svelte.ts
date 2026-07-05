@@ -96,11 +96,8 @@ export class HomepageModule {
 			}, 20000)
 		})
 
-		// let banners: any = $state([])
 		onMount(async () => {
 			try {
-				// const pageData = await PageService.getOne('home')
-				// banners = pageData
 				this.featuredCategories = (await categoryService.fetchFeaturedCategories({ limit: 18 }))?.data || []
 			} catch (e: unknown) {
 				console.error(e)
@@ -186,24 +183,6 @@ export class HomepageModule {
 		}
   }
 	getCategoryData = async () => {
-		//  resp: any = await CategoryService.fetchFooterCategories({})
-		// bannerData = resp?.data.map((item: any) => {
-		// 	return {
-		// 		src: item.thumbnail,
-		// 		alt: item.slug,
-		// 		title: item.name,
-		// 		link: item.link
-		// 	}
-		// })
-		// cardData = resp?.data.map((item: any) => {
-		// 	return {
-		// 		src: item.thumbnail,
-		// 		title: item.name,
-		// 		description: item.description,
-		// 		link: item.link,
-		// 		overlayText: item.name
-		// 	}
-		// })
 	}
 
 	hideProduct = () => {
@@ -238,24 +217,5 @@ export class HomepageModule {
 		}
 	}
 
-	// let helloBarPlugin = $state({
-	// 	active: false,
-	// 	content: ''
-	// })
-
-	// $effect(() => {
-	// 	if (page?.data?.store?.plugins) {
-	// 		const plugin = page?.data?.store?.plugins?.find((plugin: any) => plugin?.code === 'hello-bar')
-	// 		helloBarPlugin.active = plugin?.inputs?.active?.val || false
-
-	// 		if (helloBarPlugin.active) {
-	// 			helloBarPlugin.content = plugin?.inputs?.content?.val || ''
-	// 		}
-	// 	}
-	// })
-
-	// $effect(() => {
-	// 	console.log('featuredProductsStructuredData', $state.snapshot(featuredCategories))
-	// })
 }
 

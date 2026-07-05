@@ -10,14 +10,9 @@ export const load: PageLoad = async ({ fetch }) => {
 		console.error('Home page load', e)
 		return { page: {} }
 	}
-	// let productsRes = []
 	// try {
-	// 	productsRes = await ProductService.listFeaturedProducts({ page: 1 })
 	// } catch (e) {
-	// 	console.log(e)a
-	// }
-	// return {
+	// 	a
 	// 	products: productsRes.data
-	// }
 }
 

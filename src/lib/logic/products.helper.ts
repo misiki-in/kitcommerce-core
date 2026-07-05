@@ -1,13 +1,6 @@
 import type { Product, Variant } from '$lib/types'
 
-/**
- * This function stores the product and variant details to the recently viewed list in local storage.
- * @note Check if executed in the browser environment, since localStorage is not available in SSR.
- *
- * @param product Product object
- * @param variant Variant object
- * @returns Nothing
- */
+
 export const storeProductToRecentlyViewed = async ({ product, variant }: { product: Product; variant: Variant }) => {
 	const localRecentlyViewed = localStorage.getItem(`recently_viewed`)
 

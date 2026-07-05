@@ -3,14 +3,14 @@ export async function injectAffirm(publicApiKey?: string, isTest?: boolean) {
   if (isTest === undefined) throw 'Affirm isTest is required'
 
   if (document.getElementById('affirm_pay_script')) {
-    console.log('Skipping affirmjs, already injected')
+    
     return
   }
 
   const affirmPayScript = document.createElement('script')
   affirmPayScript.id = 'affirm_pay_script'
   const affirmScriptText = document.createTextNode(`
-  console.log("Injecting Affirm");
+  
 
   const _affirm_config = {
 		public_api_key: "${publicApiKey}", /* replace with public api key */
