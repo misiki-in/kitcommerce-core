@@ -145,19 +145,17 @@ class ProductState {
 			})
 		})
 
-		
-			productService
-				.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
-				.then((data) => {
-					this.relatedProducts = deepCopy(page.data)
-				})
-				.catch((err) => {
-					console.error('list related products', err)
-				})
+		productService
+			.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
+			.then((data) => {
+				this.relatedProducts = deepCopy(page.data)
+			})
+			.catch((err) => {
+				console.error('list related products', err)
+			})
+	}
 
-			// 	carousel.addEventListener('scroll', () => {
-			// 		// Update currentIndex when carousel scrolls
-		})
+	constructor() {
 		$effect(() => {
 			// Mark all options as selectable at initial render
 			if (page.data?.product?.options?.length) {
@@ -182,14 +180,6 @@ class ProductState {
 				}
 			}
 		})
-
-		// TODO: Due to this effect, the selected variant is updated two times causing an extra render
-		// Try to find a way to avoid this
-		// This effect is used to set the selected variant when the page is loaded or when navigating
-		// to and back from other product page
-		// Can we use onNavigate() instead of this effect? but its interfering with the variant selection
-		// by overwriting the selected variant as we are using goto() for variant selection
-		// 		} else {
 	}
 }
 
