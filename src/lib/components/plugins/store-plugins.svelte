@@ -6,7 +6,7 @@
 	const store = $derived(page.data.store);
 
 	onMount(() => {
-    if (!browser) return
+		if (!browser) return;
 
 		if (store?.plugins?.tawkTo?.active && browser) {
 			// Clean up existing scripts to avoid duplicates
@@ -80,39 +80,39 @@
 			document.body.appendChild(tidioScript);
 		}
 
-		if (store?.plugins?.plausible?.active && browser) {
-			// Clean up existing script to avoid duplicates
-			const existingScript = document.querySelector('script[src*="/js/script.js"]');
-			if (existingScript) existingScript.remove();
+		// if (store?.plugins?.plausible?.active && browser) {
+		// 	// Clean up existing script to avoid duplicates
+		// 	const existingScript = document.querySelector('script[src*="/js/script.js"]');
+		// 	if (existingScript) existingScript.remove();
 
-			// Create and append Plausible script
-			const plausibleScript = document.createElement('script');
-			plausibleScript.src =
-				store?.plugins?.plausible?.script ||
-				'https://utilities-plausible.g5edov.easypanel.host/js/script.js';
-			plausibleScript.defer = true;
-			plausibleScript.setAttribute(
-				'data-domain',
-				store?.plugins?.plausible?.domain || 'secertgreen.com.au'
-			);
-			document.body.appendChild(plausibleScript);
-		}
+		// 	// Create and append Plausible script
+		// 	const plausibleScript = document.createElement('script');
+		// 	plausibleScript.src =
+		// 		store?.plugins?.plausible?.script ||
+		// 		'https://utilities-plausible.g5edov.easypanel.host/js/script.js';
+		// 	plausibleScript.defer = true;
+		// 	plausibleScript.setAttribute(
+		// 		'data-domain',
+		// 		store?.plugins?.plausible?.domain || 'secertgreen.com.au'
+		// 	);
+		// 	document.body.appendChild(plausibleScript);
+		// }
 
-		if (store?.plugins?.umami?.active && browser) {
-			// Clean up existing script to avoid duplicates
-			const existingScript = document.querySelector('script[src*="/script.js"]');
-			if (existingScript) existingScript.remove();
+		// if (store?.plugins?.umami?.active && browser) {
+		// 	// Clean up existing script to avoid duplicates
+		// 	const existingScript = document.querySelector('script[src*="/script.js"]');
+		// 	if (existingScript) existingScript.remove();
 
-			// Create and append Umami script
-			const umamiScript = document.createElement('script');
-			umamiScript.src =
-				store?.plugins?.umami?.script || 'https://utilities-umami.g5edov.easypanel.host/script.js';
-			umamiScript.defer = true;
-			umamiScript.setAttribute(
-				'data-website-id',
-				store?.plugins?.umami?.websiteId || 'aac0e3f5-1766-4a9d-8c97-99852d7019cb'
-			);
-			document.body.appendChild(umamiScript);
-		}
+		// 	// Create and append Umami script
+		// 	const umamiScript = document.createElement('script');
+		// 	umamiScript.src =
+		// 		store?.plugins?.umami?.script || 'https://utilities-umami.g5edov.easypanel.host/script.js';
+		// 	umamiScript.defer = true;
+		// 	umamiScript.setAttribute(
+		// 		'data-website-id',
+		// 		store?.plugins?.umami?.websiteId || 'aac0e3f5-1766-4a9d-8c97-99852d7019cb'
+		// 	);
+		// 	document.body.appendChild(umamiScript);
+		// }
 	});
 </script>
