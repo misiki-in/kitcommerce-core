@@ -132,57 +132,6 @@ export class AddressModule {
     })
 
     onMount(this.mount)
-
-    /*
-    $effect(() => {
-
-      // When checkbox is toggled, update billing address
-
-      if (this.isBillingAddressSameAsShipping) {
-
-        if (this.cartState.cart.billingAddress) {
-
-          this.billingAddress = {
-
-            id: this.cartState.cart.billingAddress.id || 'new',
-
-            firstName: this.cartState.cart.billingAddress.firstName,
-
-            lastName: this.cartState.cart.billingAddress.lastName,
-
-            phone: this.cartState.cart.billingAddress.phone,
-
-            address_1: this.cartState.cart.billingAddress.address_1,
-
-            address_2: this.cartState.cart.billingAddress.address_2,
-
-            city: this.cartState.cart.billingAddress.city,
-
-            state: this.cartState.cart.billingAddress.state,
-
-            zip: this.cartState.cart.billingAddress.zip,
-
-            countryCode: this.cartState.cart.billingAddress.countryCode || page?.data?.store?.country?.code || 'IN'
-
-          }
-
-        } else {
-
-          this.billingAddress = {
-
-            ...this.currentAddress,
-
-            id: 'new' // Always set id to 'new' when copying
-
-          }
-
-        }
-
-      }
-
-    })
-
-    */
   }
 
   saveContactInfo = async (e: any) => {
@@ -274,31 +223,6 @@ export class AddressModule {
 
     this.editAddress = false
   }
-
-  /*
-  saveBillingAddress = async (e: any) => {
-
-    e?.preventDefault?.()
-
-    // console.log(billingAddress, 'Biling address......', currentAddress)
-
-    await this.cartState.updateShippingAddress({
-
-      shippingAddress: null,
-
-      billingAddress: this.billingAddress,
-
-      isBillingAddressSameAsShipping: false
-
-    })
-
-    this.editAddress = false
-
-    this.showBillingAddressForm = false
-
-  }
-
-  */
 
   cancelSaveBillingAddress = (e: any) => {
     e.preventDefault()
@@ -412,42 +336,10 @@ export class AddressModule {
   }
 
   handleSelectAddress = async (address: any) => {
-    // if (address.isNew) {
-
-    // 	address.id = 'new'
-
-    // 	delete address.isNew
-
-    // }
-
     this.currentAddress = { ...address }
 
     this.saveAddressToCart()
 
-    /*
-    if (this.isBillingAddressSameAsShipping) {
-
-      this.billingAddress = this.currentAddress
-
-    } else {
-
-      this.billingAddress.id = 'new'
-
-    }
-
-    // console.log('🚀 ~ handleSelectAddress ~ currentAddress:', currentAddress)
-
-    await this.cartState.updateShippingAddress({
-
-      shippingAddress: this.currentAddress,
-
-      billingAddress: this.billingAddress,
-
-      isBillingAddressSameAsShipping: this.isBillingAddressSameAsShipping
-
-    })
-
-    */
     this.showAddressList = false
   }
 
@@ -505,8 +397,6 @@ export class AddressModule {
       return
     }
 
-    // console.log('🚀 ~ handleSaveAddress ~ address:', address)
-
     const newAddress = this.removeUndefinedProperties(address)
 
     if (this.isEditingAddress) {
@@ -514,16 +404,10 @@ export class AddressModule {
 
       await addressService.saveAddress(newAddress as any)
     } else {
-      // newAddress.id = (addresses.length + 1).toString()
-
-      // newAddress.isNew = true
-
       const res = await addressService.saveAddress(newAddress as any)
 
       this.addresses = [...this.addresses, res]
     }
-
-    //this.currentAddress = { ...newAddress }
 
     this.showAddressForm = false
 
@@ -557,7 +441,6 @@ export class AddressModule {
   }
 
   handleBilingAddOrChangeClick = () => {
-    // console.log('called')
     if (!this.userState.user?.role) {
       this.showBillingAddressForm = true
       if (this.cartState.cart.billingAddress) this.openAddressForm(this.cartState.cart.billingAddress, 'billing', true)

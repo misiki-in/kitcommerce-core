@@ -62,8 +62,6 @@ export class MyProfileModule {
 		try {
 			this.isLoading = true
 			// profile.id = page.params.id
-			// if (profileExists) await profileService.saveProfiles(profile)
-			// else
 			await profileService.save(this.profile)
 			toast.success('Profile Updated Successfully!')
 			//goto('/dash/profile')

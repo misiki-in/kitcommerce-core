@@ -180,20 +180,5 @@ export class CartModule {
   }
 }
 
-//import { getContext, setContext } from "svelte"
-//
 //interface ModuleInterface<T extends { new(): InstanceType<T> }> {
 //  new (...args: any[]): InstanceType<T>
-//}
-//
-//function setInstance<T extends ModuleInterface<T>>(key: Symbol, Module: T) {
-//	return setContext(key, new Module())
-//}
-//
-//function getInstance<T extends ModuleInterface<T>>(key: Symbol, Module: T) {
-//	return getContext<T>(key)
-//}
-//
-//const key = Symbol('checkout-cart-module')
-//export const getCheckoutCartModule = getInstance(key, CartModule)
-//export const setCheckoutCartModule = setInstance(key, CartModule)

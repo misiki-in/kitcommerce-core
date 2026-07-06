@@ -414,36 +414,8 @@ export class DesktopFilterState {
 
     this.selectedSection = this.menuItemsBase.length > 0 ? this.menuItemsBase[0].id : ''
 
-    /*
-    $effect(() => {
-      const url = new URL(page.url)
-      const minPriceFromUrl = url.searchParams.get('priceFrom')
-      const maxPriceFromUrl = url.searchParams.get('priceTo')
-
-      this.minPrice = minPriceFromUrl ? Number(minPriceFromUrl) : this.priceStat.min
-      this.maxPrice = maxPriceFromUrl ? Number(maxPriceFromUrl) : this.priceStat.max
-      console.log("changed", this.minPrice, this.maxPrice)
-      this.maxPossiblePrice = this.priceStat.max
-
-      this.priceSet = true
-    })
-    */
-
     // priceRange is now defined as a $derived property at the class level
 
-    /*
-    $effect(() => {
-      if (this.minPrice && this.maxPrice) {
-        this.minPrice = Math.min(this.minPrice, this.maxPrice)
-      }
-    })
-
-    $effect(() => {
-      if (this.maxPrice && this.minPrice) {
-        this.maxPrice = Math.max(this.minPrice, this.maxPrice)
-      }
-    })
-    */
     this.syncFromParams()
     this.navigator = getSerialNavigator()
 
@@ -456,7 +428,6 @@ export class DesktopFilterState {
 
 export function getDesktopFilterState() {
   if (!DesktopFilterState._instance) {
-    // if this is happening, meaning DesktopFilterState
     // is being used outside of intented parent component
     console.error("DesktopFilterState: instance not found")
     return new DesktopFilterState()

@@ -3,7 +3,6 @@
  */
 import { env } from '$env/dynamic/public'
 import { loadStripe } from '@stripe/stripe-js'
-// import env from '$env/static/public'
 
 let stripePromise
 
