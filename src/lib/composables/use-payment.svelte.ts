@@ -97,7 +97,7 @@ export class PaymentModule {
 	affirmPaymentMethod: PaymentMethod | null = null
   isPhoneRequired = $derived(page.data?.store?.isPhoneMandatory)
 	isEmailRequired = $derived(page.data?.store?.isEmailMandatory)
-  isCheckoutDisabled = $derived(this.checkoutDisabled || (this.isPhoneRequired && !this.cartState?.cart?.phone) || (this.isEmailRequired && !this.cartState?.cart?.email) || !this.cartState?.cart?.shippingAddress || this.cartState?.cart?.shippingAddressId)
+  isCheckoutDisabled = $derived(this.checkoutDisabled || (this.isPhoneRequired && !this.cartState?.cart?.phone) || (this.isEmailRequired && !this.cartState?.cart?.email) || !this.cartState?.cart?.shippingAddress || !this.cartState?.cart?.shippingAddressId)
 
   allPaymentMethods: PaymentMethod[] = $state([])
   listOfPaymentMethods: PaymentMethod[] = $derived.by(() => {
