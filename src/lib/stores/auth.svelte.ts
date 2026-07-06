@@ -27,21 +27,14 @@ class UserState {
 	}
 
 	constructor() {
-    //console.log("auth contstroctor")
 		this.hasLoaded = new Promise((res, rej) => {
 			onMount(async () => {
 				try {
 					this.loading = true
           this.lastError = null
 					const { sid, me } = this.retrieveUserId()
-          // console.log("info", sid, me)
-					// console.log('🚀 ~ UserState ~ fetch:', sid, me)
 					if (sid) {
 						this.user = me
-						// const me = await userService.getMe()
-						// console.log('🚀 ~ UserState ~ fetch:', sid, me)
-						// this.user = me
-						// console.log('🚀 ~ UserState ~ fetch:', me)
 					} else {
 						this.user = null
 					}
@@ -49,7 +42,6 @@ class UserState {
 				} catch (e: any) {
 					this.user = null
           this.lastError = e
-					// console.log('🚀 ~ UserState ~ error ~ e:', e)
 					rej()
 				} finally {
 					this.loading = false
@@ -85,7 +77,6 @@ class UserState {
 		} catch (e: any) {
 			this.user = null
       this.lastError = e
-			// console.log(e)
 			toast.error(e.message || e.toString())
 		} finally {
 			this.loading = false
@@ -93,7 +84,6 @@ class UserState {
 	}
 
 	async verifyOtp({ phone, otp }: any) {
-		// console.log('🚀 ~ UserState ~ add:', phone, otp)
 		try {
 			this.loading = true
       this.lastError = null
@@ -105,7 +95,6 @@ class UserState {
 				goto('/')
 			}
 		} catch (e: any) {
-			// console.log(e)
 			this.user = null
       this.lastError = e
 			toast.error(e.message || e.toString())
@@ -115,7 +104,6 @@ class UserState {
 	}
 
 	async login({ email, password, cartId = null }: any) {
-		// console.log('🚀 ~ UserState ~ add:', email, password, cartId)
 		try {
 			this.loading = true
       this.lastError = null
@@ -125,14 +113,11 @@ class UserState {
 				cartId
 			})
 			this.user = me
-			// console.log('🚀 ~ UserState ~ login ~ me:', me)
-			//if (me?.role === 'ADMIN') {
 			//	goto('/select-store')
 			//} else if (me?.role === 'VENDOR') {
 			//	goto('/dash')
 			//} else {
 			//	goto('/')
-			//}
 			return true
 		} catch (e: any) {
 			this.user = null
@@ -145,17 +130,14 @@ class UserState {
 	}
 
 	async logout() {
-		// console.log('🚀 ~ UserState ~ lgout:')
 		try {
 			this.loading = true
       this.lastError = null
 			const me = await userService.logout()
-			// console.log('🚀 ~ UserState ~ lgout ~ me:', me)
 			this.user = me
 			await goto('/')
 			showAuthModal('login')
 		} catch (e: any) {
-			// console.log(e.message)
 			this.user = null
       this.lastError = e
 			toast.error(e.message || e.toString())
@@ -165,18 +147,14 @@ class UserState {
 	}
 
 	async updateMe({ id, firstName, lastName, phone, email }: any) {
-		// console.log('🚀 ~ UserState ~ update:', { firstName, lastName, phone, email })
 		try {
 			this.loading = true
       this.lastError = null
-			// console.log("FirstName: ", firstName)
 			const me = await userService.updateProfile({ id, firstName, lastName, phone, email })
-			// console.log('🚀 ~ UserState ~ add ~ c:', c)
 			this.user = me
 		} catch (e: any) {
 			this.user = null
       this.lastError = e
-			// console.log(e)
 			toast.error(e.body.message)
 		} finally {
 			this.loading = false
@@ -187,7 +165,6 @@ class UserState {
 const USER_KEY = Symbol('USER')
 
 export function setUserState() {
-  // console.log("Setting UserState")
 	return setContext(USER_KEY, new UserState())
 }
 

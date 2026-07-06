@@ -107,20 +107,12 @@ export class PaymentModule {
     if (shippingAddress && shippingAddress.country !== 'USA' && shippingAddress.countryCode !== 'US')
 				return this.allPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY')
 
-				/* if (this.getPaymentCode() === 'AFFIRMPAY') {
-					this.SELECTED_PG_CODE = ''
-					try {
-						if (this.cartState?.cart) {
-							;(this.cartState.cart as { paymentMethod?: string }).paymentMethod = ''
-						}
-					} catch (_) {}
-				} */
+				
     return this.allPaymentMethods
   })
 
 	constructor() {
 		onMount(async () => {
-      //console.log('PaymentModule mounted, fetching payment methods...')
 			if (browser) {
         this.loadingForPaymentMethods = true
 				const allPaymentMethods: any = await paymentMethodService.list({})
@@ -218,7 +210,6 @@ export class PaymentModule {
 							amount: rp.amount * 80,
 							order_id: rp.id,
 							async handler(response: any) {
-								// console.log('🚀 ~ captureRazorpayPayment ~ response:', response)
 								try {
 									const capture: any = await checkoutService.captureRazorpayPayment({
 										razorpay_order_id: response.razorpay_order_id,
@@ -229,7 +220,6 @@ export class PaymentModule {
 									toast.error(e.message)
 								} finally {
 								}
-								// this.paymentLoader = false
 							},
 							prefill: {
 								name: this.cartState.cart?.name || this.cartState.cart?.shippingAddress?.name || page?.data?.store?.businessEmail || '',
@@ -275,7 +265,6 @@ export class PaymentModule {
 					}
 					affirmPayOrder.currency = 'USD'
 
-					// console.log(affirmPayOrder)
 					try {
 						affirm.checkout(affirmPayOrder)
 						affirm.checkout.open({
@@ -298,7 +287,6 @@ export class PaymentModule {
 									// @ts-ignore - API might require this but TS doesn't know
 									return_url: `${page.url.origin}/checkout/success`
 								})
-								// console.log('Affirm checkout success:', res1)
 								goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
 							}
 						})
@@ -327,7 +315,6 @@ export class PaymentModule {
 					return
 				}
 				const redirectUrl = pp?.redirectUrl
-				// console.log('🚀 ~ placeOrder ~ orders', pp)
 				if (redirectUrl && redirectUrl !== null) {
 					window.location.href = redirectUrl
 				} else {
@@ -345,7 +332,6 @@ export class PaymentModule {
 					cartId: this.cartState.cart.id,
 					origin: page.url.origin
 				})
-				// console.log('🚀 ~ placeOrder ~ sp', sp)
 				if (sp.url) {
 					window.location.href = sp.url
 				} else {
@@ -404,11 +390,9 @@ export class PaymentModule {
 							toast.error(result.error.message || 'Payment closed or failed');
 						}
 						if (result.redirect) {
-							console.log("Payment will be redirected");
+							
 						}
 						if (result.paymentDetails) {
-							// console.log("Payment has been completed, Check for Payment Status");
-							// console.log(result.paymentDetails.paymentMessage);
 							const cartId = this.cartState.cart.id
 							const orderNo = cf.order_no || cf.order_id || ''
 							goto(`/checkout/process?pg=cashfree&order_no=${orderNo}&cart_id=${cartId}`)

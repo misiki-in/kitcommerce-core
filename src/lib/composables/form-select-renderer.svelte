@@ -53,12 +53,8 @@
 
 	// an item from the list so users can continue navigating the
 	// rest of the form with the keyboard.
-	// function closeAndFocusTrigger(triggerId: string) {
-	// 	open = false
 	// 	tick().then(() => {
 	// 		document.getElementById(triggerId)?.focus()
-	// 	})
-	// }
 
 	function closeAndFocusTrigger() {
 		open = false

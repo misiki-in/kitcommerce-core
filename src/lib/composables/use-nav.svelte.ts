@@ -48,7 +48,6 @@ export class NavModule {
 
 	productsCount = $derived(page?.data?.products?.count || 0)
 	constructor() {
-    // console.log("page.data from core", page.data)
 		onMount(async () => {
 			try {
 				const response = await menuService.list()
@@ -57,8 +56,6 @@ export class NavModule {
 				const headers = data.filter((item: any) => item?.menuId === 'header')
 				if (headers && headers.length > 0) {
 					this.navMenu = headers[0]?.items || []
-				} else {
-					console.error('Header menu not found in response')
 				}
 			} catch (error) {
 				console.error('Error fetching menu:', error)

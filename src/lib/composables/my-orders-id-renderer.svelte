@@ -16,7 +16,6 @@
 		metaDescription: 'Order Details '
 	}
 
-	// let deliveryBy = null
 	let now = $state<Date | null>(null)
 	let selectedProduct = $state<any | null>(null)
 	let showDemoScheduler = $state(false)

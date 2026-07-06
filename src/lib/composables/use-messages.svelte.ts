@@ -19,16 +19,9 @@ export class MessagesModule {
 	desktopScrollRef: HTMLDivElement | null = $state(null)
 	mobileScrollRef: HTMLDivElement | null = $state(null)
 
-	// let lazyTipex: any = $state(null)
-	// let lazyTipex2: any = $state(null)
-
 	constructor() {
 		onMount(async () => {
-			// console.log('page', page.data)
 			this.handleDisplayChats()
-
-			// lazyTipex = import('$lib/components/tipex-editor.svelte')
-			// lazyTipex2 = import('$lib/components/tipex-editor.svelte')
 		})
 
 		$effect(() => {
@@ -39,7 +32,6 @@ export class MessagesModule {
 			} else {
 				this.filteredAllChats = this.allChats
 			}
-			// console.log('filteredAllChats', filteredAllChats)
 		})
 	}
 	handleDisplayChats = async () => {
@@ -56,13 +48,6 @@ export class MessagesModule {
 			this.loading = true
 
 			this.me = await userService.getMe()
-			// console.log('me', me)
-
-			// me = {
-			// 	id: '1'
-			// }
-
-			// console.log('me', me)
 		} catch (e) {
 			this.err = e
 			toast.error((e as any)?.message)
@@ -129,10 +114,5 @@ export class MessagesModule {
 	scrollToBottom = (ref: HTMLElement) => {
 		if (ref) ref.scrollTop = ref?.scrollHeight
 	}
-
-	// $: if (selectedChat?.messages?.length) {
-	// 	scrollToBottom(desktopScrollRef)
-	// 	scrollToBottom(mobileScrollRef)
-	// }
 }
 

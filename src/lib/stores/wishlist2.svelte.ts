@@ -77,17 +77,8 @@ class WishlistState {
     )
   }
 
-  // toggleWishlist = async (product: Product) => {
-  // 	const res = await wishlistService.toggleWishlist({
   // 		productId: product?.id,
   // 		variantId: product?.variants?.[0]?.id
-  // 	})
-  // 	const active = Boolean(res?.active)
-  // 	this.isWishlisted[getProductKey(product)] = active
-  // 	if (active) this.count++
-  // 	else if (this.count) this.count--
-  // 	else console.error('Wishlist count decrementing to negative integer')
-  // }
 }
 
 const WISHLIST_KEY = Symbol('WISHLIST')

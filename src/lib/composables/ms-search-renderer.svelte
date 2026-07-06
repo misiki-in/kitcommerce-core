@@ -47,10 +47,7 @@
 			clearTimeout(searchTimeout)
 		}
 
-		/*if (!query) {
-			searchResults = []
-			return
-		}*/
+		
 
 		searchTimeout = setTimeout(() => {
 			autoComplete(query)
