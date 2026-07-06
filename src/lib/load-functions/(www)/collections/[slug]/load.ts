@@ -26,13 +26,16 @@ export const load: PageLoad = async ({ fetch, params }) => {
 	const slug = params.slug
 	try {
 		const collectionService = new CollectionService(fetch)
-		const collection = await collectionService.getOne(slug)
+
+    const [collection, brandratings] = await Promise.all([
+      collectionService.getOne(slug),
+      collectionService.getAllRatings()
+    ]);
 
 		if (collection.options?.length) {
 			collection.options = transformCollectionOptions(collection.options)
 		}
 
-		let brandratings = await collectionService.getAllRatings()
 		let allratings = brandratings.data
 		return {
 			collection: collection as Collection,

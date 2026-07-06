@@ -89,7 +89,7 @@ class ProductState {
 
 	addToCartButtonDisabled = $derived(
 		this.isAdding ||
-		(!page.data?.product?.manageInventory ? false : this.anyVariantStockThere ? !this.selectedVariant?.stock : !page.data?.product.stock)
+		(!page.data?.product?.manageInventory ? false : this.anyVariantStockThere ? (this.selectedVariant?.manageInventory && !this.selectedVariant?.stock) : !page.data?.product.stock)
   )
 
   title = $derived.by(() => {
