@@ -25,4 +25,7 @@ export { load as legalLayoutServer } from "./(legal)/layout.server.ts"
 export { getLoadWithContext as myLayoutServer } from "./(my)/layout.server.ts"
 export { load as layoutServer } from "./layout.server.ts"
 
+export { getLoadWithContext as wwwBlogsLoad } from "./(www)/blogs/load.ts"
+export { getLoadWithContext as wwwBlogsSlugLoad } from "./(www)/blogs/[slug]/load.ts"
+
 export * from './load-one-page.ts'
