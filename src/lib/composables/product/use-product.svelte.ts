@@ -134,7 +134,7 @@ class ProductState {
 		})
 	}
 
-	toggleAggregation = async (optionName: string, value: string) => {
+	toggleAggregation = async (optionName: string, value: string, noScroll = false) => {
 		if (!this.isAggregationAvaliable(optionName, value)) this.selectedAggregations = { [optionName]: value }
 		else if (this.selectedAggregations[optionName] === value) delete this.selectedAggregations[optionName]
 		else this.selectedAggregations = { ...this.selectedAggregations, [optionName]: value }
@@ -162,7 +162,7 @@ class ProductState {
 		}
 
 		if (matchingProduct?.slug) {
-			await goto(`/products/${matchingProduct.slug}?variant_id=${matchingProduct.variantId}`, { replaceState: true })
+			await goto(`/products/${matchingProduct.slug}?variant_id=${matchingProduct.variantId}`, { noScroll, replaceState: true })
 
 			setTimeout(() => {
         // productImagesArray is not a derived property
