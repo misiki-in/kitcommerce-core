@@ -403,28 +403,28 @@ class ProductState {
 			await this.mount()
 		})
 
-		$effect(() => {
-			if (this.userState?.user?.userId) {
-				checkPendingWishlistActions(this.userState?.user?.userId)
-					.then((value) => {
-						this.wishlisted = value || false
-						value && toast.success('Item added to wishlist')
-					})
-					.catch()
-			}
-		})
+		//$effect(() => {
+		//	if (this.userState?.user?.userId) {
+		//		checkPendingWishlistActions(this.userState?.user?.userId)
+		//			.then((value) => {
+		//				//this.wishlisted = value || false
+		//				//value && toast.success('Item added to wishlist')
+		//			})
+		//			.catch()
+		//	}
+		//})
 
-		$effect(() => {
-			if (this.selectedVariant?.id || page.data?.product?.id) {
-				this.checkIfWishlisted(this.selectedVariant?.id || page.data?.product?.id)
-					.then((val) => {
-						this.wishlisted = val || false
-					})
-					.catch((err) => {
-						console.error('$effect to check ifWishlisted', err)
-					})
-			}
-		})
+		//$effect(() => {
+		//	if (this.selectedVariant?.id || page.data?.product?.id) {
+		//		this.checkIfWishlisted(this.selectedVariant?.id || page.data?.product?.id)
+		//			.then((val) => {
+		//				//this.wishlisted = val || false
+		//			})
+		//			.catch((err) => {
+		//				console.error('$effect to check ifWishlisted', err)
+		//			})
+		//	}
+		//})
 
 		onMount(async () => {
 			// Load ratings and related products after the main content is displayed (lazy loading)
