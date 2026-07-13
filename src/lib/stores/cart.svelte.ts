@@ -387,7 +387,7 @@ export class Cart2State {
 				localStorage.removeItem('prev_cart_id')
 			}
 		} catch (error: unknown) {
-			console.error('CartState ~ restorePrevCart:', error)
+			//console.error('CartState ~ restorePrevCart:', error)
 			toast.error(error instanceof Error ? error.message : 'Error restoring cart')
 		} finally {
 			this.isUpdatingCart = false
@@ -401,7 +401,10 @@ export class Cart2State {
 const CART_KEY = Symbol('CART')
 
 export function setCartState() {
-	return setContext(CART_KEY, new Cart2State())
+  try {
+	  return setContext(CART_KEY, new Cart2State())
+  } catch(e: any) {
+  }
 }
 
 export function getCartState() {

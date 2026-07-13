@@ -7,6 +7,7 @@ import type { Address, Cart } from '$lib/types/index.js'
 import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
+import { fireGTagEvent } from '$lib/utils/gtag.js'
 
 interface CartExtended extends Cart {
   shippingAddress?: Address
@@ -179,6 +180,7 @@ export class AddressModule {
       }
     } catch (e: any) {
       toast.error(`Failed to save contact details${e.toString()}`)
+      fireGTagEvent('checkout_error', { error_message: 'Failed to save contact details', checkout_step: 'contact_info' })
     }
 
     this.editEmail = false
@@ -211,6 +213,7 @@ export class AddressModule {
     } catch (e: any) {
       console.error(e)
       toast.error(e.message)
+      fireGTagEvent('checkout_error', { error_message: 'Failed to save address to cart', checkout_step: 'save_address' })
     } finally {
       this.loadingForSaveToCart = false
     }
@@ -258,6 +261,7 @@ export class AddressModule {
         // showAuthModal('login')
       } else {
         toast.error('Failed to load addresses')
+        fireGTagEvent('checkout_error', { error_message: 'Failed to load addresses', checkout_step: 'load_addresses' })
       }
       return false
     }
@@ -383,6 +387,7 @@ export class AddressModule {
       await addressService.deleteAddress(address.id)
     } catch (e: any) {
       toast.error(e?.message || "Failed to delete address")
+      fireGTagEvent('checkout_error', { error_message: 'Failed to delete address', checkout_step: 'delete_address' })
     }
 
     this.addresses = this.addresses.filter((addr) => addr.id !== address.id)
@@ -417,9 +422,15 @@ export class AddressModule {
   handleProceedToPayment = async () => {
     if (!this.isBillingAddressSameAsShipping && !this.cartState.cart.billingAddress?.address_1) {
       toast.error('Enter billing address to proceed')
-
+      fireGTagEvent('checkout_error', { error_message: 'Enter billing address to proceed', checkout_step: 'proceed_to_payment' })
       return
     }
+
+    fireGTagEvent('add_shipping_info', {
+      value: this.cartState.cart.total,
+      shipping_tier: this.cartState.cart.shippingRateId,
+      items: this.cartState.cart.lineItems
+    })
 
     this.loadingForCheckout = true
 
