@@ -6,6 +6,7 @@ import { checkoutService, couponService, paymentMethodService } from '$lib/servi
 import { browser } from '$app/environment'
 import { page } from '$app/state'
 import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
+import { fireGTagEvent } from '$lib/utils/gtag.js'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -186,9 +187,21 @@ export class PaymentModule {
 	placeOrder = async () => {
 		if (!this.SELECTED_PG_CODE) {
 			toast.error('Please select a payment method')
+			fireGTagEvent('checkout_error', { error_message: 'Please select a payment method', checkout_step: 'payment' })
 			return
 		}
 		if (!this.cartState) return
+
+		fireGTagEvent('add_payment_info', {
+			total: this.cartState.cart.total,
+			shipping: { charge: this.cartState.cart.shippingRate },
+			items: this.cartState.cart.lineItems,
+			retailer: {
+				id: page.data.storeId,
+				name: page.data.store?.name,
+				email: page.data.store?.email
+			}
+		})
 
 		this.paymentLoader = true
 		if (this.getPaymentCode() === 'RAZORPAY') {
@@ -239,6 +252,7 @@ export class PaymentModule {
 					}
 				} catch (e: any) {
 					toast.error(e.message || "Checkout failed")
+					fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Razorpay)', checkout_step: 'payment' })
 				} finally {
 					this.paymentLoader = false
 				}
@@ -296,6 +310,7 @@ export class PaymentModule {
 					}
 				} catch (e: any) {
 					toast.error(e.message || "Checkout failed")
+					fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Affirm)', checkout_step: 'payment' })
 					this.paymentLoader = false
 				} finally {
 					this.cartState?.restorePrevCart()
@@ -322,6 +337,7 @@ export class PaymentModule {
 			} catch (e: any) {
         toast.error(e?.message || "Checkout failed")
 				console.error('PHONEPE checkout', e)
+				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Phonepe)', checkout_step: 'payment' })
 			} finally {
 				this.paymentLoader = false
 			}
@@ -339,6 +355,7 @@ export class PaymentModule {
 				}
 			} catch (e: any) {
 				toast.error(e.message || "Checkout failed")
+				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Stripe)', checkout_step: 'payment' })
 			} finally {
 				this.paymentLoader = false
 			}
@@ -356,6 +373,7 @@ export class PaymentModule {
 				}
 			} catch (e: any) {
 				toast.error(e.message || 'Checkout Failed')
+				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Paypal)', checkout_step: 'payment' })
 			} finally {
 				this.paymentLoader = false
 			}
@@ -403,6 +421,7 @@ export class PaymentModule {
 				}
 			} catch (e: any) {
 				toast.error(e.message || 'Checkout Failed')
+				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Cashfree)', checkout_step: 'payment' })
 			} finally {
 				this.paymentLoader = false
 			}
@@ -416,6 +435,7 @@ export class PaymentModule {
 				goto(`/checkout/process?pg=COD&order_no=${cp?.order_no}&cart_id=${this.cartState.cart.id}&store_id=${page.data.storeId}`)
 			} catch (e: any) {
 				toast.error(e.message || "Checkout failed")
+				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (COD)', checkout_step: 'payment' })
 			} finally {
 				this.paymentLoader = false
 			}

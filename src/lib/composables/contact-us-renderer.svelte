@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { contactService } from '$lib/services'
+	import { fireGTagEvent } from '$lib/utils/gtag.js'
 	import type { Snippet } from 'svelte'
 	import { z } from 'zod'
   
@@ -58,6 +59,7 @@
 		error = ''
 		try {
 			await contactService.submitContactUsForm({ name: info.name, email: info.email, message: info.message })
+			fireGTagEvent('contact', { contact_method: 'form' })
 			success = true
 		} catch (err) {
 			error = 'Failed to send message. Please try again later.'

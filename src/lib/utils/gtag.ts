@@ -236,6 +236,40 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 				})
 				break
 
+			case 'add_shipping_info':
+				// @ts-ignore
+				gtag('event', 'add_shipping_info', {
+					currency: page?.data?.store?.currency?.code,
+					value: data.value || data.total,
+					shipping_tier: data.shipping_tier,
+					items,
+					event_time: eventTime,
+					event_day: eventDay,
+					event_month: eventMonth
+				})
+				break
+
+			case 'checkout_error':
+				// @ts-ignore
+				gtag('event', 'checkout_error', {
+					error_message: data.error_message,
+					checkout_step: data.checkout_step,
+					event_time: eventTime,
+					event_day: eventDay,
+					event_month: eventMonth
+				})
+				break
+
+			case 'contact':
+				// @ts-ignore
+				gtag('event', 'contact', {
+					contact_method: data.contact_method,
+					event_time: eventTime,
+					event_day: eventDay,
+					event_month: eventMonth
+				})
+				break
+
 			default:
 				// @ts-ignore
 				gtag('event', event_name, data)
