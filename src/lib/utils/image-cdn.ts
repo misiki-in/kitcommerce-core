@@ -45,7 +45,7 @@ export function getImageCDNUrl(
     else
       return `${prefix}/${slug}${query}`
   } catch (e: any) {
-    console.error('Processing CDN URL', e)
+    //console.error('Processing CDN URL', e)
     return orig
   }
 }
