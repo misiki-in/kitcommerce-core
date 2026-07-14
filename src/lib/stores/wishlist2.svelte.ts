@@ -33,7 +33,7 @@ class WishlistState {
       this.count = res?.data?.length
       for (const { variant, product } of res?.data) this.isWishlisted[key(product?.id, variant?.id)] = true
     } catch (e: any) {
-      console.error('While fetching wishlist', e)
+      //console.error('While fetching wishlist', e)
     } finally {
       this.loading = false
     }
