@@ -395,7 +395,7 @@ export class AddressModule {
 
   handleSaveAddress = async (address: any, saveToCart = false) => {
     if (saveToCart) {
-      this.saveAddressToCart()
+      await this.saveAddressToCart()
 
       this.showAddressForm = false
 

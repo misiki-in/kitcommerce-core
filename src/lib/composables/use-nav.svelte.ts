@@ -23,6 +23,8 @@ export class NavModule {
 	userState = getUserState()
 	navMenu = $state<Menu[]>([])
 	megaMenu = $state<MegaMenuItem[]>([])
+  menuItems = $derived(page.data.store?.menu?.find(x => x.menuId === 'header')?.items)
+
 	selectedCategory = $state('')
 	selectedCategory2 = $state('')
 	showSubCategory = $state<boolean[]>([])
@@ -124,10 +126,36 @@ export class NavModule {
 		}
 	}
 
+  handleToggleSubMenu = (m: { name: string; items: string | any[] }, mx: number) => {
+		this.selectedCategory = m.name
+
+		if (m.items?.length > 0) {
+			if (this.showSubCategory[mx] === true) {
+				this.selectedCategory = ''
+				this.showSubCategory[mx] = false
+			} else {
+				this.showSubCategory[mx] = true
+			}
+		}
+	}
+
 	handleToggleSubCategory2 = (c: { name: string; children: string | any[] }, cx: number) => {
 		this.selectedCategory2 = c.name
 
 		if (c.children?.length > 0) {
+			if (this.showSubCategory2[cx] === true) {
+				this.selectedCategory2 = ''
+				this.showSubCategory2[cx] = false
+			} else {
+				this.showSubCategory2[cx] = true
+			}
+		}
+	}
+
+  handleToggleSubMenu2 = (c: { name: string; items: string | any[] }, cx: number) => {
+		this.selectedCategory2 = c.name
+
+		if (c.items?.length > 0) {
 			if (this.showSubCategory2[cx] === true) {
 				this.selectedCategory2 = ''
 				this.showSubCategory2[cx] = false
