@@ -4,6 +4,7 @@
 	import { onMount, type Snippet } from 'svelte'
 
 	let menuItems: any[] = $state([])
+  let headerItems = $derived(page.data.store?.menu?.find(x => x.menuId === 'header')?.items)
 	let selectedCategory = $state('')
 	let toggleMenuItemChildren = $state<boolean[]>([])
 
@@ -17,6 +18,7 @@
 		selectedCategory: string
 		toggleMenuItemChildren: boolean[]
 		menuItems: any[]
+    headerItems: any[]
 		openChildMenu: (categoryName: string, index: number) => void
 		closeChildMenu: (index: number, closeCategory: boolean) => void
 	}
@@ -45,4 +47,4 @@
 	}
 </script>
 
-{@render content({ menuItems, toggleMenuItemChildren, selectedCategory, openChildMenu, closeChildMenu })}
+{@render content({ menuItems, headerItems, toggleMenuItemChildren, selectedCategory, openChildMenu, closeChildMenu })}
