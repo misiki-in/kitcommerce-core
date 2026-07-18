@@ -491,10 +491,17 @@ class ProductState {
 			if (page.data?.product) {
 				this.structuredData = {
 					name: page.data?.product?.title,
-					image: [page.data?.product?.thumbnail],
+					// all gallery images, not just the thumbnail
+					image: page.data?.product?.images
+						? page.data.product.images
+								.split(',')
+								.map((i: string) => i.trim())
+								.filter(Boolean)
+						: [page.data?.product?.thumbnail].filter(Boolean),
 					description: page.data?.product?.description,
 					sku: page.data?.product?.sku,
-					brandName: page.data?.product?.vendorId,
+					// brandName intentionally omitted — the schema component falls back to the store
+					// brand. (The previous value was vendorId, a UUID, which is invalid for brand.name.)
 					aggregateRating: {
 						ratingValue: page.data?.product?.rating,
 						reviewCount: page.data?.product?.reviewCount

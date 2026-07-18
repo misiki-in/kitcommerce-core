@@ -19,7 +19,12 @@ class WishlistState {
 
   constructor() {
     onMount(() => {
-      this.setState()
+      // Only read the wishlist for authenticated users. A guest has no session, so
+      // /wishlists/me returns 422 on every page load (console noise fleet-wide). Gate on
+      // the session cookie rather than firing an authenticated request for everyone.
+      if (typeof document !== 'undefined' && document.cookie.includes('connect.sid')) {
+        this.setState()
+      }
     })
   }
 

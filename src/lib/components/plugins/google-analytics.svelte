@@ -3,13 +3,15 @@
 	import { page } from '$app/state'
 	import { onMount } from 'svelte';
 
-  const googleTagManagerPlugin = $derived(page.data.store?.plugins?.googleTagManager?.id)
-	const gtagId = $derived(googleTagManagerPlugin.id)
+  // the plugin OBJECT — previously this was `…googleTagManager?.id` (a string), so `.id`
+  // and `.active` below read off a string and GTM never loaded
+  const googleTagManagerPlugin = $derived(page.data.store?.plugins?.googleTagManager)
+	const gtagId = $derived(googleTagManagerPlugin?.id)
 
 	onMount(() => {
     if (!googleTagManagerPlugin) return
 
-	  const isActive = googleTagManagerPlugin.active
+	  const isActive = googleTagManagerPlugin.active ?? googleTagManagerPlugin.isActive
 
 		if (isActive && gtagId  && browser) {
 			// Clean up existing scripts to avoid duplicates
