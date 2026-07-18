@@ -107,10 +107,20 @@ export class Cart2State {
 					this.resetSingleItemCheckoutSession()
 					const cartId = this.retrieveCartId()
 					if (cartId) {
+						// This single fetch is the ONLY thing that restores the bag after a full
+						// page load; a silently-swallowed transient failure used to render as an
+						// empty cart. Retry once, and log instead of hiding a persistent failure.
 						try {
 							const c = await cartService.getCartByCartId(cartId)
 							if (!c.hasOwnProperty('message')) this.cart = c
-						} catch (e) {}
+						} catch (e) {
+							try {
+								const c = await cartService.getCartByCartId(cartId)
+								if (!c.hasOwnProperty('message')) this.cart = c
+							} catch (e2) {
+								console.error('Cart hydration failed; bag may display empty:', e2)
+							}
+						}
 					}
 					res()
 				} catch (e) {
@@ -156,7 +166,10 @@ export class Cart2State {
 		if (lineId) this.updatingItem[lineId] = true
 		try {
 			const c = await cartService.addToCart({
-				cartId: this.cart.id,
+				// The in-memory id is '' until the onMount hydration lands; falling back to the
+				// persisted id stops an early add from spawning a fresh cart that orphans the
+				// shopper's existing one.
+				cartId: this.cart.id || this.retrieveCartId(),
 				lineId: lineId || null,
 				qty,
 				productId: productId,
