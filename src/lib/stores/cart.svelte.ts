@@ -153,9 +153,9 @@ export class Cart2State {
 		if (!this.cart?.lineItems) this.cart = { ...this.cart, lineItems: [] }
 		let cart_item = this.cart.lineItems.find((item) => item?.id === lineId)
 		if (!cart_item) {
-			cart_item = this.cart.lineItems.find((item) => {
-				item?.productId === productId && item?.variantId === variantId
-			})
+			cart_item = this.cart.lineItems.find(
+				(item) => item?.productId === productId && item?.variantId === variantId
+			)
 			lineId = cart_item?.id
 		}
 		const cart_qty = cart_item?.qty || 0
@@ -231,7 +231,7 @@ export class Cart2State {
 			this.cart = c
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Update email failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}
@@ -246,7 +246,7 @@ export class Cart2State {
 			return c
 		} catch (e: unknown) {
 			toast.error(e?.message || 'Apply coupon failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}
@@ -259,7 +259,7 @@ export class Cart2State {
 			this.cart = c
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Remove coupon failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}
@@ -279,7 +279,7 @@ export class Cart2State {
 			this.cart = { ...cart }
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Update shipping address failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}
@@ -311,7 +311,7 @@ export class Cart2State {
 			this.cart = c
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Remove item failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 			this.showCheckout = false
@@ -326,7 +326,7 @@ export class Cart2State {
 			this.cart = initialCart
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Clear cart failed')
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}
@@ -338,7 +338,7 @@ export class Cart2State {
 			const c = await cartService.updateShippingRate({ shippingRateId, cartId: this.cart.id })
 			this.cart = c
 		} catch (e: unknown) {
-			throw e instanceof Error ? e.message : String(e)
+			throw e instanceof Error ? e : new Error(String(e))
 		} finally {
 			this.isUpdatingCart = false
 		}

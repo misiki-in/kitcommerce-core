@@ -1,7 +1,7 @@
 import { ProductService } from '$lib/services'
 import type { Product } from '$lib/types'
 import type { PageLoad } from '$lib/types/index.ts'
-import { redirect } from '@sveltejs/kit'
+import { error } from '@sveltejs/kit'
 
 function transformProductOptions(options: Product['options']) {
 	return options?.map((option) => {
@@ -39,9 +39,9 @@ export const load: PageLoad = async ({ fetch, params }) => {
 			product: product as Product
 		}
 	} catch (e) {
-		// locals.store.plugins.redirectToHomepageIfProductNotFound
-		redirect(308, '/')
-		// error(404, 'Product not found')
+		// A missing product is a 404 — not a 308 redirect to the homepage, which produces
+		// soft-404s (crawlers index '/' under dead product URLs) and masks real fetch errors.
+		error(404, 'Product not found')
 	}
 }
 
