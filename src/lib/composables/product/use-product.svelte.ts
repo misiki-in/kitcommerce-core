@@ -6,13 +6,12 @@ import { storeProductToRecentlyViewed, findVariantWithOptionValue, addPendingWis
 import { getUserState, getCartState, getWishlistState, getProductKey } from '$lib/stores/index.js'
 import { deepCopy, fireGTagEvent } from '$lib/utils/index.js'
 import { meilisearchService, productService, reviewService, wishlistService } from '$lib/services/index.js'
-import { onMount } from 'svelte'
+import { getContext, onMount, setContext } from 'svelte'
 import { toast } from 'svelte-sonner'
 
 const PRODUCT_STATE_KEY = Symbol('product-state')
 
 class ProductState {
-  static _instance: ProductState
 	ADD_TO_CART_MESSAGE_DURATION = 10000
 
 	userState = getUserState()
@@ -592,11 +591,13 @@ class ProductState {
 }
 
 export function createProductStateContext() {
-	const productState = new ProductState()
-  ProductState._instance = productState
-	return productState
+	// Use Svelte context (not a module-level static) so concurrent SSR requests don't
+	// share one ProductState instance — a static _instance written during one request's
+	// render is readable by another request on the server. The <ProductStateProvider>
+	// wraps every consumer, so getContext/setContext resolve correctly (same as cart).
+	return setContext(PRODUCT_STATE_KEY, new ProductState())
 }
 
-export function useProductState() {
-  return ProductState._instance
+export function useProductState(): ProductState {
+  return getContext(PRODUCT_STATE_KEY)
 }
