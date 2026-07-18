@@ -134,7 +134,7 @@ class ProductState {
 		})
 	}
 
-	toggleAggregation = async (optionName: string, value: string, noScroll = false) => {
+	toggleAggregation = async (optionName: string, value: string, noScroll = true) => {
 		if (!this.isAggregationAvaliable(optionName, value)) this.selectedAggregations = { [optionName]: value }
 		else if (this.selectedAggregations[optionName] === value) delete this.selectedAggregations[optionName]
 		else this.selectedAggregations = { ...this.selectedAggregations, [optionName]: value }
