@@ -220,7 +220,10 @@ export class PaymentModule {
 						const options = {
 							key: rp.key_id, // Enter the Key ID generated from the Dashboard
 							description: `Order #${this.order_no}`,
-							amount: rp.amount * 80,
+							// rp.amount is already the order amount in the smallest unit (paise) — the
+							// backend creates the order as totalAmount*100 and it is authoritative via
+							// order_id below. Never apply a hardcoded FX/paise multiplier here.
+							amount: rp.amount,
 							order_id: rp.id,
 							async handler(response: any) {
 								try {
@@ -322,7 +325,7 @@ export class PaymentModule {
 				const pp: any = await checkoutService.checkoutPhonepe({
 					cartId: this.cartState.cart.id,
 					email: this.cartState.cart.email,
-					phone: '8249028220',
+					phone: this.cartState.cart?.phone || this.cartState.cart?.shippingAddress?.phone || '',
 					origin: page.url.origin
 				})
 				if (!pp) {
