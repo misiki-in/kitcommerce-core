@@ -12,7 +12,10 @@ export const findVariantWithOptionValue = (
 	{ selectedVariant, optionId, value }: { optionId: string; value: string; selectedVariant: Variant }
 ) => {
 	// Step 1: Take account of what previous options have been selected except the current change
-	const selectedOptions = selectedVariant.options?.filter((option: Variant['options'][0]) => option.optionId !== optionId) as {
+	// selectedVariant can be undefined (e.g. a deep-linked variant_id that matches no variant, or a
+	// grouped product whose variants carry ids that never resolve) — guard it so the option click
+	// updates state instead of throwing on `.options`.
+	const selectedOptions = selectedVariant?.options?.filter((option: Variant['options'][0]) => option.optionId !== optionId) as {
 		optionId: string
 		value: string
 	}[]
