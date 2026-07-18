@@ -204,7 +204,7 @@ class ProductState {
 				this.selectedVariant = page.data?.product?.variants.find((v) => v.id === variantId) || page.data?.product?.variants[0]
 			} else {
 				this.selectedVariant = page.data?.product?.variants?.find((v) => v.title == 'default') || page.data?.product?.variants[0]
-				goto(`?variant_id=${this.selectedVariant?.id || ''}`, { replaceState: true })
+				goto(`?variant_id=${this.selectedVariant?.id || ''}`, { replaceState: true, noScroll: true })
 			}
 		}
     if (!this.selectedVariant) console.error("Failed to select a variant")
@@ -229,7 +229,8 @@ class ProductState {
 				})
 			}
 
-			if (this.selectedVariant?.id) goto(`?variant_id=${this.selectedVariant?.id || ''}`)
+			// noScroll: selecting an option must not jump the page to the top (match the jws reference).
+			if (this.selectedVariant?.id) goto(`?variant_id=${this.selectedVariant?.id || ''}`, { replaceState: true, noScroll: true })
 		}
 	}
 
@@ -342,10 +343,16 @@ class ProductState {
 	setInitialSelectedVariant = () => {
 		if (page.data?.product?.variants?.length) {
 			const variantId = page.url.searchParams.get('variant_id')
+			const variants = page.data?.product?.variants
 			if (variantId) {
-				this.selectedVariant = page.data?.product.variants.find((v) => v.id === variantId)
+				this.selectedVariant = variants.find((v) => v.id === variantId)
 			} else {
-				this.selectedVariant = page.data?.product?.variants?.find((v) => v.title !== 'default')
+				this.selectedVariant = variants?.find((v) => v.title !== 'default')
+			}
+			// Fallback: never leave selectedVariant undefined (e.g. a deep-linked variant_id that
+			// matches no variant), otherwise selectVariant -> findVariantWithOptionValue throws.
+			if (!this.selectedVariant) {
+				this.selectedVariant = variants?.find((v) => v.title === 'default') || variants?.[0]
 			}
 		}
 	}
