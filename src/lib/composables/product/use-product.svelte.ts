@@ -521,7 +521,8 @@ class ProductState {
 			productService
 				.listRelatedProducts({ page: 1, categoryId: page.data?.product?.categoryId })
 				.then((data) => {
-					this.relatedProducts = deepCopy(page.data)
+					// assign the fetched related products, not a deep clone of the whole page payload
+					this.relatedProducts = data
 				})
 				.catch((err) => {
 					console.error('list related products', err)
