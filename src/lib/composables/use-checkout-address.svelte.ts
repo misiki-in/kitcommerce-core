@@ -349,6 +349,7 @@ export class AddressModule {
 
   handleFormClose = () => {
     this.currentAddressType = null
+    this.editAddress = false
   }
 
   handleFormSave = async (address: BaseAddress) => {
@@ -366,6 +367,7 @@ export class AddressModule {
 
       this.showAddressList = true
     }
+    this.editAddress = false
   }
 
   removeUndefinedProperties = (obj: any): Record<string, any> => {
@@ -417,6 +419,7 @@ export class AddressModule {
     this.showAddressForm = false
 
     this.showAddressList = true
+    this.editAddress = false
   }
 
   handleProceedToPayment = async () => {
