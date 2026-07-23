@@ -4,7 +4,9 @@
 	import OrderTimelineRenderer from './order-timeline-renderer.svelte';
 
 	interface Props {
-		pincode: string | undefined;
+		// Consumers bind this to an `<input type="number">`, which Svelte writes back
+		// as a number, so accept both. It is only interpolated into the lookup URL.
+		pincode: string | number | undefined;
 		content: Snippet<[SnippetParams]>;
 	}
 
