@@ -7,10 +7,239 @@ declare global {
 
 import { page } from '$app/state'
 
-// Reference gtag from window object
-const gtag = typeof window !== 'undefined' ? window.gtag : undefined
+let cachedIPv4 = ''
+let cachedIPv6 = ''
+let ipFetched = false
 
-export const fireGTagEvent = (event_name: string, data: any) => {
+const cleanPhone = (phone: string, defaultCountryCode: string = '44'): string => {
+	if (!phone) return ''
+	let digits = phone.replace(/\D/g, '')
+	if (digits.startsWith('00')) {
+		digits = digits.substring(2)
+	}
+	if (digits.startsWith('0')) {
+		digits = digits.substring(1)
+	}
+	const code = defaultCountryCode.replace(/\D/g, '')
+	if (!digits.startsWith(code)) {
+		digits = code + digits
+	}
+	return digits
+}
+
+const fetchIPs = async () => {
+	if (typeof window === 'undefined' || ipFetched) return
+	ipFetched = true
+	try {
+		fetch('https://api.ipify.org?format=json')
+			.then((r) => r.json())
+			.then((res) => {
+				cachedIPv4 = res.ip
+			})
+			.catch(() => {})
+
+		fetch('https://api6.ipify.org?format=json')
+			.then((r) => r.json())
+			.then((res) => {
+				cachedIPv6 = res.ip
+			})
+			.catch(() => {
+				// Fallback to api64 which handles ipv4-mapped ipv6 or ipv4 if no ipv6
+				fetch('https://api64.ipify.org?format=json')
+					.then((r) => r.json())
+					.then((res) => {
+						if (!cachedIPv4) cachedIPv4 = res.ip
+						cachedIPv6 = res.ip
+					})
+					.catch(() => {})
+			})
+	} catch (e) {
+		// ignore
+	}
+}
+
+if (typeof window !== 'undefined') {
+	fetchIPs()
+}
+
+const hashVal = async (val: string) => {
+	if (!val || typeof window === 'undefined' || !window.crypto || !window.crypto.subtle) return ''
+	try {
+		const msgBuffer = new TextEncoder().encode(val)
+		const hashBuffer = await window.crypto.subtle.digest('SHA-256', msgBuffer)
+		return Array.from(new Uint8Array(hashBuffer))
+			.map((b) => b.toString(16).padStart(2, '0'))
+			.join('')
+	} catch (e) {
+		return ''
+	}
+}
+
+const getDevice = () => {
+	if (typeof navigator === 'undefined') return 'desktop'
+	const ua = navigator.userAgent
+	if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+		return 'tablet'
+	}
+	if (
+		/Mobile|iP(hone|od)|Android|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(
+			ua
+		)
+	) {
+		return 'mobile'
+	}
+	return 'desktop'
+}
+
+const getGaSessionId = () => {
+	if (typeof document === 'undefined') return ''
+	const cookies = document.cookie.split(';')
+
+	const parseSessionId = (valParts: string[]) => {
+		let sessionId = valParts[2] || ''
+		if (sessionId.includes('$')) {
+			sessionId = sessionId.split('$')[0]
+		}
+		if (sessionId.startsWith('s')) {
+			sessionId = sessionId.substring(1)
+		}
+		return sessionId
+	}
+
+	// Scan all matching _ga_ cookies generically
+	for (let i = 0; i < cookies.length; i++) {
+		const cookie = cookies[i].trim()
+		if (cookie.startsWith('_ga_')) {
+			const parts = cookie.split('=')
+			if (parts.length > 1) {
+				const val = parts[1]
+				const valParts = val.split('.')
+				if (valParts.length > 2 && valParts[0].startsWith('GS')) {
+					const sessionId = parseSessionId(valParts)
+					if (sessionId) return sessionId
+				}
+			}
+		}
+	}
+	return ''
+}
+
+const getAddressDetails = (pageVal: any) => {
+	const details = {
+		address1: '',
+		address2: '',
+		city: '',
+		state: '',
+		country: '',
+		zip: ''
+	}
+
+	const cartShipping = pageVal?.data?.cart?.shipping_address
+	const preSelected = pageVal?.data?.preSelectedAddress
+	const firstAddr = pageVal?.data?.myAddresses?.[0]
+	const addr = cartShipping || preSelected || firstAddr
+
+	if (addr && (addr.address || addr.city || addr.zip)) {
+		const fullAddress = addr.address || addr.addressLine1 || ''
+		const lines = fullAddress.split('\n').map((l: string) => l.trim()).filter(Boolean)
+		details.address1 = lines[0] || ''
+		details.address2 = addr.addressLine2 || lines.slice(1).join(', ') || ''
+		details.city = addr.city || ''
+		details.state = addr.state || ''
+		details.country = addr.country || ''
+		details.zip = addr.zip || addr.pincode || ''
+
+		if (typeof window !== 'undefined') {
+			try {
+				localStorage.setItem('last_known_address', JSON.stringify(details))
+			} catch (e) {}
+		}
+		return details
+	}
+
+	if (typeof window !== 'undefined') {
+		try {
+			const cached = localStorage.getItem('last_known_address')
+			if (cached) {
+				return JSON.parse(cached)
+			}
+		} catch (e) {}
+	}
+
+	return details
+}
+
+export const fireGTagEvent = async (event_name: string, data: any) => {
+	const checkoutFunnelEvents = ['begin_checkout', 'add_payment_info', 'credit_eligible', 'purchase', 'credit_request']
+	if (typeof window !== 'undefined' && checkoutFunnelEvents.includes(event_name)) {
+		const sessionKey = `event_fired_${event_name}`
+		if (sessionStorage.getItem(sessionKey)) {
+			return
+		}
+		sessionStorage.setItem(sessionKey, 'true')
+	}
+
+	if (event_name === 'logout' && typeof window !== 'undefined') {
+		checkoutFunnelEvents.forEach((event) => {
+			sessionStorage.removeItem(`event_fired_${event}`)
+		})
+	}
+
+	// Shadow window.gtag
+	const gtag = async (action: string, name: string, payload: any) => {
+		if (typeof window === 'undefined') return
+		// @ts-ignore
+		const actualGtag = window.gtag
+		if (typeof actualGtag !== 'function') return
+
+		const pageVal = page
+		const me = pageVal?.data?.me
+
+		console.log("me", me)
+
+		const addressInfo = getAddressDetails(pageVal)
+
+		let hashedEmail = ''
+		let hashedPhone = ''
+		const email = me?.email || ''
+		const phone = cleanPhone(me?.phone || '')
+
+		if (email) {
+			hashedEmail = await hashVal(email.trim().toLowerCase())
+		}
+		if (phone) {
+			hashedPhone = await hashVal(phone)
+		}
+
+		const userPayload = me ? {
+			firstName: me.firstName || '',
+			lastName: me.lastName || '',
+			city: addressInfo.city,
+			state: addressInfo.state,
+			country: addressInfo.country,
+			zip: addressInfo.zip,
+			'address_1': addressInfo.address1,
+			'address_2': addressInfo.address2,
+			email: hashedEmail || me.email || '',
+			phone: phone || '',
+			hashedEmail,
+			hashedPhone
+		} : {}
+
+		const enrichedPayload = {
+			...payload,
+			iPv4: cachedIPv4,
+			iPv6: cachedIPv6,
+			'session_id': getGaSessionId(),
+			'user_agent': navigator.userAgent,
+			device: getDevice(),
+			'screen_h': window.screen ? window.screen.height : 0,
+			'screen_w': window.screen ? window.screen.width : 0,
+			...userPayload
+		}
+		;(actualGtag as any)(action, name, enrichedPayload)
+	}
+
 	let items
 
 	const formatDate = (date: Date) => {
@@ -18,16 +247,32 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 		return `${padZero(date.getHours())}:${padZero(date.getMinutes())}`
 	}
 
-	const getDayOfWeek = (date: Date) => ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()]
+	const getDayOfWeek = (date: Date) =>
+		['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][date.getDay()]
 
 	const getMonthName = (date: Date) =>
-		['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][date.getMonth()]
+		[
+			'January',
+			'February',
+			'March',
+			'April',
+			'May',
+			'June',
+			'July',
+			'August',
+			'September',
+			'October',
+			'November',
+			'December'
+		][date.getMonth()]
 
 	const now = new Date()
 
 	const eventTime = formatDate(now)
 	const eventDay = getDayOfWeek(now)
 	const eventMonth = getMonthName(now)
+
+	const currencyCode = page?.data?.store?.currency?.code || 'GBP'
 
 	if (!data) data = {}
 	data.items = data.items || []
@@ -39,11 +284,15 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 			item_name: item.name,
 			affiliation: item.vendorBusinessName || item.vendor?.BusinessName || item.vendor?.business_name,
 			item_brand: item.brandName,
-			item_category: item.category?.name || item.category,
+			item_category: item.category?.name || item.category || item.item_category,
+			item_category2: item.item_category2,
+			item_category3: item.item_category3,
+			item_category4: item.item_category4,
+			item_category5: item.item_category5,
 			price: item.price,
 			quantity: item.qty,
 			coupon: item.discount?.code,
-			currency: page?.data?.store?.currency?.code,
+			currency: currencyCode,
 			discount: item.discount?.amount,
 			savings: item.savings,
 			index: idx
@@ -52,14 +301,18 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 	if (event_name == 'view_item') {
 		items = {
-			item_id: data.sku ? data.sku : data.id,
-			item_name: data.title,
+			item_id: data.sku ? data.sku : (data._id || data.id),
+			item_name: data.name || data.title,
 			affiliation: data.vendor?.BusinessName || data.vendorBusinessName || data.vendor?.business_name,
 			item_brand: data.brand?.name,
-			item_category: data.category?.name,
+			item_category: data.categoryPool?.[0]?.name || data.category?.name,
+			item_category2: data.categoryPool?.[1]?.name,
+			item_category3: data.categoryPool?.[2]?.name,
+			item_category4: data.categoryPool?.[3]?.name,
+			item_category5: data.categoryPool?.[4]?.name,
 			price: data.price,
 			quantity: data.qty,
-			currency: page?.data?.store?.currency?.code,
+			currency: currencyCode,
 			index: 0
 		}
 	}
@@ -68,15 +321,15 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 		items = data.items.map((item: any) => {
 			item.discount = item.discount || item.coupon || {}
 			return {
-				item_id: item.sku ? item.sku : item.id,
-				item_name: item.title,
+				item_id: item.sku ? item.sku : (item._id || item.id),
+				item_name: item.name || item.title,
 				affiliation: item.vendorBusinessName,
 				item_brand: item.brandName,
 				item_category: item.category?.name,
 				price: item.price,
 				quantity: item.qty,
 				coupon: item.discount?.code,
-				currency: page?.data?.store?.currency?.code,
+				currency: currencyCode,
 				discount: item.discount?.amount,
 				savings: item.savings,
 				index: 0
@@ -84,28 +337,22 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 		})
 	}
 
-	//         item_id: data.sku ? data.sku : data._id,
-	//         item_name: data.name,
-	//         affiliation: data.vendor?.BusinessName,
-	//         item_brand: data.brand?.name,
-	//         // item_category: data.category.name,
-	//         price: data.price,
-	//         quantity: data.qty,
-	//         currency: page?.data?.store?.currency?.code,
-	//         index: 0
 	if (gtag) {
 		switch (event_name) {
 			case 'add_to_cart':
 				// @ts-ignore
-				gtag('event', 'add_to_cart', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'add_to_cart', {
+					currency: currencyCode,
 					value: data.total,
 					quantity: data.qty,
 					affiliation: data.vendorBusinessName || data.vendor?.BusinessName || data.vendor?.business_name,
 					items,
-					user_id: data.user?.id,
-					user_name: data.user?.name,
+					user_id: data.user?.id || data.user?._id,
+					user_name: data.user?.name || data.user?.firstName,
 					user_email: data.user?.email,
+					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
+					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
+					vendor_email: data.vendor?.email || data.retailer?.email,
 					event_time: eventTime,
 					event_day: eventDay,
 					event_month: eventMonth
@@ -114,8 +361,8 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'view_cart':
 				// @ts-ignore
-				gtag('event', 'view_cart', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'view_cart', {
+					currency: currencyCode,
 					value: data.total,
 					items,
 					event_time: eventTime,
@@ -126,8 +373,8 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'view_item':
 				// @ts-ignore
-				gtag('event', 'view_item', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'view_item', {
+					currency: currencyCode,
 					value: data.price,
 					items,
 					event_time: eventTime,
@@ -138,11 +385,11 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'view_item_list':
 				// @ts-ignore
-				gtag('event', 'view_item_list', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'view_item_list', {
+					currency: currencyCode,
 					item_list_id: data.category_id,
 					item_list_name: data.category_name,
-					total_items_id: [`${data.items.map((item: any) => `'${item._id}'`)}`],
+					total_items_id: [`${data.items.map((item: any) => `'${item._id || item.id}'`)}`],
 					items,
 					event_time: eventTime,
 					event_day: eventDay,
@@ -152,8 +399,8 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'remove_from_cart':
 				// @ts-ignore
-				gtag('event', 'remove_from_cart', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'remove_from_cart', {
+					currency: currencyCode,
 					value: data.price,
 					items,
 					affiliation: data.vendorBusinessName || data.vendor?.BusinessName || data.vendor?.business_name,
@@ -165,31 +412,37 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'begin_checkout':
 				const beginCheckoutData = {
-					currency: page?.data?.store?.currency?.code,
+					currency: currencyCode,
 					value: data.total,
 					items,
 					affiliation: data.brand_name,
-					retailer_id: data.retailer.id,
-					retailer_name: data.retailer.name,
-					retailer_email: data.retailer.email,
+					user_id: data.user?.id || data.user?._id,
+					user_name: data.user?.name || data.user?.firstName,
+					user_email: data.user?.email,
+					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
+					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
+					vendor_email: data.vendor?.email || data.retailer?.email,
 					event_time: eventTime,
 					event_day: eventDay,
 					event_month: eventMonth
 				}
 				// @ts-ignore
-				gtag('event', 'begin_checkout', beginCheckoutData)
+				await gtag('event', 'begin_checkout', beginCheckoutData)
 				break
 
 			case 'add_payment_info':
 				// @ts-ignore
-				gtag('event', 'add_payment_info', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'add_payment_info', {
+					currency: currencyCode,
 					value: data.total,
 					shipping: data.shipping?.charge,
 					items,
-					retailer_id: data.retailer.id,
-					retailer_name: data.retailer.name,
-					retailer_email: data.retailer.email,
+					user_id: data.user?.id || data.user?._id,
+					user_name: data.user?.name || data.user?.firstName,
+					user_email: data.user?.email,
+					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
+					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
+					vendor_email: data.vendor?.email || data.retailer?.email,
 					event_time: eventTime,
 					event_day: eventDay,
 					event_month: eventMonth
@@ -198,25 +451,29 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'search':
 				// @ts-ignore
-				gtag('event', 'search', {
+				await gtag('event', 'search', {
 					search_term: data.search_term
 				})
 				break
 
 			case 'purchase':
 				// @ts-ignore
-				gtag('event', 'purchase', {
+				await gtag('event', 'purchase', {
 					transaction_id: data.orderNo,
 					affiliation: items[0]?.vendorBusinessName || items[0]?.vendor?.BusinessName || items[0]?.vendor?.business_name,
 					value: data.amount?.total,
 					tax: data.tax,
 					shipping: data.amount?.shipping,
-					currency: page?.data?.store?.currency?.code,
+					currency: currencyCode,
 					coupon: data.coupon?.code,
 					items,
-					retailer_id: data.retailer.id,
-					retailer_name: data.retailer.name,
-					retailer_email: data.retailer.email,
+					user_id: data.user?.id || data.user?._id,
+					user_name: data.user?.name || data.user?.firstName,
+					user_email: data.user?.email,
+					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
+					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
+					vendor_email: data.vendor?.email || data.retailer?.email,
+					credit_opted: data.credit_opted,
 					event_time: eventTime,
 					event_day: eventDay,
 					event_month: eventMonth
@@ -225,8 +482,8 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'credit_request':
 				// @ts-ignore
-				gtag('event', 'credit_request', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'credit_request', {
+					currency: currencyCode,
 					company_id: data.company_id,
 					company_name: data.company_name,
 					credit: data.credit,
@@ -238,8 +495,8 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'add_shipping_info':
 				// @ts-ignore
-				gtag('event', 'add_shipping_info', {
-					currency: page?.data?.store?.currency?.code,
+				await gtag('event', 'add_shipping_info', {
+					currency: currencyCode,
 					value: data.value || data.total,
 					shipping_tier: data.shipping_tier,
 					items,
@@ -251,7 +508,7 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'checkout_error':
 				// @ts-ignore
-				gtag('event', 'checkout_error', {
+				await gtag('event', 'checkout_error', {
 					error_message: data.error_message,
 					checkout_step: data.checkout_step,
 					event_time: eventTime,
@@ -262,7 +519,7 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			case 'contact':
 				// @ts-ignore
-				gtag('event', 'contact', {
+				await gtag('event', 'contact', {
 					contact_method: data.contact_method,
 					event_time: eventTime,
 					event_day: eventDay,
@@ -272,7 +529,7 @@ export const fireGTagEvent = (event_name: string, data: any) => {
 
 			default:
 				// @ts-ignore
-				gtag('event', event_name, data)
+				await gtag('event', event_name, data)
 				break
 		}
 	}

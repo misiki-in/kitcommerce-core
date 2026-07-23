@@ -8,6 +8,7 @@ export interface CategoryTree {
   parentCategoryId: string | null
   slug: string
   thumbnail: string
+  rank?: number
   children?: CategoryTree[]
 }
 
@@ -67,7 +68,10 @@ class CategoryFilterState {
     }
 
     for (const category of allCategories) {
-      category.children = categoryToParentIdMap[category.id]
+      const children = categoryToParentIdMap[category.id]
+      if (children) {
+        category.children = children.sort((a, b) => (a.rank || 0) - (b.rank || 0))
+      }
     }
 
     return roots
