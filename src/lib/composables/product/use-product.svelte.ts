@@ -58,6 +58,27 @@ class ProductState {
 	structuredData: any = $state({})
 	showEnquiryModal = $state(false)
 
+	sortedAgEntries = $derived.by(() => {
+		const ag = page.data?.product?.ag
+		if (!ag || !Object.keys(ag).length) return []
+		const entries = Object.entries(ag)
+		const attributes = page.data?.product?.attributes || []
+		if (!attributes.length) return entries
+
+		const rankMap: Record<string, number> = {}
+		for (const attr of attributes) {
+			if (attr?.name && typeof attr?.rank === 'number' && rankMap[attr.name] === undefined) {
+				rankMap[attr.name] = attr.rank
+			}
+		}
+
+		return entries.sort(([aName], [bName]) => {
+			const aRank = rankMap[aName] ?? Number.MAX_SAFE_INTEGER
+			const bRank = rankMap[bName] ?? Number.MAX_SAFE_INTEGER
+			return aRank - bRank
+		})
+	})
+
 	anyVariantStockThere = $derived(page.data?.product?.variants?.some((v) => (v.stock || 0) > 0))
 
 	trustBadgesPlugin = $derived(page.data?.store?.plugins?.trustBadges)
