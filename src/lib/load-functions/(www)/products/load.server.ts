@@ -1,8 +1,9 @@
 import type { StoreData } from '$lib/types'
-import type { PageServerLoad } from '$lib/types/index.ts'
+import { type PageServerLoad } from '$lib/types/index.ts'
+import { PageService } from '$lib/services'
 import { checkSecuredCatalogue } from '$lib/utils'
 
-export const load: PageServerLoad = async ({ cookies, url, request, parent }) => {
+export const load: PageServerLoad = async ({ cookies, url, request, parent, fetch }) => {
 	const { store }: { store: StoreData | {} } = await parent()
 
 	if (store?.plugins?.isSecureCatalogue?.active) {
@@ -10,7 +11,8 @@ export const load: PageServerLoad = async ({ cookies, url, request, parent }) =>
 	}
 
 	try {
-		const page = {} // await PageService.getOne('products')
+    const pageService = new PageService(fetch)
+		const page = await pageService.getOne('products')
 		return { page }
 	} catch (e) {
 		console.error('Error loading /products:', e)
