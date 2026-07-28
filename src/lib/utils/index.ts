@@ -6,6 +6,7 @@ import type { TransitionConfig } from 'svelte/transition'
 import { twMerge } from 'tailwind-merge'
 
 export * from './image-cdn.ts'
+export * from './get-store.ts'
 export * from './sanitize.ts'
 export * from './one-time-cart.ts'
 export * from './gtag.ts'

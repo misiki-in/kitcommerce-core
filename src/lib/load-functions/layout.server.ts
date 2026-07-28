@@ -1,5 +1,6 @@
 import { StoreService } from '$lib/services'
 import type { LayoutServerLoad } from '$lib/types/index.ts'
+import { getStore } from '$lib/utils/get-store.ts'
 
 export const load: LayoutServerLoad = async ({ locals, url, cookies, fetch, request }) => {
 	let storeDetails = locals?.storeDetails
@@ -7,7 +8,7 @@ export const load: LayoutServerLoad = async ({ locals, url, cookies, fetch, requ
 		const storeId = cookies.get('litekart_store_id')
 		if (storeId) {
 			const storeService = new StoreService(fetch)
-			storeDetails = await storeService.getStoreByIdOrDomain({ storeId })
+			storeDetails = await getStore({ storeId }, storeService)
 			if (storeDetails) {
 				locals.storeDetails = storeDetails
 			} else {
