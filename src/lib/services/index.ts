@@ -1,5 +1,6 @@
 import { services } from 'kitcommerce.config'
 
+export const BaseService = services.BaseService
 export const AddressService = services.AddressService
 export const addressService = services.addressService
 export const AuthService = services.AuthService
