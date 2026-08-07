@@ -329,14 +329,18 @@ export class AddressModule {
     this.showAddressList = false
 
     if (this.currentAddressType === null) console.error('Current Address Type should be set')
-    this.openAddressForm(emptyAddress('new'), this.currentAddressType, false)
+    setTimeout(() => {
+      this.openAddressForm(emptyAddress('new'), this.currentAddressType!, false)
+    }, 100)
   }
 
   handleEditAddress = (address: BaseAddress) => {
     this.showAddressList = false
 
     if (this.currentAddressType === null) console.error('Current Address Type should be set')
-    this.openAddressForm({ ...address }, this.currentAddressType, true)
+    setTimeout(() => {
+      this.openAddressForm({ ...address }, this.currentAddressType!, true)
+    }, 100)
   }
 
   handleSelectAddress = async (address: any) => {
