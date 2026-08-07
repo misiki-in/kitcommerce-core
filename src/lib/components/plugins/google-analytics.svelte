@@ -1,56 +1,102 @@
 <script lang="ts">
-	import { browser } from '$app/environment';
-	import { page } from '$app/state'
-	import { onMount } from 'svelte';
+	import { page } from '$app/state';
 
-  // the plugin OBJECT — previously this was `…googleTagManager?.id` (a string), so `.id`
-  // and `.active` below read off a string and GTM never loaded
-  const googleTagManagerPlugin = $derived(page.data.store?.plugins?.googleTagManager)
-	const gtagId = $derived(googleTagManagerPlugin?.id)
+	const storeData = $derived(page.data.store);
 
-	onMount(() => {
-    if (!googleTagManagerPlugin) return
+	const isActive: boolean = storeData?.plugins?.googleTagManager?.active;
 
-	  const isActive = googleTagManagerPlugin.active ?? googleTagManagerPlugin.isActive
+	// Read tags list (supporting both array and legacy single string id)
+	const rawTags = storeData?.plugins?.googleTagManager?.tags;
+	const legacyId = storeData?.plugins?.googleTagManager?.id;
 
-		if (isActive && gtagId  && browser) {
-			// Clean up existing scripts to avoid duplicates
-			const existingLoader = document.querySelector(`script[src="https://www.googletagmanager.com/gtm.js?id=${gtagId}"]`)
-			const existingConfig = document.querySelector('script#gtag-config')
+	let tagsList: string[] = [];
+	if (Array.isArray(rawTags)) {
+		tagsList = rawTags.map((t: any) => (typeof t === 'string' ? t : t?.id || '')).filter(Boolean);
+	} else if (typeof rawTags === 'string' && rawTags.trim()) {
+		tagsList = [rawTags.trim()];
+	}
+	if (!tagsList.length && legacyId) {
+		tagsList = [legacyId];
+	}
 
-			if (existingLoader) existingLoader.remove()
-			if (existingConfig) existingConfig.remove()
+	const conversions = storeData?.plugins?.googleTagManager?.conversions || [];
 
-			// Create and append loader script
-			const loaderScript = document.createElement('script')
-			loaderScript.src = `https://www.googletagmanager.com/gtm.js?id=${gtagId}`
-			loaderScript.async = true
+	// Separate GTM tags from standard Google Tags (G-XXXXX, AW-XXXXX, etc.)
+	const gtmTag = tagsList.find((id) => id.startsWith('GTM-'));
+	const normalTags = tagsList.filter((id) => !id.startsWith('GTM-'));
+	const primaryGtagId = normalTags[0] || '';
 
-			// Create and append configuration script
-			const configScript = document.createElement('script')
-			configScript.id = 'gtag-config'
-			configScript.textContent = `
-        window.dataLayer = window.dataLayer || []
+	// Build config script to initialize window.__GOOGLE_TAG_CONFIG__ and all gtag configs
+	const configScriptBody = normalTags
+		.map((id) => {
+			if (id.startsWith('G-')) {
+				return `gtag('js', new Date()); gtag('config', '${id}');`;
+			}
+			return `gtag('config', '${id}');`;
+		})
+		.join('\n');
 
-        function gtag() {
-          dataLayer.push(arguments)
-        }
+	const initConfigScript = `
+    window.__GOOGLE_TAG_CONFIG__ = ${JSON.stringify({
+			active: isActive,
+			tags: tagsList,
+			conversions
+		})};
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    ${isActive ? configScriptBody : ''}
+  `;
 
-        gtag('js', new Date())
-        gtag('config', '${gtagId}')
-      `
+	// gtag/js + gtm.js are ~460KB and were downloading inside the LCP window, starving the
+	// product image of bandwidth on Slow 4G. The gtag() shim above queues every call into
+	// dataLayer, and GTM drains that queue when it arrives, so deferring the *library* to the
+	// load event loses no events — it only stops it competing with above-the-fold content.
+	const deferredLoader = (src: string) => `
+    (function(){
+      var load = function(){
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = '${src}';
+        document.head.appendChild(s);
+      };
+      if (document.readyState === 'complete') load();
+      else addEventListener('load', load, { once: true });
+    })();
+  `;
 
-			document.head.appendChild(loaderScript)
-			document.head.appendChild(configScript)
-		}
-	})
+	// gtm.start is pushed immediately so GTM still reports correct container timing; only the
+	// container script itself waits for `load`.
+	const gtmScript =
+		isActive && gtmTag
+			? `
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+      ${deferredLoader(`https://www.googletagmanager.com/gtm.js?id=${gtmTag}`)}
+    `
+			: '';
 </script>
 
-<!-- Add noscript fallback iframe for users with JavaScript disabled -->
-{#if googleTagManagerPlugin.isActive && gtagId}
+<svelte:head>
+	{#if isActive}
+		{@html `<script id="gtag-config">${initConfigScript}</script>`}
+
+		{#if primaryGtagId}
+			<!-- Primary Google Tag Library — injected on `load`, see deferredLoader. -->
+			{@html `<script id="gtag-lib">${deferredLoader(`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`)}</script>`}
+		{/if}
+
+		{#if gtmTag}
+			<!-- Google Tag Manager -->
+			{@html `<script id="gtm-script">${gtmScript}</script>`}
+		{/if}
+	{/if}
+</svelte:head>
+
+{#if isActive && gtmTag}
+	<!-- Google Tag Manager (noscript) -->
 	<noscript>
 		<iframe
-			src="https://www.googletagmanager.com/ns.html?id={gtagId}"
+			src={`https://www.googletagmanager.com/ns.html?id=${gtmTag}`}
 			height="0"
 			width="0"
 			style="display:none;visibility:hidden"
