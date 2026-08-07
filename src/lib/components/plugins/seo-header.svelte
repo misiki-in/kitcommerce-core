@@ -13,7 +13,16 @@
 
 	const finalCanonicalUrl = $derived(canonicalUrl || page.url.origin + page.url.pathname);
 	const storeName = $derived(page.data?.store?.name || 'Litekart');
-	const finalTitle = $derived(metaTitle || page.data.store?.name || `${storeName} | Premium E-commerce Shopping`);
+	// CMS-authored titles arrive with stray wrapping quotes. Strip them once here rather than at
+	// each call site.
+	const stripQuotes = (value: unknown) =>
+		String(value ?? '')
+			.trim()
+			.replace(/^["']+|["']+$/g, '')
+			.trim();
+	const finalTitle = $derived(
+		stripQuotes(metaTitle) || page.data.store?.name || `${storeName} | Premium E-commerce Shopping`
+	);
 	const finalDescription = $derived(
 		metaDescription ||
 			parseHTMLToText(page.data?.store?.description) ||

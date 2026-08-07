@@ -51,7 +51,7 @@
 								shippingDetails: {
 									'@type': 'OfferShippingDetails',
 									shippingDestination: {
-										'@type': 'Country',
+										'@type': 'DefinedRegion',
 										name: product?.offers?.shippingDetails?.shippingDestination?.name
 									},
 									shippingRate: {

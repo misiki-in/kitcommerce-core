@@ -16,6 +16,7 @@ export * from './navigator.ts'
 export * from './whatsapp.js'
 export * from './affirm-injector.ts'
 export * from './secure-catalogue.ts'
+export * from './sort.ts'
 // `debounce` is re-exported explicitly further down; only validations was missing.
 export * from './validations.ts'
 

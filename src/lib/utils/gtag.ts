@@ -169,6 +169,15 @@ const getAddressDetails = (pageVal: any) => {
 	return details
 }
 
+// Identity fields that must never reach GA4 as plaintext. Used by the default switch branch,
+// which forwards caller-supplied objects verbatim.
+const PII_KEYS = ['email', 'phone', 'firstName', 'lastName', 'name', 'user_email', 'user_name', 'retailer_email']
+
+const stripPii = (data: any) =>
+	data && typeof data === 'object' && !Array.isArray(data)
+		? Object.fromEntries(Object.entries(data).filter(([k]) => !PII_KEYS.includes(k)))
+		: data
+
 export const fireGTagEvent = async (event_name: string, data: any) => {
 	const checkoutFunnelEvents = ['begin_checkout', 'add_payment_info', 'credit_eligible', 'purchase', 'credit_request']
 	if (typeof window !== 'undefined' && checkoutFunnelEvents.includes(event_name)) {
@@ -195,12 +204,12 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 		const pageVal = page
 		const me = pageVal?.data?.me
 
-		console.log("me", me)
-
 		const addressInfo = getAddressDetails(pageVal)
 
 		let hashedEmail = ''
 		let hashedPhone = ''
+		let hashedFirstName = ''
+		let hashedLastName = ''
 		const email = me?.email || ''
 		const phone = cleanPhone(me?.phone || '')
 
@@ -210,20 +219,33 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 		if (phone) {
 			hashedPhone = await hashVal(phone)
 		}
+		if (me?.firstName) {
+			hashedFirstName = await hashVal(String(me.firstName).trim().toLowerCase())
+		}
+		if (me?.lastName) {
+			hashedLastName = await hashVal(String(me.lastName).trim().toLowerCase())
+		}
 
+		// Identifying fields go out hashed only. GA4's terms prohibit PII in event parameters and
+		// Ads enhanced conversions expects SHA-256, not plaintext, so the plaintext copies were
+		// never buying anything.
+		//
+		// `email` was `hashedEmail || me.email`: hashVal returns '' when crypto.subtle is missing
+		// (insecure origin, older browser), so the fallback fired precisely when hashing failed and
+		// turned that case into a plaintext leak. An empty field is the correct outcome there.
+		// `phone` was always raw and never hashed at all.
+		//
+		// city/state/country/zip stay in the clear — enhanced conversions accepts them unhashed and
+		// they do not identify a person on their own. The street lines are gone; they do.
 		const userPayload = me ? {
-			firstName: me.firstName || '',
-			lastName: me.lastName || '',
 			city: addressInfo.city,
 			state: addressInfo.state,
 			country: addressInfo.country,
 			zip: addressInfo.zip,
-			'address_1': addressInfo.address1,
-			'address_2': addressInfo.address2,
-			email: hashedEmail || me.email || '',
-			phone: phone || '',
 			hashedEmail,
-			hashedPhone
+			hashedPhone,
+			hashedFirstName,
+			hashedLastName
 		} : {}
 
 		const enrichedPayload = {
@@ -348,8 +370,6 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 					affiliation: data.vendorBusinessName || data.vendor?.BusinessName || data.vendor?.business_name,
 					items,
 					user_id: data.user?.id || data.user?._id,
-					user_name: data.user?.name || data.user?.firstName,
-					user_email: data.user?.email,
 					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
 					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
 					vendor_email: data.vendor?.email || data.retailer?.email,
@@ -417,8 +437,6 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 					items,
 					affiliation: data.brand_name,
 					user_id: data.user?.id || data.user?._id,
-					user_name: data.user?.name || data.user?.firstName,
-					user_email: data.user?.email,
 					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
 					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
 					vendor_email: data.vendor?.email || data.retailer?.email,
@@ -438,8 +456,6 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 					shipping: data.shipping?.charge,
 					items,
 					user_id: data.user?.id || data.user?._id,
-					user_name: data.user?.name || data.user?.firstName,
-					user_email: data.user?.email,
 					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
 					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
 					vendor_email: data.vendor?.email || data.retailer?.email,
@@ -468,8 +484,6 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 					coupon: data.coupon?.code,
 					items,
 					user_id: data.user?.id || data.user?._id,
-					user_name: data.user?.name || data.user?.firstName,
-					user_email: data.user?.email,
 					vendor_id: data.vendor?.id || data.vendor?._id || data.retailer?.id,
 					vendor_name: data.vendor?.name || data.vendorBusinessName || data.vendor?.business_name || data.vendor?.BusinessName || data.retailer?.name,
 					vendor_email: data.vendor?.email || data.retailer?.email,
@@ -528,8 +542,12 @@ export const fireGTagEvent = async (event_name: string, data: any) => {
 				break
 
 			default:
+				// Unmapped events pass `data` straight through, and callers do hand it whole
+				// objects — `fireGTagEvent('logout', userState.user)` in use-nav sends the entire
+				// user record. Scrub identity fields here so an unmapped event cannot leak what
+				// the mapped ones are careful about.
 				// @ts-ignore
-				await gtag('event', event_name, data)
+				await gtag('event', event_name, stripPii(data))
 				break
 		}
 	}
