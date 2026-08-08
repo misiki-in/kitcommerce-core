@@ -1,6 +1,6 @@
 {
 	"name": "@misiki/kitcommerce-core",
-	"version": "0.1.35",
+	"version": "0.1.36",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -40,7 +40,8 @@
 		},
 		"./utils": {
 			"types": "./dist/utils/index.d.ts",
-			"svelte": "./dist/utils/index.js"
+			"svelte": "./dist/utils/index.js",
+      "default": "./dist/utils/index.js"
 		},
 		"./logic": {
 			"types": "./dist/logic/index.d.ts",
