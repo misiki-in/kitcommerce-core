@@ -5,21 +5,21 @@ import { cubicOut } from 'svelte/easing'
 import type { TransitionConfig } from 'svelte/transition'
 import { twMerge } from 'tailwind-merge'
 
-export * from './image-cdn.ts'
-export * from './get-store.ts'
-export * from './sanitize.ts'
-export * from './one-time-cart.ts'
-export * from './gtag.ts'
-export * from './time.ts'
-export * from './stripe.ts'
-export * from './navigator.ts'
-export * from './analytics.ts'
+export * from './image-cdn.js'
+export * from './get-store.js'
+export * from './sanitize.js'
+export * from './one-time-cart.js'
+export * from './gtag.js'
+export * from './time.js'
+export * from './stripe.js'
+export * from './navigator.js'
+export * from './analytics.js'
 export * from './whatsapp.js'
-export * from './affirm-injector.ts'
-export * from './secure-catalogue.ts'
-export * from './sort.ts'
+export * from './affirm-injector.js'
+export * from './secure-catalogue.js'
+export * from './sort.js'
 // `debounce` is re-exported explicitly further down; only validations was missing.
-export * from './validations.ts'
+export * from './validations.js'
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs))
@@ -274,7 +274,7 @@ export const wait = (delay: number) => new Promise((res) => {
   setTimeout(res, delay)
 })
 
-export { debounce } from './debounce.ts'
+export { debounce } from './debounce.js'
 
 export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T
 
