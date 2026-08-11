@@ -19,11 +19,14 @@ class UserState {
   lastError = $state<any | null>(null)
 	loading = $state<boolean>(false)
 	hasLoaded: Promise<void>
+	// `connect.sid` is httpOnly, so document.cookie can never see it — gating on it
+	// here renders every signed-in visitor as logged out. The sibling `me` cookie
+	// carries the same claims unsigned, is written alongside connect.sid at every
+	// login site, and is cleared alongside it on logout.
 	retrieveUserId = () => {
 		const cookies = parseCookies(document.cookie)
-		const sid = cookies['connect.sid'] || null
 		const me = JSON.parse(decodeURIComponent(cookies['me'] || '{}'))
-		return { sid, me }
+		return { me }
 	}
 
 	constructor() {
@@ -32,8 +35,8 @@ class UserState {
 				try {
 					this.loading = true
           this.lastError = null
-					const { sid, me } = this.retrieveUserId()
-					if (sid) {
+					const { me } = this.retrieveUserId()
+					if (me?.userId) {
 						this.user = me
 					} else {
 						this.user = null
