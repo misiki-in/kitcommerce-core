@@ -106,7 +106,7 @@ export class PaymentModule {
 	  if (!shippingAddress) return this.allPaymentMethods
 
     if (shippingAddress && shippingAddress.country !== 'USA' && shippingAddress.countryCode !== 'US')
-				return this.allPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY')
+				return this.allPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY' || method?.code?.toUpperCase?.() !== 'AFFIRM_PAY')
 
 				
     return this.allPaymentMethods
@@ -154,8 +154,8 @@ export class PaymentModule {
 					}
 					document.head.appendChild(razorpayScript)
 				}
-				this.affirmPaymentMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'AFFIRMPAY') || null
-				if (this.affirmPaymentMethod) {
+				this.affirmPaymentMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'AFFIRMPAY' || f?.code?.toUpperCase?.() === 'AFFIRM_PAY') || null
+        if (this.affirmPaymentMethod) {
 					if (shippingAddress?.country === 'USA' || shippingAddress?.countryCode === 'US') {
 						injectAffirm(this.affirmPaymentMethod.apiKey, this.affirmPaymentMethod.isTest)
 					}
@@ -260,8 +260,8 @@ export class PaymentModule {
 					this.paymentLoader = false
 				}
 			}
-		} else if (this.getPaymentCode() === 'AFFIRMPAY') {
-			if (typeof affirm === 'undefined' || !affirm) {
+		} else if (this.getPaymentCode() === 'AFFIRMPAY' || this.getPaymentCode() === 'AFFIRM_PAY') {
+      if (typeof affirm === 'undefined' || !affirm) {
 				toast.error('Affirm is not ready yet')
 			} else {
 				try {
@@ -284,9 +284,10 @@ export class PaymentModule {
 
 					try {
 						affirm.checkout(affirmPayOrder)
+						const self = this
 						affirm.checkout.open({
-							onFail: async function (error: any) {
-								this.paymentLoader = false
+							onFail: async (error: any) => {
+								self.paymentLoader = false
 								toast.error('Affirm Payment Failed')
 								await checkoutService.cancelAffirmOrder({
 									orderId: affirmPayOrder?.order_id || '',
@@ -294,17 +295,22 @@ export class PaymentModule {
 									origin: page.url.origin
 								})
 							},
-							onSuccess: async function (success_object: any) {
-								this.paymentLoader = false
-								const res1 = await checkoutService.confirmAffirmOrder({
-									affirmToken: success_object.checkout_token,
-									orderId: affirmPayOrder?.order_id || '',
-									storeId: page.data?.store?.id,
-									origin: page.url.origin,
-									// @ts-ignore - API might require this but TS doesn't know
-									return_url: `${page.url.origin}/checkout/success`
-								})
-								goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
+							onSuccess: async (success_object: any) => {
+								try {
+									const res1 = await checkoutService.confirmAffirmOrder({
+										affirmToken: success_object.checkout_token,
+										orderId: affirmPayOrder?.order_id || '',
+										storeId: page.data?.store?.id,
+										origin: page.url.origin,
+										// @ts-ignore - API might require this but TS doesn't know
+										return_url: `${page.url.origin}/checkout/success`
+									})
+									goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
+								} catch (e: any) {
+									toast.error(e.message || 'Failed to confirm Affirm order')
+								} finally {
+									self.paymentLoader = false
+								}
 							}
 						})
 					} catch (error) {
