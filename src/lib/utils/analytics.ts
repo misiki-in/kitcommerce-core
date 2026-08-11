@@ -28,41 +28,26 @@ const cleanPhone = (phone: string, defaultCountryCode: string = '44'): string =>
 	return digits
 }
 
-const fetchIPs = async () => {
+const fetchIPs = () => {
 	if (typeof window === 'undefined' || ipFetched) return
 	ipFetched = true
-	try {
-		fetch('https://api.ipify.org?format=json')
-			.then((r) => r.json())
-			.then((res) => {
-				cachedIPv4 = res.ip
-			})
-			.catch(() => {})
-
-		fetch('https://api6.ipify.org?format=json')
-			.then((r) => r.json())
-			.then((res) => {
-				cachedIPv6 = res.ip
-			})
-			.catch(() => {
-				fetch('https://api64.ipify.org?format=json')
-					.then((r) => r.json())
-					.then((res) => {
-						if (!cachedIPv4) cachedIPv4 = res.ip
-						cachedIPv6 = res.ip
-					})
-					.catch(() => {})
-			})
-	} catch (e) {
-		/* ignore */
-	}
+	// api64 returns the client's IPv6 when it has one, IPv4 otherwise. Don't call api.ipify /
+	// api6.ipify separately: api6 is IPv6-only, so on an IPv4-only network its DNS never resolves
+	// and it throws ERR_NAME_NOT_RESOLVED on every page load.
+	fetch('https://api64.ipify.org?format=json')
+		.then((r) => r.json())
+		.then((res) => {
+			if (String(res.ip).includes(':')) cachedIPv6 = res.ip
+			else cachedIPv4 = res.ip
+		})
+		.catch(() => {})
 }
 
 if (typeof window !== 'undefined') {
-	// Deferred to idle: these are three third-party round trips that Lighthouse put on the
-	// critical path at ~3.2s. Nothing regresses — events already fire before the fetch resolves
-	// (mergedParams just reads whatever cachedIPv4/v6 hold at send time), so running them at
-	// import time bought accuracy we never had, at the cost of LCP bandwidth.
+	// Deferred to idle: a third-party round trip that Lighthouse put on the critical path at
+	// ~3.2s. Nothing regresses — events already fire before the fetch resolves (mergedParams
+	// just reads whatever cachedIPv4/v6 hold at send time), so running it at import time bought
+	// accuracy we never had, at the cost of LCP bandwidth.
 	const idle = window.requestIdleCallback || ((cb: () => void) => setTimeout(cb, 2000))
 	idle(() => fetchIPs())
 }
