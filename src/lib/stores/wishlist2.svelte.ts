@@ -22,7 +22,9 @@ class WishlistState {
       // Only read the wishlist for authenticated users. A guest has no session, so
       // /wishlists/me returns 422 on every page load (console noise fleet-wide). Gate on
       // the session cookie rather than firing an authenticated request for everyone.
-      if (typeof document !== 'undefined' && document.cookie.includes('connect.sid')) {
+      // `me`, not `connect.sid`: the session cookie is httpOnly and invisible here.
+      // Anchored on a cookie boundary because a bare 'me=' also matches 'theme='.
+      if (typeof document !== 'undefined' && /(^|;)\s*me=[^;]/.test(document.cookie)) {
         this.setState()
       }
     })
