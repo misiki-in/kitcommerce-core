@@ -7,10 +7,11 @@
 
   interface Props {
     code: string
+    open?: boolean
     content: Snippet<[SnippetParams]> 
   }
 
-	let { content, code = $bindable() }: Props = $props()
+	let { content, code = $bindable(), open = $bindable(false) }: Props = $props()
 
 	interface SnippetParams {
 	  coupons: Coupon[]
@@ -55,6 +56,7 @@
 			const c = await cartState?.applyCoupon(code)
 			if (c?.couponCode) {
 				toast.success('Coupon applied successfully')
+				open = false
 			} else {
 				toast.error('Invalid coupon code')
 			}

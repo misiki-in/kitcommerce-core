@@ -237,7 +237,7 @@ export class Cart2State {
 		}
 	}
 
-	async applyCoupon(couponCode: string) {
+	applyCoupon = async (couponCode: string) => {
 		try {
 			this.isUpdatingCart = true
 			const cartId = this.retrieveCartId()
@@ -252,7 +252,7 @@ export class Cart2State {
 		}
 	}
 
-	async removeCoupon() {
+	removeCoupon = async () => {
 		try {
 			this.isUpdatingCart = true
 			const c = await cartService.removeCoupon()
