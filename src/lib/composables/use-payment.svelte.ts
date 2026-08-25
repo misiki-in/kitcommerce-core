@@ -184,45 +184,58 @@ export class PaymentModule {
 		this.cartState?.removeCoupon()
 	}
 
-	placeOrder = async () => {
+		placeOrder = async () => {
 		if (!this.SELECTED_PG_CODE) {
 			toast.error('Please select a payment method')
-			fireGTagEvent('checkout_error', { error_message: 'Please select a payment method', checkout_step: 'payment' })
+			try {
+				fireGTagEvent('checkout_error', { error_message: 'Please select a payment method', checkout_step: 'payment' })
+			} catch (err) {
+				console.warn('Analytics error:', err)
+			}
 			return
 		}
-		if (!this.cartState) return
 
-		fireGTagEvent('add_payment_info', {
-			total: this.cartState.cart.total,
-			shipping: { charge: this.cartState.cart.shippingRate },
-			items: this.cartState.cart.lineItems,
-			retailer: {
-				id: page.data.storeId,
-				name: page.data.store?.name,
-				email: page.data.store?.email
-			}
-		})
+		const origin = typeof window !== 'undefined' ? window.location.origin : (page?.url?.origin || '')
+		const cartId = this.cartState?.cart?.id || (typeof window !== 'undefined' ? localStorage.getItem('cart_id') : '') || ''
+
+		if (!cartId) {
+			toast.error('Cart is missing or empty')
+			return
+		}
+
+		try {
+			fireGTagEvent('add_payment_info', {
+				total: this.cartState?.cart?.total || 0,
+				shipping: { charge: this.cartState?.cart?.shippingRate },
+				items: this.cartState?.cart?.lineItems || [],
+				retailer: {
+					id: page?.data?.storeId || page?.data?.store?.id,
+					name: page?.data?.store?.name,
+					email: page?.data?.store?.email
+				}
+			})
+		} catch (err) {
+			console.warn('Analytics error:', err)
+		}
 
 		this.paymentLoader = true
-		if (this.getPaymentCode() === 'RAZORPAY') {
-			// Razorpay checkout
-			if (!this.razorpayReady) {
-				toast.error('Please wait till payment gateway is ready')
-			} else {
-				try {
+		try {
+			const pgCode = this.getPaymentCode()
+
+			if (pgCode === 'RAZORPAY') {
+				if (!this.razorpayReady) {
+					toast.error('Please wait till payment gateway is ready')
+					this.paymentLoader = false
+				} else {
 					const rp: any = await checkoutService.checkoutRazorpay({
-						cartId: this.cartState.cart.id,
-						origin: page.url.origin
+						cartId,
+						origin
 					})
 					this.order_no = rp?.order_no || ''
 					if (rp && rp !== null) {
-						const cartId = this.cartState.cart.id
 						const options = {
-							key: rp.key_id, // Enter the Key ID generated from the Dashboard
+							key: rp.key_id,
 							description: `Order #${this.order_no}`,
-							// rp.amount is already the order amount in the smallest unit (paise) — the
-							// backend creates the order as totalAmount*100 and it is authoritative via
-							// order_id below. Never apply a hardcoded FX/paise multiplier here.
 							amount: rp.amount,
 							order_id: rp.id,
 							async handler(response: any) {
@@ -234,46 +247,41 @@ export class PaymentModule {
 									goto(`/checkout/process?pg=razorpay&order_no=${capture?.order_no}&cart_id=${cartId}`)
 								} catch (e: any) {
 									toast.error(e.message)
-								} finally {
 								}
 							},
 							prefill: {
-								name: this.cartState.cart?.name || this.cartState.cart?.shippingAddress?.name || page?.data?.store?.businessEmail || '',
-								contact: this.cartState.cart?.phone || this.cartState.cart?.shippingAddress?.phone || page?.data?.store?.businessPhone || '',
-								email: this.cartState.cart?.email || this.cartState.cart?.shippingAddress?.email || ''
+								name: this.cartState?.cart?.name || this.cartState?.cart?.shippingAddress?.name || page?.data?.store?.businessEmail || '',
+								contact: this.cartState?.cart?.phone || this.cartState?.cart?.shippingAddress?.phone || page?.data?.store?.businessPhone || '',
+								email: this.cartState?.cart?.email || this.cartState?.cart?.shippingAddress?.email || ''
 							}
 						}
 
 						if (typeof window.Razorpay === 'undefined') {
 							toast.error('Payment gateway is not ready yet')
+							this.paymentLoader = false
 							return
 						}
 						const rzp1 = new window.Razorpay(options)
 						rzp1.open()
 					} else {
 						toast.error('Something went wrong')
+						this.paymentLoader = false
 					}
-				} catch (e: any) {
-					toast.error(e.message || "Checkout failed")
-					fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Razorpay)', checkout_step: 'payment' })
-				} finally {
-					this.paymentLoader = false
 				}
-			}
-		} else if (this.getPaymentCode() === 'AFFIRMPAY' || this.getPaymentCode() === 'AFFIRM_PAY') {
-      if (typeof affirm === 'undefined' || !affirm) {
-				toast.error('Affirm is not ready yet')
-			} else {
-				try {
+			} else if (pgCode === 'AFFIRMPAY' || pgCode === 'AFFIRM_PAY') {
+				if (typeof affirm === 'undefined' || !affirm) {
+					toast.error('Affirm is not ready yet')
+					this.paymentLoader = false
+				} else {
 					affirm.ui.error.on('close', () => {
 						this.paymentLoader = false
 					})
 
 					const affirmPayOrder: any = await checkoutService.createAffirmPayOrder({
-						cartId: this.cartState.cart.id,
-						addressId: this.cartState.cart.shippingAddressId ?? '',
-						origin: page.url.origin,
-						storeId: page.data.storeId,
+						cartId,
+						addressId: this.cartState?.cart?.shippingAddressId ?? '',
+						origin,
+						storeId: page?.data?.storeId || page?.data?.store?.id,
 						paymentMethodId: 'AffirmPay'
 					})
 
@@ -282,172 +290,124 @@ export class PaymentModule {
 					}
 					affirmPayOrder.currency = 'USD'
 
-					try {
-						affirm.checkout(affirmPayOrder)
-						const self = this
-						affirm.checkout.open({
-							onFail: async (error: any) => {
-								self.paymentLoader = false
-								toast.error('Affirm Payment Failed')
-								await checkoutService.cancelAffirmOrder({
+					affirm.checkout(affirmPayOrder)
+					const self = this
+					affirm.checkout.open({
+						onFail: async (error: any) => {
+							self.paymentLoader = false
+							toast.error('Affirm Payment Failed')
+							await checkoutService.cancelAffirmOrder({
+								orderId: affirmPayOrder?.order_id || '',
+								storeId: page?.data?.storeId || page?.data?.store?.id,
+								origin
+							})
+						},
+						onSuccess: async (success_object: any) => {
+							try {
+								await checkoutService.confirmAffirmOrder({
+									affirmToken: success_object.checkout_token,
 									orderId: affirmPayOrder?.order_id || '',
-									storeId: page.data.storeId,
-									origin: page.url.origin
+									storeId: page?.data?.store?.id,
+									origin,
+									return_url: `${origin}/checkout/success`
 								})
-							},
-							onSuccess: async (success_object: any) => {
-								try {
-									const res1 = await checkoutService.confirmAffirmOrder({
-										affirmToken: success_object.checkout_token,
-										orderId: affirmPayOrder?.order_id || '',
-										storeId: page.data?.store?.id,
-										origin: page.url.origin,
-										// @ts-ignore - API might require this but TS doesn't know
-										return_url: `${page.url.origin}/checkout/success`
-									})
-									goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
-								} catch (e: any) {
-									toast.error(e.message || 'Failed to confirm Affirm order')
-								} finally {
-									self.paymentLoader = false
-								}
+								goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
+							} catch (e: any) {
+								toast.error(e.message || 'Failed to confirm Affirm order')
+							} finally {
+								self.paymentLoader = false
 							}
-						})
-					} catch (error) {
-						console.error('Error initiating Affirm checkout:', error)
-						this.paymentLoader = false
-					}
-				} catch (e: any) {
-					toast.error(e.message || "Checkout failed")
-					fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Affirm)', checkout_step: 'payment' })
-					this.paymentLoader = false
-				} finally {
-					this.cartState?.restorePrevCart()
+						}
+					})
 				}
-			}
-		} else if (this.getPaymentCode() === 'PHONEPE') {
-			// Phonepe checkout
-			try {
+			} else if (pgCode === 'PHONEPE') {
 				const pp: any = await checkoutService.checkoutPhonepe({
-					cartId: this.cartState.cart.id,
-					email: this.cartState.cart.email,
-					phone: this.cartState.cart?.phone || this.cartState.cart?.shippingAddress?.phone || '',
-					origin: page.url.origin
+					cartId,
+					email: this.cartState?.cart?.email,
+					phone: this.cartState?.cart?.phone || this.cartState?.cart?.shippingAddress?.phone || '',
+					origin
 				})
-				if (!pp) {
-					toast.error('Something went wrong')
-					return
-				}
-				const redirectUrl = pp?.redirectUrl
-				if (redirectUrl && redirectUrl !== null) {
-					window.location.href = redirectUrl
+				if (pp?.redirectUrl) {
+					window.location.href = pp.redirectUrl
 				} else {
+					toast.error('Something went wrong with PhonePe')
+					this.paymentLoader = false
 				}
-			} catch (e: any) {
-        toast.error(e?.message || "Checkout failed")
-				console.error('PHONEPE checkout', e)
-				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Phonepe)', checkout_step: 'payment' })
-			} finally {
-				this.paymentLoader = false
-			}
-		} else if (this.getPaymentCode() === 'STRIPE') {
-			try {
-				// Stripe chekout
+			} else if (['STRIPE', 'APPLE_PAY', 'APPLEPAY', 'STRIPE_APPLE_PAY', 'KLARNA', 'AFTERPAY', 'AFTERPAY_CLEARPAY'].includes(pgCode)) {
 				const sp: any = await checkoutService.checkoutStripe({
-					cartId: this.cartState.cart.id,
-					origin: page.url.origin
+					cartId,
+					origin,
+					pg: this.SELECTED_PG_CODE || 'apple_pay'
 				})
-				if (sp.url) {
+				if (sp?.url) {
 					window.location.href = sp.url
 				} else {
-					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
+					toast.error(sp?.message || 'Failed to initiate Stripe / Apple Pay payment')
+					this.paymentLoader = false
 				}
-			} catch (e: any) {
-				toast.error(e.message || "Checkout failed")
-				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Stripe)', checkout_step: 'payment' })
-			} finally {
-				this.paymentLoader = false
-			}
-		} else if (this.getPaymentCode() === 'PAYPAL') {
-			try {
+			} else if (pgCode === 'PAYPAL') {
 				const res: any = await checkoutService.checkoutPaypal({
-					cartId: this.cartState.cart.id,
-					origin: page.url.origin,
-					return_url: `${page.url.origin}/checkout/success`
+					cartId,
+					origin,
+					return_url: `${origin}/checkout/success`
 				})
-				if (res?.redirect_url && res?.redirect_url !== null) {
+				if (res?.redirect_url) {
 					window.location.href = `${res.redirect_url}`
 				} else {
-					toast.error('Something went wrong, please check if order is placed by checking your email or contact support')
+					toast.error('Something went wrong with PayPal')
+					this.paymentLoader = false
 				}
-			} catch (e: any) {
-				toast.error(e.message || 'Checkout Failed')
-				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Paypal)', checkout_step: 'payment' })
-			} finally {
-				this.paymentLoader = false
-			}
-		} else if (this.getPaymentCode() === 'CASHFREE') {
-			try {
+			} else if (pgCode === 'CASHFREE') {
 				await this.loadCashfreeScript()
 				const cf: any = await checkoutService.checkoutCashfree({
-					cartId: this.cartState.cart.id,
-					email: this.cartState.cart.email || this.cartState.cart.shippingAddress?.email || '',
-					origin: page.url.origin
+					cartId,
+					email: this.cartState?.cart?.email || this.cartState?.cart?.shippingAddress?.email || '',
+					origin
 				})
-
 				const cashfreeMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'CASHFREE')
 				const mode = cashfreeMethod?.isTest === false ? 'production' : 'sandbox'
-
 				if (typeof (window as any).Cashfree === 'undefined') {
 					toast.error('Cashfree SDK could not be loaded')
+					this.paymentLoader = false
 					return
 				}
-
 				const cashfree = (window as any).Cashfree({ mode })
-
 				if (cf?.payment_session_id) {
 					let checkoutOptions = {
 						paymentSessionId: cf.payment_session_id,
-						redirectTarget: "_modal",
+						redirectTarget: '_modal'
 					}
 					cashfree.checkout(checkoutOptions).then((result: any) => {
 						if (result.error) {
-							console.error("User has closed the popup or there is some payment error, Check for Payment Status");
-							console.error('cashfree checkout', result.error);
-							toast.error(result.error.message || 'Payment closed or failed');
-						}
-						if (result.redirect) {
-							
+							toast.error(result.error.message || 'Payment closed or failed')
 						}
 						if (result.paymentDetails) {
-							const cartId = this.cartState.cart.id
 							const orderNo = cf.order_no || cf.order_id || ''
 							goto(`/checkout/process?pg=cashfree&order_no=${orderNo}&cart_id=${cartId}`)
 						}
 					})
 				} else {
-					toast.error('Something went wrong, payment session could not be created')
+					toast.error('Payment session could not be created')
+					this.paymentLoader = false
 				}
-			} catch (e: any) {
-				toast.error(e.message || 'Checkout Failed')
-				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (Cashfree)', checkout_step: 'payment' })
-			} finally {
-				this.paymentLoader = false
-			}
-		} else if (this.getPaymentCode() === 'COD') {
-			try {
-				// COD chekout
+			} else if (pgCode === 'COD') {
 				const cp: any = await checkoutService.checkoutCOD({
-					cartId: this.cartState.cart.id,
-					origin: page.url.origin
+					cartId,
+					origin
 				})
-				goto(`/checkout/process?pg=COD&order_no=${cp?.order_no}&cart_id=${this.cartState.cart.id}&store_id=${page.data.storeId}`)
-			} catch (e: any) {
-				toast.error(e.message || "Checkout failed")
-				fireGTagEvent('checkout_error', { error_message: 'Checkout failed (COD)', checkout_step: 'payment' })
-			} finally {
+				const storeIdParam = page?.data?.storeId || page?.data?.store?.id || ''
+				goto(`/checkout/process?pg=COD&order_no=${cp?.order_no}&cart_id=${cartId}&store_id=${storeIdParam}`)
+			} else {
+				toast.error(`Unsupported payment method: ${this.SELECTED_PG_CODE}`)
 				this.paymentLoader = false
 			}
+		} catch (e: any) {
+			console.error('Checkout error:', e)
+			toast.error(e?.message || 'Checkout failed')
+			try {
+				fireGTagEvent('checkout_error', { error_message: e?.message || 'Checkout failed', checkout_step: 'payment' })
+			} catch {}
+			this.paymentLoader = false
 		}
 	}
 
@@ -503,7 +463,7 @@ export class PaymentModule {
     goto(appendOneTimeCartId('/checkout/address?showEditAddress=true'))
   }
 
-  handlePaymentMethodChange = async (code?: string) => {
+	handlePaymentMethodChange = async (code?: string) => {
     this.SELECTED_PG_CODE = code
     if (code) {
       this.cartState.cart.paymentMethod = code
