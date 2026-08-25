@@ -24,3 +24,5 @@ export { default as StorePlugins } from './plugins/store-plugins.svelte'
 export { default as StructuredData } from './plugins/structured-data.svelte'
 export { default as TrustBadges } from './plugins/trust-badges.svelte'
 export { default as TrustpilotPlugin } from './plugins/trustpilot-plugin.svelte'
+
+export { default as StripePaymentElement } from './common/stripe-payment-element.svelte'

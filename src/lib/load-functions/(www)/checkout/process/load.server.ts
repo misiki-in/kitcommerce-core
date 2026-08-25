@@ -12,7 +12,8 @@ export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 		let failed = true;
 		let pg_name = url.searchParams.get('pg');
 		try {
-			if (pg_name?.toUpperCase?.() === 'STRIPE') {
+			const pgUpper = pg_name?.toUpperCase?.() || '';
+			if (['STRIPE', 'APPLE_PAY', 'APPLEPAY', 'STRIPE_APPLE_PAY', 'KLARNA', 'AFTERPAY', 'AFTERPAY_CLEARPAY'].includes(pgUpper)) {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.checkoutStripeCapture({
 					order_no,
