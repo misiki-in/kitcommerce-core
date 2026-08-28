@@ -8,6 +8,8 @@ export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 		const cart_id = url.searchParams.get('cart_id');
 		const order_no = url.searchParams.get('order_no');
 		const storeId = url.searchParams.get('store_id');
+		const token = url.searchParams.get('token');
+		const PayerID = url.searchParams.get('PayerID');
 
 		let failed = true;
 		let pg_name = url.searchParams.get('pg');
@@ -22,17 +24,34 @@ export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 					storeId
 				});
 				
-			} else if (pg_name?.toUpperCase?.() === 'CASHFREE') {
+			} else if (pgUpper === 'CASHFREE') {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.captureCashfreePayment({
 					order_no: order_no || ''
 				});
 				
+			} else if (pgUpper === 'PAYPAL') {
+				const checkoutService = new CheckoutService(fetch);
+				if (typeof (checkoutService as any).capturePaypalPayment === 'function') {
+					await (checkoutService as any).capturePaypalPayment({
+						order_no: order_no || '',
+						token: token || paymentSessionId || '',
+						PayerID: PayerID || '',
+						storeId: storeId || ''
+					});
+				} else {
+					await (checkoutService as any).post('/api/checkout/paypal-capture', {
+						order_no: order_no || '',
+						token: token || paymentSessionId || '',
+						PayerID: PayerID || '',
+						storeId: storeId || ''
+					});
+				}
 			}
 			failed = false;
 		} catch (e) {
 			failed = true;
-			console.error('Payment process', e);
+			console.error('Payment process error:', e);
 		}
 		redirect(
 			307,

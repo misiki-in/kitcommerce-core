@@ -20,6 +20,7 @@ export { load as legalRefundPolicyLoadServer } from "./(legal)/refund-policy/loa
 export { load as legalShippingPolicyLoadServer } from "./(legal)/shipping-policy/load.server.ts"
 export { load as legalTermsLoadServer } from "./(legal)/terms-and-conditions/load.server.ts"
 export { load as legalPrivacyPolicyLoadServer } from "./(legal)/privacy-policy/load.server.ts"
+export { load as legalWarrantyLoadServer } from "./(legal)/warranty/load.server.ts"
 export { load as legalLayoutServer } from "./(legal)/layout.server.ts"
 
 export { getLoadWithContext as myLayoutServer } from "./(my)/layout.server.ts"

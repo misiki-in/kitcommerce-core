@@ -89,3 +89,5 @@ export const VarniCustomDesignService = services.VarniCustomDesignService
 export const varniCustomDesignService = services.varniCustomDesignService
 export const VarniCustomProductService = services.VarniCustomProductService
 export const varniCustomProductService = services.varniCustomProductService
+export const WarrantyService = services.WarrantyService
+export const warrantyService = services.warrantyService
