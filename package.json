@@ -1,6 +1,6 @@
 {
 	"name": "@misiki/kitcommerce-core",
-	"version": "0.1.42",
+	"version": "0.1.43",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
@@ -75,11 +75,11 @@
 	"peerDependencies": {
 		"svelte": "^5.0.0",
 		"@sveltejs/kit": "^2.50.2",
-		"@misiki/litekart-connector": "^2.0.28"
+		"@misiki/litekart-connector": "^2.0.31"
 	},
 	"devDependencies": {
 		"@internationalized/date": "^3.7.0",
-		"@misiki/litekart-connector": "^2.0.28",
+		"@misiki/litekart-connector": "^2.0.31",
 		"@sveltejs/adapter-auto": "^7.0.0",
 		"@sveltejs/package": "^2.5.7",
 		"@sveltejs/vite-plugin-svelte": "^6.2.4",

@@ -86,6 +86,8 @@ export class PaymentModule {
 	payment_sessions = []
 	editAddress = $state(false)
 	razorpayReady = $state(false)
+	affirmReady = $state(false)
+	cashfreeReady = $state(false)
 	order_no = $state('')
 	showError = $state(false)
 	errorMessage = $state('')
@@ -103,13 +105,23 @@ export class PaymentModule {
   allPaymentMethods: PaymentMethod[] = $state([])
   listOfPaymentMethods: PaymentMethod[] = $derived.by(() => {
     const shippingAddress = this.cartState?.cart?.shippingAddress
-	  if (!shippingAddress) return this.allPaymentMethods
+    let methods = this.allPaymentMethods
 
-    if (shippingAddress && shippingAddress.country !== 'USA' && shippingAddress.countryCode !== 'US')
-				return this.allPaymentMethods.filter((method: PaymentMethod) => method?.code?.toUpperCase?.() !== 'AFFIRMPAY' || method?.code?.toUpperCase?.() !== 'AFFIRM_PAY')
+    if (shippingAddress && shippingAddress.country !== 'USA' && shippingAddress.countryCode !== 'US') {
+      methods = methods.filter((method: PaymentMethod) => {
+        const code = method?.code?.toUpperCase?.()
+        return code !== 'AFFIRMPAY' && code !== 'AFFIRM_PAY'
+      })
+    }
 
-				
-    return this.allPaymentMethods
+    // Filter out payment methods whose external SDKs are not ready yet
+    return methods.filter((method: PaymentMethod) => {
+      const code = method?.code?.toUpperCase?.()
+      if (code === 'RAZORPAY') return this.razorpayReady
+      if (code === 'AFFIRMPAY' || code === 'AFFIRM_PAY') return this.affirmReady
+      if (code === 'CASHFREE') return this.cashfreeReady
+      return true
+    })
   })
 
 	constructor() {
@@ -147,18 +159,32 @@ export class PaymentModule {
 					razorpayScript.src = 'https://checkout.razorpay.com/v1/checkout.js'
 					razorpayScript.async = true
 					razorpayScript.onload = () => {
-						// Add a small delay to ensure the script is fully initialized
 						setTimeout(() => {
 							this.razorpayReady = true
-						}, 1000)
+						}, 500)
 					}
 					document.head.appendChild(razorpayScript)
 				}
 				this.affirmPaymentMethod = this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'AFFIRMPAY' || f?.code?.toUpperCase?.() === 'AFFIRM_PAY') || null
         if (this.affirmPaymentMethod) {
-					if (shippingAddress?.country === 'USA' || shippingAddress?.countryCode === 'US') {
+					if (shippingAddress?.country === 'USA' || shippingAddress?.countryCode === 'US' || !shippingAddress) {
 						injectAffirm(this.affirmPaymentMethod.apiKey, this.affirmPaymentMethod.isTest)
+							.then(() => {
+								this.affirmReady = true
+							})
+							.catch(() => {
+								this.affirmReady = false
+							})
 					}
+				}
+				if (this.allPaymentMethods.find((f: PaymentMethod) => f?.code?.toUpperCase?.() === 'CASHFREE')) {
+					this.loadCashfreeScript()
+						.then(() => {
+							this.cashfreeReady = true
+						})
+						.catch(() => {
+							this.cashfreeReady = false
+						})
 				}
 				try {
 					const res: any = await couponService.listCoupons({})
@@ -223,7 +249,7 @@ export class PaymentModule {
 			const pgCode = this.getPaymentCode()
 
 			if (pgCode === 'RAZORPAY') {
-				if (!this.razorpayReady) {
+				if (!this.razorpayReady || typeof window.Razorpay === 'undefined') {
 					toast.error('Please wait till payment gateway is ready')
 					this.paymentLoader = false
 				} else {
@@ -269,57 +295,81 @@ export class PaymentModule {
 					}
 				}
 			} else if (pgCode === 'AFFIRMPAY' || pgCode === 'AFFIRM_PAY') {
-				if (typeof affirm === 'undefined' || !affirm) {
-					toast.error('Affirm is not ready yet')
-					this.paymentLoader = false
-				} else {
-					affirm.ui.error.on('close', () => {
-						this.paymentLoader = false
-					})
+				let affirmObj = typeof window !== 'undefined' ? (window as any).affirm : (typeof affirm !== 'undefined' ? affirm : null)
 
-					const affirmPayOrder: any = await checkoutService.createAffirmPayOrder({
-						cartId,
-						addressId: this.cartState?.cart?.shippingAddressId ?? '',
-						origin,
-						storeId: page?.data?.storeId || page?.data?.store?.id,
-						paymentMethodId: 'AffirmPay'
-					})
-
+				// If Affirm SDK is not yet initialized or ready, attempt to load and initialize it on the fly
+				if (!affirmObj || typeof affirmObj.checkout !== 'function') {
 					if (this.affirmPaymentMethod?.apiKey) {
-						affirmPayOrder.merchant.public_api_key = this.affirmPaymentMethod.apiKey
-					}
-					affirmPayOrder.currency = 'USD'
-
-					affirm.checkout(affirmPayOrder)
-					const self = this
-					affirm.checkout.open({
-						onFail: async (error: any) => {
-							self.paymentLoader = false
-							toast.error('Affirm Payment Failed')
-							await checkoutService.cancelAffirmOrder({
-								orderId: affirmPayOrder?.order_id || '',
-								storeId: page?.data?.storeId || page?.data?.store?.id,
-								origin
-							})
-						},
-						onSuccess: async (success_object: any) => {
-							try {
-								await checkoutService.confirmAffirmOrder({
-									affirmToken: success_object.checkout_token,
-									orderId: affirmPayOrder?.order_id || '',
-									storeId: page?.data?.store?.id,
-									origin,
-									return_url: `${origin}/checkout/success`
-								})
-								goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
-							} catch (e: any) {
-								toast.error(e.message || 'Failed to confirm Affirm order')
-							} finally {
-								self.paymentLoader = false
-							}
+						try {
+							await injectAffirm(this.affirmPaymentMethod.apiKey, this.affirmPaymentMethod.isTest)
+							this.affirmReady = true
+							affirmObj = typeof window !== 'undefined' ? (window as any).affirm : (typeof affirm !== 'undefined' ? affirm : null)
+						} catch (err) {
+							console.warn('Failed to dynamically inject Affirm script:', err)
 						}
-					})
+					}
 				}
+
+				if (!affirmObj || typeof affirmObj.checkout !== 'function') {
+					toast.error('Affirm is not ready yet, please try reloading the page.')
+					this.paymentLoader = false
+					return
+				}
+
+				if (affirmObj.ui?.error?.on && typeof affirmObj.ui.error.on === 'function') {
+					try {
+						affirmObj.ui.error.on('close', () => {
+							this.paymentLoader = false
+						})
+					} catch (err) {
+						console.warn('Could not attach Affirm error close listener:', err)
+					}
+				}
+
+				const affirmPayOrder: any = await checkoutService.createAffirmPayOrder({
+					cartId,
+					addressId: this.cartState?.cart?.shippingAddressId ?? '',
+					origin,
+					storeId: page?.data?.storeId || page?.data?.store?.id,
+					paymentMethodId: 'AffirmPay'
+				})
+
+				if (this.affirmPaymentMethod?.apiKey && affirmPayOrder?.merchant) {
+					affirmPayOrder.merchant.public_api_key = this.affirmPaymentMethod.apiKey
+				}
+				if (affirmPayOrder) {
+					affirmPayOrder.currency = 'USD'
+				}
+
+				affirmObj.checkout(affirmPayOrder)
+				const self = this
+				affirmObj.checkout.open({
+					onFail: async (error: any) => {
+						self.paymentLoader = false
+						toast.error('Affirm Payment Failed')
+						await checkoutService.cancelAffirmOrder({
+							orderId: affirmPayOrder?.order_id || '',
+							storeId: page?.data?.storeId || page?.data?.store?.id,
+							origin
+						})
+					},
+					onSuccess: async (success_object: any) => {
+						try {
+							await checkoutService.confirmAffirmOrder({
+								affirmToken: success_object?.checkout_token,
+								orderId: affirmPayOrder?.order_id || '',
+								storeId: page?.data?.store?.id,
+								origin,
+								return_url: `${origin}/checkout/success`
+							})
+							goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
+						} catch (e: any) {
+							toast.error(e.message || 'Failed to confirm Affirm order')
+						} finally {
+							self.paymentLoader = false
+						}
+					}
+				})
 			} else if (pgCode === 'PHONEPE') {
 				const pp: any = await checkoutService.checkoutPhonepe({
 					cartId,
@@ -411,7 +461,7 @@ export class PaymentModule {
 		}
 	}
 
-  private async loadCashfreeScript(): Promise<void> {
+  loadCashfreeScript = async (): Promise<void> => {
     if (typeof window !== 'undefined' && (window as any).Cashfree) {
       return
     }
