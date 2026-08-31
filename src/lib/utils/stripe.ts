@@ -1,14 +1,19 @@
 /**
  * This is a singleton to ensure we only instantiate Stripe once.
  */
-import { env } from '$env/dynamic/public'
 import { loadStripe } from '@stripe/stripe-js'
 
-let stripePromise
+let stripePromiseMap: Record<string, Promise<any>> = {}
 
-const getStripe = () => {
-	stripePromise = loadStripe(env.STRIPE_PUBLISHABLE_KEY)
-	return stripePromise
+export const getStripe = (publishableKey?: string) => {
+	const key = publishableKey
+	if (!key) return null
+
+	if (!stripePromiseMap[key]) {
+		stripePromiseMap[key] = loadStripe(key)
+	}
+	return stripePromiseMap[key]
 }
 
 export default getStripe
+
