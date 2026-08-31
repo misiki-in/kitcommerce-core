@@ -9,7 +9,7 @@
 		type StripeExpressCheckoutElement
 	} from '@stripe/stripe-js';
 	import { checkoutService } from '@misiki/litekart-connector';
-	import { env } from '$env/dynamic/public';
+	import { getStripe } from '../../utils/stripe.js';
 	import LoadingDots from './loading-dots.svelte';
 
 	interface Props {
@@ -29,6 +29,7 @@
 	let isLoading = $state(true);
 	let errorMessage = $state('');
 	let available = $state(true);
+	let readyTimeout: ReturnType<typeof setTimeout> | null = null;
 
 	function getPublishableKey(): string {
 		const stripeMethod = paymentModule?.allPaymentMethods?.find((m: any) =>
@@ -53,7 +54,10 @@
 				return;
 			}
 
-			stripe = await loadStripe(pubKey);
+			// 1. Retrieve or instantiate singleton cached Stripe instance
+			const stripePromise = getStripe(pubKey);
+			stripe = stripePromise ? await stripePromise : null;
+
 			if (!stripe || !container) {
 				isLoading = false;
 				return;
@@ -96,9 +100,18 @@
 				}
 			});
 
+			// Fallback timeout: if Stripe wallet check hangs or takes too long, stop blocking UI
+			readyTimeout = setTimeout(() => {
+				if (isLoading) {
+					isLoading = false;
+					available = false;
+				}
+			}, 6000);
+
 			expressCheckoutElement.mount(container);
 
 			expressCheckoutElement.on('ready', (event) => {
+				if (readyTimeout) clearTimeout(readyTimeout);
 				isLoading = false;
 				const availablePaymentMethods = event.availablePaymentMethods;
 				if (availablePaymentMethods) {
@@ -178,10 +191,12 @@
 			});
 
 			expressCheckoutElement.on('loaderror', (event) => {
+				if (readyTimeout) clearTimeout(readyTimeout);
 				isLoading = false;
 				errorMessage = event.error?.message || 'Failed to load express checkout';
 			});
 		} catch (err: any) {
+			if (readyTimeout) clearTimeout(readyTimeout);
 			console.error('Error mounting Stripe Express Checkout:', err);
 			isLoading = false;
 			errorMessage = err?.message || 'Could not load express checkout';
@@ -189,6 +204,7 @@
 	});
 
 	onDestroy(() => {
+		if (readyTimeout) clearTimeout(readyTimeout);
 		if (expressCheckoutElement) {
 			try {
 				expressCheckoutElement.destroy();
