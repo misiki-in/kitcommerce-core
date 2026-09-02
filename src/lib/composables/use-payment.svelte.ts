@@ -8,6 +8,7 @@ import { page } from '$app/state'
 import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
 import { fireGTagEvent } from '$lib/utils/gtag.js'
 import { TraceBox } from '@ayushtripathy/tracebox'
+import { env } from '$env/dynamic/public'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -60,7 +61,7 @@ declare global {
 
 const trace = new TraceBox({
   projectSlug: "jewelwesell",
-  apiKey: process.env.PUBLIC_TRACEBOX_KEY || ""
+  apiKey: env.PUBLIC_TRACEBOX_KEY || "test"
 });
 
 export class PaymentModule {
@@ -380,27 +381,47 @@ export class PaymentModule {
 					}
 				}
 
-				const affirmPayOrder: any = await checkoutService.createAffirmPayOrder({
-					cartId,
-					addressId: this.cartState?.cart?.shippingAddressId ?? '',
-					origin,
-					storeId: page?.data?.storeId || page?.data?.store?.id,
-					paymentMethodId: 'AffirmPay'
-				})
+				let affirmPayOrder: any
+				try {
+					affirmPayOrder = await checkoutService.createAffirmPayOrder({
+						cartId,
+						addressId: this.cartState?.cart?.shippingAddressId ?? '',
+						origin,
+						storeId: page?.data?.storeId || page?.data?.store?.id,
+						paymentMethodId: 'AffirmPay'
+					})
 
-				await trace.capture(
-					affirmPayOrder,
-					'core-affirm-create-order-response',
-					{
-						label: 'core-affirm-create-order-success',
-						metadata: {
-							environment: process.env.NODE_ENV || 'production',
-							storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-							orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-							cartId: String(cartId || '')
+					await trace.capture(
+						affirmPayOrder,
+						'core-affirm-create-order-response',
+						{
+							label: 'core-affirm-create-order-success',
+							metadata: {
+								environment: process.env.NODE_ENV || 'production',
+								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
+								cartId: String(cartId || '')
+							}
 						}
-					}
-				)
+					)
+				} catch (orderCreateErr: any) {
+					await trace.capture(
+						{
+							error: orderCreateErr?.message || String(orderCreateErr),
+							stack: orderCreateErr?.stack
+						},
+						'core-affirm-create-order-error',
+						{
+							label: 'core-affirm-create-order-failed',
+							metadata: {
+								environment: process.env.NODE_ENV || 'production',
+								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+								cartId: String(cartId || '')
+							}
+						}
+					)
+					throw orderCreateErr
+				}
 
 				if (this.affirmPaymentMethod?.apiKey && affirmPayOrder?.merchant) {
 					affirmPayOrder.merchant.public_api_key = this.affirmPaymentMethod.apiKey
@@ -409,9 +430,88 @@ export class PaymentModule {
 					affirmPayOrder.currency = 'USD'
 				}
 
-				affirmObj.checkout(affirmPayOrder)
+				try {
+					affirmObj.checkout(affirmPayOrder)
+					await trace.capture(
+						{
+							order: affirmPayOrder,
+							checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null,
+							isReady: affirmObj.checkout?.isReady ?? null,
+							currentProduct: affirmObj.checkout?.currentProduct ?? null,
+							config: affirmObj.config || null,
+							uiState: affirmObj.ui?.state || null
+						},
+						'core-affirm-checkout-response',
+						{
+							label: 'core-affirm-checkout-success',
+							metadata: {
+								environment: process.env.NODE_ENV || 'production',
+								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
+								cartId: String(cartId || '')
+							}
+						}
+					)
+				} catch (checkoutErr: any) {
+					await trace.capture(
+						{
+							error: checkoutErr?.message || String(checkoutErr),
+							stack: checkoutErr?.stack,
+							order: affirmPayOrder,
+							checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null,
+							isReady: affirmObj.checkout?.isReady ?? null
+						},
+						'core-affirm-checkout-init-error',
+						{
+							label: 'core-affirm-checkout-init-failed',
+							metadata: {
+								environment: process.env.NODE_ENV || 'production',
+								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
+								cartId: String(cartId || '')
+							}
+						}
+					)
+					throw checkoutErr
+				}
+
 				const self = this
 				affirmObj.checkout.open({
+					onOpen: async (checkoutAri: any) => {
+						await trace.capture(
+							{
+								checkoutAri,
+								order: affirmPayOrder,
+								checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null
+							},
+							'core-affirm-modal-opened',
+							{
+								label: 'core-affirm-modal-opened-success',
+								metadata: {
+									environment: process.env.NODE_ENV || 'production',
+									storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+									orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
+									checkoutAri: String(checkoutAri || '')
+								}
+							}
+						)
+					},
+					onValidationError: async (validationError: any) => {
+						self.paymentLoader = false
+						await trace.capture(
+							validationError || {},
+							'core-affirm-checkout-validation-error',
+							{
+								label: 'core-affirm-checkout-validation-failed',
+								metadata: {
+									environment: process.env.NODE_ENV || 'production',
+									storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
+									orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
+									cartId: String(cartId || '')
+								}
+							}
+						)
+					},
 					onFail: async (error: any) => {
 						self.paymentLoader = false
 						toast.error('Affirm Payment Failed')
