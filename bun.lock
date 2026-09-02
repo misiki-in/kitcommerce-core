@@ -5,6 +5,7 @@
     "": {
       "name": "core",
       "dependencies": {
+        "@ayushtripathy/tracebox": "^0.0.3",
         "@stripe/stripe-js": "^9.0.0",
         "bits-ui": "^2.16.3",
         "clsx": "^2.1.1",
@@ -18,7 +19,7 @@
       },
       "devDependencies": {
         "@internationalized/date": "^3.7.0",
-        "@misiki/litekart-connector": "^2.0.28",
+        "@misiki/litekart-connector": "^2.0.31",
         "@sveltejs/adapter-auto": "^7.0.0",
         "@sveltejs/package": "^2.5.7",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
@@ -37,7 +38,7 @@
         "vite": "^7.3.1",
       },
       "peerDependencies": {
-        "@misiki/litekart-connector": "^2.0.28",
+        "@misiki/litekart-connector": "^2.0.31",
         "@sveltejs/kit": "^2.50.2",
         "svelte": "^5.0.0",
       },
@@ -51,6 +52,8 @@
     "@asamuzakjp/generational-cache": ["@asamuzakjp/generational-cache@1.0.1", "", {}, "sha512-wajfB8KqzMCN2KGNFdLkReeHncd0AslUSrvHVvvYWuU8ghncRJoA50kT3zP9MVL0+9g4/67H+cdvBskj9THPzg=="],
 
     "@asamuzakjp/nwsapi": ["@asamuzakjp/nwsapi@2.3.9", "", {}, "sha512-n8GuYSrI9bF7FFZ/SjhwevlHc8xaVlb/7HmHelnc/PZXBD2ZR49NnN9sMMuDdEGPeeRQ5d0hqlSlEpgCX3Wl0Q=="],
+
+    "@ayushtripathy/tracebox": ["@ayushtripathy/tracebox@0.0.3", "", {}, "sha512-BVDDOJIgavhbbj2aLnDxouZ3/zJugmernWwOvUhS6QLTek3sdAfyWHDxb6Dfhg6a0cUsUCiixM2syjKhUELITg=="],
 
     "@bramus/specificity": ["@bramus/specificity@2.4.2", "", { "dependencies": { "css-tree": "^3.0.0" }, "bin": { "specificity": "bin/cli.js" } }, "sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw=="],
 
@@ -140,7 +143,7 @@
 
     "@jridgewell/trace-mapping": ["@jridgewell/trace-mapping@0.3.31", "", { "dependencies": { "@jridgewell/resolve-uri": "^3.1.0", "@jridgewell/sourcemap-codec": "^1.4.14" } }, "sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw=="],
 
-    "@misiki/litekart-connector": ["@misiki/litekart-connector@2.0.29", "", {}, "sha512-ADY5L+hvWpZndbMb5G8rkly25hA5/oCawh+V+EeoViqeAH2sgfhFh21AYjwuC4HG8M01vji3JtJu7OVE2Shr4g=="],
+    "@misiki/litekart-connector": ["@misiki/litekart-connector@2.0.31", "", {}, "sha512-YTsnt5cJKPVBUKHW9AV49zCtxS4N1Pn1HKr1YF/dPNtg37ctux4cVDO56yVe6v7n4XEgxjOSl6UgsUIQd0X7+w=="],
 
     "@polka/url": ["@polka/url@1.0.0-next.29", "", {}, "sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww=="],
 
