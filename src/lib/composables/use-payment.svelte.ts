@@ -7,8 +7,6 @@ import { browser } from '$app/environment'
 import { page } from '$app/state'
 import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
 import { fireGTagEvent } from '$lib/utils/gtag.js'
-import { TraceBox } from '@ayushtripathy/tracebox'
-import { env } from '$env/dynamic/public'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -58,11 +56,6 @@ declare global {
 	const affirm: any
 	const Cashfree: any
 }
-
-const trace = new TraceBox({
-  projectSlug: "jewelwesell",
-  apiKey: env.PUBLIC_TRACEBOX_KEY || "test"
-});
 
 export class PaymentModule {
   static _instance: PaymentModule
@@ -311,49 +304,13 @@ export class PaymentModule {
 							await injectAffirm(this.affirmPaymentMethod.apiKey, this.affirmPaymentMethod.isTest)
 							this.affirmReady = true
 							affirmObj = typeof window !== 'undefined' ? (window as any).affirm : (typeof affirm !== 'undefined' ? affirm : null)
-							await trace.capture(
-								{ isTest: this.affirmPaymentMethod?.isTest },
-								'core-affirm-dynamic-inject-success',
-								{
-									label: 'core-affirm-dynamic-injected',
-									metadata: {
-										environment: process.env.NODE_ENV || 'production',
-										storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-										cartId: String(cartId || '')
-									}
-								}
-							)
 						} catch (err: any) {
 							console.warn('Failed to dynamically inject Affirm script:', err)
-							await trace.capture(
-								{ error: err?.message || String(err) },
-								'core-affirm-dynamic-inject-error',
-								{
-									label: 'core-affirm-dynamic-inject-failed',
-									metadata: {
-										environment: process.env.NODE_ENV || 'production',
-										storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-										cartId: String(cartId || '')
-									}
-								}
-							)
 						}
 					}
 				}
 
 				if (!affirmObj || typeof affirmObj.checkout !== 'function') {
-					await trace.capture(
-						{ affirmReady: this.affirmReady, hasAffirmObj: !!affirmObj },
-						'core-affirm-not-ready',
-						{
-							label: 'core-affirm-not-ready',
-							metadata: {
-								environment: process.env.NODE_ENV || 'production',
-								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-								cartId: String(cartId || '')
-							}
-						}
-					)
 					toast.error('Affirm is not ready yet, please try reloading the page.')
 					this.paymentLoader = false
 					return
@@ -363,18 +320,6 @@ export class PaymentModule {
 					try {
 						affirmObj.ui.error.on('close', async () => {
 							this.paymentLoader = false
-							await trace.capture(
-								{},
-								'core-affirm-modal-error-closed',
-								{
-									label: 'core-affirm-ui-error-close',
-									metadata: {
-										environment: process.env.NODE_ENV || 'production',
-										storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-										cartId: String(cartId || '')
-									}
-								}
-							)
 						})
 					} catch (err) {
 						console.warn('Could not attach Affirm error close listener:', err)
@@ -391,35 +336,7 @@ export class PaymentModule {
 						paymentMethodId: 'AffirmPay'
 					})
 
-					await trace.capture(
-						affirmPayOrder,
-						'core-affirm-create-order-response',
-						{
-							label: 'core-affirm-create-order-success',
-							metadata: {
-								environment: process.env.NODE_ENV || 'production',
-								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-								cartId: String(cartId || '')
-							}
-						}
-					)
 				} catch (orderCreateErr: any) {
-					await trace.capture(
-						{
-							error: orderCreateErr?.message || String(orderCreateErr),
-							stack: orderCreateErr?.stack
-						},
-						'core-affirm-create-order-error',
-						{
-							label: 'core-affirm-create-order-failed',
-							metadata: {
-								environment: process.env.NODE_ENV || 'production',
-								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-								cartId: String(cartId || '')
-							}
-						}
-					)
 					throw orderCreateErr
 				}
 
@@ -432,102 +349,26 @@ export class PaymentModule {
 
 				try {
 					affirmObj.checkout(affirmPayOrder)
-					await trace.capture(
-						{
-							order: affirmPayOrder,
-							checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null,
-							isReady: affirmObj.checkout?.isReady ?? null,
-							currentProduct: affirmObj.checkout?.currentProduct ?? null,
-							config: affirmObj.config || null,
-							uiState: affirmObj.ui?.state || null
-						},
-						'core-affirm-checkout-response',
-						{
-							label: 'core-affirm-checkout-success',
-							metadata: {
-								environment: process.env.NODE_ENV || 'production',
-								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-								cartId: String(cartId || '')
-							}
-						}
-					)
 				} catch (checkoutErr: any) {
-					await trace.capture(
-						{
-							error: checkoutErr?.message || String(checkoutErr),
-							stack: checkoutErr?.stack,
-							order: affirmPayOrder,
-							checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null,
-							isReady: affirmObj.checkout?.isReady ?? null
-						},
-						'core-affirm-checkout-init-error',
-						{
-							label: 'core-affirm-checkout-init-failed',
-							metadata: {
-								environment: process.env.NODE_ENV || 'production',
-								storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-								orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-								cartId: String(cartId || '')
-							}
-						}
-					)
 					throw checkoutErr
 				}
 
 				const self = this
 				affirmObj.checkout.open({
-					onOpen: async (checkoutAri: any) => {
-						await trace.capture(
-							{
-								checkoutAri,
-								order: affirmPayOrder,
-								checkoutData: affirmObj.checkout?.data || affirmObj.checkout?._data || null
-							},
-							'core-affirm-modal-opened',
-							{
-								label: 'core-affirm-modal-opened-success',
-								metadata: {
-									environment: process.env.NODE_ENV || 'production',
-									storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-									orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-									checkoutAri: String(checkoutAri || '')
-								}
-							}
-						)
-					},
+					// onOpen: async (checkoutAri: any) => {},
 					onValidationError: async (validationError: any) => {
 						self.paymentLoader = false
-						await trace.capture(
-							validationError || {},
-							'core-affirm-checkout-validation-error',
-							{
-								label: 'core-affirm-checkout-validation-failed',
-								metadata: {
-									environment: process.env.NODE_ENV || 'production',
-									storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-									orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-									cartId: String(cartId || '')
-								}
-							}
-						)
+            if (validationError.code === 'missing_fields') {
+              toast.error('Please fill all the required fields.')
+            } else if (validationError.code === 'invalid_field') {
+              toast.error(validationError?.message || 'Invalid data entered.')
+            } else {
+              toast.error(validationError?.message || 'Affirm Payment Validation Failed')
+            }
 					},
-					onFail: async (error: any) => {
+					onFail: async () => {
 						self.paymentLoader = false
 						toast.error('Affirm Payment Failed')
-						await trace.capture(
-							error || {},
-							'core-affirm-checkout-onfail',
-							{
-								label: 'core-affirm-checkout-failed',
-								metadata: {
-									environment: process.env.NODE_ENV || 'production',
-									storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-									orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-									cartId: String(cartId || '')
-								}
-							}
-						)
 						await checkoutService.cancelAffirmOrder({
 							orderId: affirmPayOrder?.order_id || '',
 							storeId: page?.data?.storeId || page?.data?.store?.id,
@@ -544,36 +385,8 @@ export class PaymentModule {
 								return_url: `${origin}/checkout/success`
 							})
 
-							await trace.capture(
-								response1,
-								"core-affirm-api-charge-response",
-								{
-									label: "core-affirm-charge-success",
-									metadata: {
-										environment: process.env.NODE_ENV || "production",
-										storeId: String(page?.data?.storeId || page?.data?.store?.id || ""),
-										orderId: String(affirmPayOrder?.order_id || ""),
-										affirmTransactionId: String(response1?.data?.id || ""),
-                    successObject: success_object
-									}
-								}
-							)
-
 							goto(`/checkout/success?order_no=${affirmPayOrder?.order_id || ''}&status=PAYMENT_SUCCESS&provider=AffirmPay`)
 						} catch (e: any) {
-							await trace.capture(
-								{ error: e?.message || String(e), stack: e?.stack, successObject: success_object },
-								'core-affirm-api-charge-error',
-								{
-									label: 'core-affirm-charge-failed',
-									metadata: {
-										environment: process.env.NODE_ENV || 'production',
-										storeId: String(page?.data?.storeId || page?.data?.store?.id || ''),
-										orderId: String(affirmPayOrder?.order_id || affirmPayOrder?.id || ''),
-										affirmToken: String(success_object?.checkout_token || '')
-									}
-								}
-							)
 							toast.error(e.message || 'Failed to confirm Affirm order')
 						} finally {
 							self.paymentLoader = false
