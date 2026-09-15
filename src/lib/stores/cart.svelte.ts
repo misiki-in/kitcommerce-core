@@ -104,21 +104,55 @@ export class Cart2State {
 			onMount(async () => {
 				try {
 					this.isUpdatingCart = true
-					this.resetSingleItemCheckoutSession()
-					const cartId = this.retrieveCartId()
-					if (cartId) {
-						// This single fetch is the ONLY thing that restores the bag after a full
-						// page load; a silently-swallowed transient failure used to render as an
-						// empty cart. Retry once, and log instead of hiding a persistent failure.
+					let searchParams: URLSearchParams | null = null
+					if (typeof window !== 'undefined' && window.location?.search) {
+						searchParams = new URLSearchParams(window.location.search)
+					}
+					const productsParam = searchParams?.get('products')
+					const couponParam = searchParams?.get('coupon') || searchParams?.get('couponCode')
+					const productsJsonParam = searchParams?.get('products_json')
+
+					if (productsParam) {
+						const currentCartId = this.retrieveCartId()
+						const isExistingCheckoutSession = sessionStorage.getItem('is_checkout_url_session') === 'true'
+						if (currentCartId && !isExistingCheckoutSession) {
+							localStorage.setItem('prev_cart_id', currentCartId)
+						}
+						sessionStorage.setItem('is_checkout_url_session', 'true')
 						try {
-							const c = await cartService.getCartByCartId(cartId)
-							if (!c.hasOwnProperty('message')) this.cart = c
-						} catch (e) {
+							const newCart = await this.createCartFromCheckoutUrl({
+								products: productsParam,
+								coupon: couponParam || undefined,
+								products_json: productsJsonParam || undefined,
+							})
+							if (newCart && newCart.id) {
+								localStorage.setItem('cart_id', newCart.id)
+								sessionStorage.setItem('checkout_url_cart_id', newCart.id)
+								this.cart = newCart
+							}
+						} catch (err) {
+							console.error('Failed to create cart from checkout URL:', err)
+						}
+					} else {
+						const prevCartId = localStorage.getItem('prev_cart_id')
+						const isCheckoutSession = sessionStorage.getItem('is_checkout_url_session') === 'true'
+						if (prevCartId && !isCheckoutSession) {
+							localStorage.setItem('cart_id', prevCartId)
+							localStorage.removeItem('prev_cart_id')
+						}
+						this.resetSingleItemCheckoutSession()
+						const cartId = this.retrieveCartId()
+						if (cartId) {
 							try {
 								const c = await cartService.getCartByCartId(cartId)
 								if (!c.hasOwnProperty('message')) this.cart = c
-							} catch (e2) {
-								console.error('Cart hydration failed; bag may display empty:', e2)
+							} catch (e) {
+								try {
+									const c = await cartService.getCartByCartId(cartId)
+									if (!c.hasOwnProperty('message')) this.cart = c
+								} catch (e2) {
+									console.error('Cart hydration failed; bag may display empty:', e2)
+								}
 							}
 						}
 					}
@@ -126,8 +160,8 @@ export class Cart2State {
 				} catch (e) {
 					rej()
 				} finally {
+					this.isUpdatingCart = false
 				}
-				this.isUpdatingCart = false
 			})
 		})
 	}
@@ -404,6 +438,46 @@ export class Cart2State {
 			toast.error(error instanceof Error ? error.message : 'Error restoring cart')
 		} finally {
 			this.isUpdatingCart = false
+		}
+	}
+
+
+	async createCartFromCheckoutUrl(params: { products: string; coupon?: string; products_json?: string }) {
+		try {
+			this.isUpdatingCart = true
+			const response = await fetch('/api/carts/from-checkout-url', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(params),
+			})
+			if (!response.ok) {
+				const errData = await response.json().catch(() => ({}))
+				throw new Error(errData?.message || 'Failed to create cart from checkout URL')
+			}
+			const cart = await response.json()
+			return cart
+		} catch (error: unknown) {
+			console.error('CartState ~ createCartFromCheckoutUrl:', error)
+			toast.error(error instanceof Error ? error.message : 'Error initializing checkout cart')
+			throw error
+		} finally {
+			this.isUpdatingCart = false
+		}
+	}
+
+	async endCheckoutUrlSession() {
+		try {
+			sessionStorage.removeItem('is_checkout_url_session')
+			sessionStorage.removeItem('checkout_url_cart_id')
+			const prev_cart_id = localStorage.getItem('prev_cart_id')
+			if (prev_cart_id) {
+				localStorage.setItem('cart_id', prev_cart_id)
+				localStorage.removeItem('prev_cart_id')
+			} else {
+				localStorage.removeItem('cart_id')
+			}
+		} catch (error: unknown) {
+			console.error('CartState ~ endCheckoutUrlSession:', error)
 		}
 	}
 
