@@ -2,7 +2,8 @@ import { page } from '$app/state'
 
 declare global {
 	interface Window {
-		gtag: (...args: any[]) => void
+		gtag?: (...args: any[]) => void
+		fbq?: (...args: any[]) => void
 	}
 }
 
@@ -319,6 +320,64 @@ async function track(name: string, params: AnyRec = {}): Promise<void> {
 		}
 	} catch {
 		/* never let analytics break the app */
+	}
+
+	try {
+		if (typeof win.fbq === 'function') {
+			const fbEventMap: Record<string, string> = {
+				view_item: 'ViewContent',
+				add_to_cart: 'AddToCart',
+				view_item_list: 'ViewCategory',
+				begin_checkout: 'InitiateCheckout',
+				add_payment_info: 'AddPaymentInfo',
+				purchase: 'Purchase',
+				search: 'Search'
+			}
+
+			const standardFbEvents = new Set([
+				'AddPaymentInfo',
+				'AddToCart',
+				'AddToWishlist',
+				'CompleteRegistration',
+				'Contact',
+				'CustomizeProduct',
+				'Donate',
+				'FindLocation',
+				'InitiateCheckout',
+				'Lead',
+				'Purchase',
+				'Schedule',
+				'Search',
+				'StartTrial',
+				'SubmitApplication',
+				'Subscribe',
+				'ViewContent',
+				'PageView'
+			])
+
+			const fbEvent = fbEventMap[name] || name
+			const contentIds = Array.isArray(params.items)
+				? params.items.map((i: any) => i.sku || i.item_id || i.id).filter(Boolean)
+				: []
+			const numItems = Array.isArray(params.items)
+				? params.items.reduce((acc: number, i: any) => acc + (Number(i.quantity) || 1), 0)
+				: undefined
+
+			const fbData: AnyRec = {
+				...mergedParams,
+				...(contentIds.length ? { content_ids: contentIds, content_type: 'product' } : {}),
+				...(numItems !== undefined ? { num_items: numItems } : {}),
+				...(params.search_term ? { search_string: params.search_term } : {})
+			}
+
+			if (standardFbEvents.has(fbEvent)) {
+				win.fbq('track', fbEvent, fbData)
+			} else {
+				win.fbq('trackCustom', fbEvent, fbData)
+			}
+		}
+	} catch {
+		/* never let fbq break the app */
 	}
 }
 
