@@ -159,6 +159,11 @@ const getAddressDetails = (pageVal: any) => {
 	return details
 }
 
+export interface TrackOptions {
+	googleOnly?: boolean
+	fbOnly?: boolean
+}
+
 const checkoutFunnelEvents = [
 	'begin_checkout',
 	'add_payment_info',
@@ -167,8 +172,18 @@ const checkoutFunnelEvents = [
 	'credit_request'
 ]
 
-async function track(name: string, params: AnyRec = {}): Promise<void> {
+export async function track(
+	name: string,
+	params: AnyRec = {},
+	options: TrackOptions = {}
+): Promise<void> {
 	if (typeof window === 'undefined') return
+
+	const isGoogleOnly = Boolean(options.googleOnly)
+	const isFbOnly = Boolean(options.fbOnly)
+
+	const shouldSendGoogle = !isFbOnly
+	const shouldSendFb = !isGoogleOnly
 
 	// Smart Deduplication logic
 	if (name === 'purchase') {
@@ -308,76 +323,101 @@ async function track(name: string, params: AnyRec = {}): Promise<void> {
 		}
 	}
 
-	try {
-		const g = win.gtag
-		if (typeof g === 'function') {
-			g('event', name, mergedParams)
-		} else {
-			win.dataLayer.push({
-				event: name,
-				...mergedParams
-			})
+	if (shouldSendGoogle) {
+		try {
+			const g = win.gtag
+			if (typeof g === 'function') {
+				g('event', name, mergedParams)
+			} else {
+				win.dataLayer.push({
+					event: name,
+					...mergedParams
+				})
+			}
+		} catch {
+			/* never let analytics break the app */
 		}
-	} catch {
-		/* never let analytics break the app */
 	}
 
-	try {
-		if (typeof win.fbq === 'function') {
-			const fbEventMap: Record<string, string> = {
-				view_item: 'ViewContent',
-				add_to_cart: 'AddToCart',
-				view_item_list: 'ViewCategory',
-				begin_checkout: 'InitiateCheckout',
-				add_payment_info: 'AddPaymentInfo',
-				purchase: 'Purchase',
-				search: 'Search'
+	if (shouldSendFb) {
+		try {
+			if (typeof win.fbq === 'function') {
+				const fbEventMap: Record<string, string> = {
+					page_view: 'PageView',
+					view_item: 'ViewContent',
+					add_to_cart: 'AddToCart',
+					view_item_list: 'ViewCategory',
+					begin_checkout: 'InitiateCheckout',
+					add_payment_info: 'AddPaymentInfo',
+					purchase: 'Purchase',
+					search: 'Search'
+				}
+
+				const standardFbEvents = new Set([
+					'AddPaymentInfo',
+					'AddToCart',
+					'AddToWishlist',
+					'CompleteRegistration',
+					'Contact',
+					'CustomizeProduct',
+					'Donate',
+					'FindLocation',
+					'InitiateCheckout',
+					'Lead',
+					'Purchase',
+					'Schedule',
+					'Search',
+					'StartTrial',
+					'SubmitApplication',
+					'Subscribe',
+					'ViewContent',
+					'PageView'
+				])
+
+				const fbEvent = fbEventMap[name] || name
+
+				// Auto-extract product context from active page state if not explicitly passed
+				const activeProduct = pageVal?.data?.product
+				const activeProducts = pageVal?.data?.products?.data || pageVal?.data?.products
+
+				let effectiveItems = params.items
+				if (!effectiveItems && activeProduct) {
+					effectiveItems = [toItem(activeProduct, params.currency || pageVal?.data?.store?.currencyCode)]
+				} else if (!effectiveItems && Array.isArray(activeProducts) && activeProducts.length) {
+					effectiveItems = activeProducts
+						.slice(0, 40)
+						.map((p: AnyRec) => toItem(p, params.currency || pageVal?.data?.store?.currencyCode))
+				}
+
+				const contentIds = Array.isArray(effectiveItems)
+					? effectiveItems.map((i: any) => i.sku || i.item_id || i.id).filter(Boolean)
+					: []
+				const numItems = Array.isArray(effectiveItems)
+					? effectiveItems.reduce((acc: number, i: any) => acc + (Number(i.quantity) || 1), 0)
+					: undefined
+
+				const fbData: AnyRec = {
+					...mergedParams,
+					...(contentIds.length ? { content_ids: contentIds, content_type: 'product' } : {}),
+					...(numItems !== undefined ? { num_items: numItems } : {}),
+					...(activeProduct?.name || activeProduct?.title
+						? { content_name: activeProduct.name || activeProduct.title }
+						: {}),
+					...(activeProduct?.category?.name || activeProduct?.category
+						? { content_category: activeProduct.category?.name || activeProduct.category }
+						: {}),
+					...(params.search_term ? { search_string: params.search_term } : {})
+				}
+
+				if (standardFbEvents.has(fbEvent)) {
+					win.fbq('track', fbEvent, fbData)
+				} else {
+					win.fbq('trackCustom', fbEvent, fbData)
+				}
 			}
-
-			const standardFbEvents = new Set([
-				'AddPaymentInfo',
-				'AddToCart',
-				'AddToWishlist',
-				'CompleteRegistration',
-				'Contact',
-				'CustomizeProduct',
-				'Donate',
-				'FindLocation',
-				'InitiateCheckout',
-				'Lead',
-				'Purchase',
-				'Schedule',
-				'Search',
-				'StartTrial',
-				'SubmitApplication',
-				'Subscribe',
-				'ViewContent',
-				'PageView'
-			])
-
-			const fbEvent = fbEventMap[name] || name
-			const contentIds = Array.isArray(params.items)
-				? params.items.map((i: any) => i.sku || i.item_id || i.id).filter(Boolean)
-				: []
-			const numItems = Array.isArray(params.items)
-				? params.items.reduce((acc: number, i: any) => acc + (Number(i.quantity) || 1), 0)
-				: undefined
-
-			const fbData: AnyRec = {
-				...mergedParams,
-				...(contentIds.length ? { content_ids: contentIds, content_type: 'product' } : {}),
-				...(numItems !== undefined ? { num_items: numItems } : {}),
-				...(params.search_term ? { search_string: params.search_term } : {})
-			}
-
-			if (standardFbEvents.has(fbEvent)) {
-				win.fbq('track', fbEvent, fbData)
-			} else {
-				win.fbq('trackCustom', fbEvent, fbData)
-			}
+		} catch {
+			/* never let fbq break the app */
 		}
-	} catch {
-		/* never let fbq break the app */
 	}
 }
 
@@ -393,48 +433,59 @@ function toItem(p: AnyRec, currency?: string): AnyRec {
 	}
 }
 
-export function trackViewItem(product: AnyRec | undefined, currency?: string): void {
+export function trackViewItem(product: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
 	if (!product) return
-	track('view_item', { currency, value: product.price, items: [toItem(product, currency)] })
+	track('view_item', { currency, value: product.price, items: [toItem(product, currency)] }, options)
+
+  track('page_view', {
+		currency,
+		value: product.price,
+		items: [toItem(product, currency)]
+	}, { fbOnly: true })
 }
 
-export function trackAddToCart(product: AnyRec | undefined, qty = 1, currency?: string): void {
+export function trackAddToCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): void {
 	if (!product) return
 	track('add_to_cart', {
 		currency,
 		value: (product.price ?? 0) * (qty || 1),
 		items: [toItem({ ...product, qty: qty || 1 }, currency)]
-	})
+	}, options)
 }
 
-export function trackRemoveFromCart(product: AnyRec | undefined, qty = 1, currency?: string): void {
+export function trackRemoveFromCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): void {
 	if (!product) return
 	track('remove_from_cart', {
 		currency,
 		value: (product.price ?? 0) * (qty || 1),
 		items: [toItem({ ...product, qty: qty || 1 }, currency)]
-	})
+	}, options)
 }
 
-export function trackViewItemList(products: AnyRec[] = [], listName?: string, currency?: string): void {
+export function trackViewItemList(products: AnyRec[] = [], listName?: string, currency?: string, options?: TrackOptions): void {
 	if (!products?.length) return
 	track('view_item_list', {
 		item_list_name: listName,
 		items: products.slice(0, 30).map((p) => toItem(p, currency))
-	})
+	}, options)
+
+  track('page_view', {
+		item_list_name: listName,
+		items: products.slice(0, 30).map((p) => toItem(p, currency))
+	}, { fbOnly: true })
 }
 
-export function trackBeginCheckout(cart: AnyRec | undefined, currency?: string): void {
+export function trackBeginCheckout(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
 	if (!cart?.lineItems?.length) return
 	track('begin_checkout', {
 		currency,
 		value: cart.total,
 		coupon: cart.couponCode,
 		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	})
+	}, options)
 }
 
-export function trackPurchase(order: AnyRec | undefined, currency?: string): void {
+export function trackPurchase(order: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
 	if (!order) return
 	track('purchase', {
 		transaction_id: order.orderNo ?? order.id,
@@ -444,29 +495,35 @@ export function trackPurchase(order: AnyRec | undefined, currency?: string): voi
 		currency,
 		coupon: order.coupon?.code,
 		items: (order.lineItems ?? []).map((p: AnyRec) => toItem(p, currency))
-	})
+	}, options)
 }
 
-export function trackSearch(term: string): void {
+export function trackSearch(term: string, options?: TrackOptions): void {
 	if (!term?.trim()) return
-	track('search', { search_term: term.trim() })
+	track('search', { search_term: term.trim() }, options)
 }
 
-export function trackSelectItem(product: AnyRec | undefined, listName?: string, currency?: string): void {
+export function trackSelectItem(product: AnyRec | undefined, listName?: string, currency?: string, options?: TrackOptions): void {
 	if (!product) return
-	track('select_item', { item_list_name: listName, items: [toItem(product, currency)] })
+	track('select_item', { item_list_name: listName, items: [toItem(product, currency)] }, options)
 }
 
-export function trackViewCart(cart: AnyRec | undefined, currency?: string): void {
+export function trackViewCart(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
 	if (!cart?.lineItems?.length) return
 	track('view_cart', {
 		currency,
 		value: cart.total,
 		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	})
+	}, options)
+
+  track('page_view', {
+		currency,
+		value: cart.total,
+		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
+	}, { fbOnly: true })
 }
 
-export function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: string, currency?: string): void {
+export function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: string, currency?: string, options?: TrackOptions): void {
 	if (!cart?.lineItems?.length) return
 	track('add_shipping_info', {
 		currency,
@@ -474,10 +531,10 @@ export function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: st
 		coupon: cart.couponCode,
 		shipping_tier: shippingTier,
 		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	})
+	}, options)
 }
 
-export function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: string, currency?: string): void {
+export function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: string, currency?: string, options?: TrackOptions): void {
 	if (!cart?.lineItems?.length) return
 	track('add_payment_info', {
 		currency,
@@ -485,5 +542,10 @@ export function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: stri
 		coupon: cart.couponCode,
 		payment_type: paymentType,
 		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	})
+	}, options)
 }
+
+export function trackPageView(customParams: AnyRec = {}, options?: TrackOptions): void {
+	track('page_view', customParams, options)
+}
+
