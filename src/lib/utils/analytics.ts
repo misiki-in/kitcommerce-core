@@ -220,25 +220,15 @@ export async function track(
 	const me = pageVal?.data?.me
 	const addressInfo = getAddressDetails(pageVal)
 
-	let hashedEmail = ''
-	let hashedPhone = ''
-	let hashedFirstName = ''
-	let hashedLastName = ''
 	const rawEmail = me?.email || ''
 	const rawPhone = cleanPhone(me?.phone || '')
 
-	if (rawEmail) {
-		hashedEmail = await hashVal(rawEmail.trim().toLowerCase())
-	}
-	if (rawPhone) {
-		hashedPhone = await hashVal(rawPhone)
-	}
-	if (me?.firstName) {
-		hashedFirstName = await hashVal(String(me.firstName).trim().toLowerCase())
-	}
-	if (me?.lastName) {
-		hashedLastName = await hashVal(String(me.lastName).trim().toLowerCase())
-	}
+	const [hashedEmail, hashedPhone, hashedFirstName, hashedLastName] = await Promise.all([
+		rawEmail ? hashVal(rawEmail.trim().toLowerCase()) : '',
+		rawPhone ? hashVal(rawPhone) : '',
+		me?.firstName ? hashVal(String(me.firstName).trim().toLowerCase()) : '',
+		me?.lastName ? hashVal(String(me.lastName).trim().toLowerCase()) : ''
+	])
 
 	const now = new Date()
 	const formatDate = (date: Date) => {
@@ -433,51 +423,53 @@ function toItem(p: AnyRec, currency?: string): AnyRec {
 	}
 }
 
-export function trackViewItem(product: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
+export async function trackViewItem(product: AnyRec | undefined, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!product) return
-	track('view_item', { currency, value: product.price, items: [toItem(product, currency)] }, options)
-
-  track('page_view', {
-		currency,
-		value: product.price,
-		items: [toItem(product, currency)]
-	}, { fbOnly: true })
+	await Promise.all([
+		track('view_item', { currency, value: product.price, items: [toItem(product, currency)] }, options),
+		track('page_view', {
+			currency,
+			value: product.price,
+			items: [toItem(product, currency)]
+		}, { fbOnly: true })
+	])
 }
 
-export function trackAddToCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): void {
+export async function trackAddToCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!product) return
-	track('add_to_cart', {
-		currency,
-		value: (product.price ?? 0) * (qty || 1),
-		items: [toItem({ ...product, qty: qty || 1 }, currency)]
-	}, options)
-}
-
-export function trackRemoveFromCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): void {
-	if (!product) return
-	track('remove_from_cart', {
+	await track('add_to_cart', {
 		currency,
 		value: (product.price ?? 0) * (qty || 1),
 		items: [toItem({ ...product, qty: qty || 1 }, currency)]
 	}, options)
 }
 
-export function trackViewItemList(products: AnyRec[] = [], listName?: string, currency?: string, options?: TrackOptions): void {
+export async function trackRemoveFromCart(product: AnyRec | undefined, qty = 1, currency?: string, options?: TrackOptions): Promise<void> {
+	if (!product) return
+	await track('remove_from_cart', {
+		currency,
+		value: (product.price ?? 0) * (qty || 1),
+		items: [toItem({ ...product, qty: qty || 1 }, currency)]
+	}, options)
+}
+
+export async function trackViewItemList(products: AnyRec[] = [], listName?: string, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!products?.length) return
-	track('view_item_list', {
-		item_list_name: listName,
-		items: products.slice(0, 30).map((p) => toItem(p, currency))
-	}, options)
-
-  track('page_view', {
-		item_list_name: listName,
-		items: products.slice(0, 30).map((p) => toItem(p, currency))
-	}, { fbOnly: true })
+	await Promise.all([
+		track('view_item_list', {
+			item_list_name: listName,
+			items: products.slice(0, 30).map((p) => toItem(p, currency))
+		}, options),
+		track('page_view', {
+			item_list_name: listName,
+			items: products.slice(0, 30).map((p) => toItem(p, currency))
+		}, { fbOnly: true })
+	])
 }
 
-export function trackBeginCheckout(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
+export async function trackBeginCheckout(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!cart?.lineItems?.length) return
-	track('begin_checkout', {
+	await track('begin_checkout', {
 		currency,
 		value: cart.total,
 		coupon: cart.couponCode,
@@ -485,9 +477,9 @@ export function trackBeginCheckout(cart: AnyRec | undefined, currency?: string, 
 	}, options)
 }
 
-export function trackPurchase(order: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
+export async function trackPurchase(order: AnyRec | undefined, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!order) return
-	track('purchase', {
+	await track('purchase', {
 		transaction_id: order.orderNo ?? order.id,
 		value: order.amount?.total ?? order.total,
 		tax: order.tax ?? order.amount?.tax,
@@ -498,34 +490,35 @@ export function trackPurchase(order: AnyRec | undefined, currency?: string, opti
 	}, options)
 }
 
-export function trackSearch(term: string, options?: TrackOptions): void {
+export async function trackSearch(term: string, options?: TrackOptions): Promise<void> {
 	if (!term?.trim()) return
-	track('search', { search_term: term.trim() }, options)
+	await track('search', { search_term: term.trim() }, options)
 }
 
-export function trackSelectItem(product: AnyRec | undefined, listName?: string, currency?: string, options?: TrackOptions): void {
+export async function trackSelectItem(product: AnyRec | undefined, listName?: string, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!product) return
-	track('select_item', { item_list_name: listName, items: [toItem(product, currency)] }, options)
+	await track('select_item', { item_list_name: listName, items: [toItem(product, currency)] }, options)
 }
 
-export function trackViewCart(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): void {
+export async function trackViewCart(cart: AnyRec | undefined, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!cart?.lineItems?.length) return
-	track('view_cart', {
-		currency,
-		value: cart.total,
-		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	}, options)
-
-  track('page_view', {
-		currency,
-		value: cart.total,
-		items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
-	}, { fbOnly: true })
+	await Promise.all([
+		track('view_cart', {
+			currency,
+			value: cart.total,
+			items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
+		}, options),
+		track('page_view', {
+			currency,
+			value: cart.total,
+			items: cart.lineItems.map((p: AnyRec) => toItem(p, currency))
+		}, { fbOnly: true })
+	])
 }
 
-export function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: string, currency?: string, options?: TrackOptions): void {
+export async function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: string, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!cart?.lineItems?.length) return
-	track('add_shipping_info', {
+	await track('add_shipping_info', {
 		currency,
 		value: cart.total,
 		coupon: cart.couponCode,
@@ -534,9 +527,9 @@ export function trackAddShippingInfo(cart: AnyRec | undefined, shippingTier?: st
 	}, options)
 }
 
-export function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: string, currency?: string, options?: TrackOptions): void {
+export async function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: string, currency?: string, options?: TrackOptions): Promise<void> {
 	if (!cart?.lineItems?.length) return
-	track('add_payment_info', {
+	await track('add_payment_info', {
 		currency,
 		value: cart.total,
 		coupon: cart.couponCode,
@@ -545,7 +538,7 @@ export function trackAddPaymentInfo(cart: AnyRec | undefined, paymentType?: stri
 	}, options)
 }
 
-export function trackPageView(customParams: AnyRec = {}, options?: TrackOptions): void {
-	track('page_view', customParams, options)
+export async function trackPageView(customParams: AnyRec = {}, options?: TrackOptions): Promise<void> {
+	await track('page_view', customParams, options)
 }
 
