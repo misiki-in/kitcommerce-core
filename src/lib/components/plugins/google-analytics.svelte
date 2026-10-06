@@ -1,89 +1,137 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { browser } from '$app/environment';
 
-	const storeData = $derived(page.data.store);
+	let { storeData: propStoreData } = $props<{ storeData?: any }>();
+	const storeData = $derived(propStoreData || page.data?.store);
 
-	const isActive: boolean = storeData?.plugins?.googleTagManager?.active;
+	const isActive = $derived(Boolean(storeData?.plugins?.googleTagManager?.active));
 
-	// Read tags list (supporting both array and legacy single string id)
-	const rawTags = storeData?.plugins?.googleTagManager?.tags;
-	const legacyId = storeData?.plugins?.googleTagManager?.id;
+	const isValidTag = (id: string) => {
+		if (!id || typeof id !== 'string') return false;
+		const trimmed = id.trim();
+		return /^(G|AW|GTM|GT|DC|UA)-[A-Z0-9_-]+$/i.test(trimmed);
+	};
 
-	let tagsList: string[] = [];
-	if (Array.isArray(rawTags)) {
-		tagsList = rawTags.map((t: any) => (typeof t === 'string' ? t : t?.id || '')).filter(Boolean);
-	} else if (typeof rawTags === 'string' && rawTags.trim()) {
-		tagsList = [rawTags.trim()];
-	}
-	if (!tagsList.length && legacyId) {
-		tagsList = [legacyId];
-	}
+	// Read tags list (supporting array, comma-separated, or legacy single id)
+	const rawTags = $derived(storeData?.plugins?.googleTagManager?.tags);
+	const legacyId = $derived(storeData?.plugins?.googleTagManager?.id);
 
-	const conversions = storeData?.plugins?.googleTagManager?.conversions || [];
+	let tagsList = $derived.by(() => {
+		let list: string[] = [];
+		if (Array.isArray(rawTags)) {
+			list = rawTags.map((t: any) => (typeof t === 'string' ? t : t?.id || '')).filter(Boolean);
+		} else if (typeof rawTags === 'string' && rawTags.trim()) {
+			list = [rawTags.trim()];
+		}
+		if (!list.length && legacyId) {
+			list = [legacyId];
+		}
+		return list.filter(isValidTag);
+	});
+
+	const conversions = $derived(storeData?.plugins?.googleTagManager?.conversions || []);
 
 	// Separate GTM tags from standard Google Tags (G-XXXXX, AW-XXXXX, etc.)
-	const gtmTag = tagsList.find((id) => id.startsWith('GTM-'));
-	const normalTags = tagsList.filter((id) => !id.startsWith('GTM-'));
-	const primaryGtagId = normalTags[0] || '';
+	const gtmTag = $derived(tagsList.find((id) => id.startsWith('GTM-')));
+	const normalTags = $derived(tagsList.filter((id) => !id.startsWith('GTM-')));
+	const primaryGtagId = $derived(normalTags[0] || tagsList[0] || '');
 
-	// Build config script to initialize window.__GOOGLE_TAG_CONFIG__ and all gtag configs
-	const configScriptBody = normalTags
-		.map((id) => {
-			if (id.startsWith('G-')) {
-				return `gtag('js', new Date()); gtag('config', '${id}');`;
-			}
-			return `gtag('config', '${id}');`;
-		})
-		.join('\n');
+	const configScriptBody = $derived(
+		normalTags.map((id) => `gtag('config', '${id}');`).join('\n  ')
+	);
 
-	const initConfigScript = `
-    window.__GOOGLE_TAG_CONFIG__ = ${JSON.stringify({
+	const initConfigScript = $derived(`
+  window.__GOOGLE_TAG_CONFIG__ = ${JSON.stringify({
+		active: isActive,
+		tags: tagsList,
+		conversions
+	})};
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  ${isActive ? configScriptBody : ''}
+`);
+
+	const gtmScript = $derived(
+		isActive && gtmTag
+			? `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmTag}');`
+			: ''
+	);
+
+	// Client-side synchronization: ensure window objects, gtag config, and script elements are active during SPA transitions
+	$effect(() => {
+		if (!browser) return;
+
+		const win = window as any;
+		win.__GOOGLE_TAG_CONFIG__ = {
 			active: isActive,
 			tags: tagsList,
 			conversions
-		})};
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){ dataLayer.push(arguments); }
-    ${isActive ? configScriptBody : ''}
-  `;
+		};
 
-	// gtag/js + gtm.js are ~460KB and were downloading inside the LCP window, starving the
-	// product image of bandwidth on Slow 4G. The gtag() shim above queues every call into
-	// dataLayer, and GTM drains that queue when it arrives, so deferring the *library* to the
-	// load event loses no events — it only stops it competing with above-the-fold content.
-	const deferredLoader = (src: string) => `
-    (function(){
-      var load = function(){
-        var s = document.createElement('script');
-        s.async = true;
-        s.src = '${src}';
-        document.head.appendChild(s);
-      };
-      if (document.readyState === 'complete') load();
-      else addEventListener('load', load, { once: true });
-    })();
-  `;
+		if (!isActive) {
+			console.log('[GoogleAnalytics] Plugin is inactive.');
+			return;
+		}
 
-	// gtm.start is pushed immediately so GTM still reports correct container timing; only the
-	// container script itself waits for `load`.
-	const gtmScript =
-		isActive && gtmTag
-			? `
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
-      ${deferredLoader(`https://www.googletagmanager.com/gtm.js?id=${gtmTag}`)}
-    `
-			: '';
+		if (!tagsList.length) {
+			console.warn('[GoogleAnalytics] Plugin is active, but no valid Google Tag IDs were found.');
+			return;
+		}
+
+		win.dataLayer = win.dataLayer || [];
+		if (typeof win.gtag !== 'function') {
+			win.gtag = function () {
+				win.dataLayer.push(arguments);
+			};
+		}
+
+		// Inject single gtag.js library script if not present in DOM
+		if (primaryGtagId) {
+			const gtagSrc = `https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`;
+			if (!document.querySelector('script[src*="googletagmanager.com/gtag/js"]')) {
+				const script = document.createElement('script');
+				script.async = true;
+				script.src = gtagSrc;
+				document.head.appendChild(script);
+			}
+
+			win.gtag('js', new Date());
+
+			// Configure all Google tags (GA4, Google Ads, etc.)
+			for (const id of normalTags) {
+				win.gtag('config', id);
+			}
+		}
+
+		// Inject GTM if configured and not present in DOM
+		if (gtmTag) {
+			const gtmSrc = `https://www.googletagmanager.com/gtm.js?id=${gtmTag}`;
+			if (!document.querySelector('script[src*="googletagmanager.com/gtm.js"]')) {
+				win.dataLayer.push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+				const script = document.createElement('script');
+				script.async = true;
+				script.src = gtmSrc;
+				document.head.appendChild(script);
+			} else {
+			}
+		}
+	});
 </script>
 
 <svelte:head>
 	{#if isActive}
-		{@html `<script id="gtag-config">${initConfigScript}</script>`}
-
 		{#if primaryGtagId}
-			<!-- Primary Google Tag Library — injected on `load`, see deferredLoader. -->
-			{@html `<script id="gtag-lib">${deferredLoader(`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`)}</script>`}
+			<!-- Global site tag (gtag.js) - Google Analytics & Ads -->
+			<script async src={`https://www.googletagmanager.com/gtag/js?id=${primaryGtagId}`}></script>
 		{/if}
+
+		{@html `<script id="gtag-config">${initConfigScript}</script>`}
 
 		{#if gtmTag}
 			<!-- Google Tag Manager -->
