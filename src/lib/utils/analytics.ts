@@ -293,22 +293,22 @@ export async function track(
 	}
 
 	const tagConfig = win.__GOOGLE_TAG_CONFIG__
+	const adsSendToList: string[] = []
 
 	if (tagConfig?.active) {
 		const conversions = Array.isArray(tagConfig.conversions) ? tagConfig.conversions : []
-		const match = conversions.find((c: any) => c.event === name && c.label?.trim())
-		if (match?.label) {
+		const matches = conversions.filter((c: any) => c?.event === name && c?.label?.trim())
+		const tagsList: string[] = Array.isArray(tagConfig.tags) ? tagConfig.tags : []
+		const adsTag = tagsList.find((t: string) => typeof t === 'string' && t.startsWith('AW-'))
+
+		for (const match of matches) {
 			const cleanLabel = match.label.trim()
 			if (cleanLabel.includes('/')) {
-				mergedParams.send_to = cleanLabel
+				adsSendToList.push(cleanLabel)
+			} else if (adsTag) {
+				adsSendToList.push(`${adsTag}/${cleanLabel}`)
 			} else {
-				const tagsList: string[] = Array.isArray(tagConfig.tags) ? tagConfig.tags : []
-				const adsTag = tagsList.find((t: string) => t.startsWith('AW-'))
-				if (adsTag) {
-					mergedParams.send_to = `${adsTag}/${cleanLabel}`
-				} else {
-					mergedParams.send_to = cleanLabel
-				}
+				adsSendToList.push(cleanLabel)
 			}
 		}
 	}
@@ -317,12 +317,28 @@ export async function track(
 		try {
 			const g = win.gtag
 			if (typeof g === 'function') {
+				// 1. Broadcast to all configured tags (GA4 G-XXXX, general AW-XXXX, etc.)
 				g('event', name, mergedParams)
+
+				// 2. Fire conversion-specific event(s) to Google Ads if conversion label(s) configured
+				for (const sendTo of adsSendToList) {
+					g('event', name, {
+						...mergedParams,
+						send_to: sendTo
+					})
+				}
 			} else {
 				win.dataLayer.push({
 					event: name,
 					...mergedParams
 				})
+				for (const sendTo of adsSendToList) {
+					win.dataLayer.push({
+						event: name,
+						...mergedParams,
+						send_to: sendTo
+					})
+				}
 			}
 		} catch {
 			/* never let analytics break the app */
