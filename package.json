@@ -12,7 +12,7 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"p": "npm run build && npm publish --access public",
-		"test": "bun run src/lib/utils/sort.spec.ts"
+		"test": "bun run src/lib/utils/sort.spec.ts && bun run src/lib/utils/payment-reference.spec.ts"
 	},
 	"files": [
 		"dist",
