@@ -153,7 +153,7 @@
 					const res: any = await apiRes.json();
 					const clientSecret = res?.client_secret || '';
 					const orderNo = res?.order_no || res?.id || '';
-					const returnUrl = `${window.location.origin}/checkout/process?cart_id=${cartId}&order_no=${orderNo}&pg=${pgCode}`;
+					const returnUrl = `${window.location.origin}/checkout/process?cart_id=${cartId}&order_no=${orderNo}&pg=${pgCode}&payment_session_id=${res?.payment_session_id}`;
 
 					if (!clientSecret) {
 						toast.error(res?.message || 'Failed to initialize payment');
