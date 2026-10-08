@@ -322,7 +322,7 @@ export async function track(
 
 				// 2. Fire conversion-specific event(s) to Google Ads if conversion label(s) configured
 				for (const sendTo of adsSendToList) {
-					g('event', name, {
+					g('event', 'conversion', {
 						...mergedParams,
 						send_to: sendTo
 					})
@@ -334,7 +334,7 @@ export async function track(
 				})
 				for (const sendTo of adsSendToList) {
 					win.dataLayer.push({
-						event: name,
+						event: 'conversion',
 						...mergedParams,
 						send_to: sendTo
 					})
