@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { parseHTMLToText } from '$lib/utils/index.js';
+	import { canonicalUrl as selfCanonicalUrl, parseHTMLToText } from '$lib/utils/index.js';
 
 	const {
 		metaTitle = '',
@@ -11,7 +11,8 @@
 		noindex = false
 	} = $props();
 
-	const finalCanonicalUrl = $derived(canonicalUrl || page.url.origin + page.url.pathname);
+	// Keeps ?page=N for N > 1 (each page lists different products); drops sort and filter params.
+	const finalCanonicalUrl = $derived(canonicalUrl || selfCanonicalUrl(page.url));
 	const storeName = $derived(page.data?.store?.name || 'Litekart');
 	// CMS-authored titles arrive with stray wrapping quotes. Strip them once here rather than at
 	// each call site.

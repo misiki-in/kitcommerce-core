@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation'
 	import { page } from '$app/state'
 	import { onMount, type Snippet } from 'svelte'
+	import { pageHref as hrefForPage } from '$lib/utils/index.js'
 
 	interface Props {
 		content: Snippet<[SnippetParams]>
@@ -17,12 +18,15 @@
 		goToPreviousPage: () => Promise<void>
 		goToNextPage: () => Promise<void>
 		goToPage: (newPage: number) => Promise<void>
+		/** href for page `newPage` with the other params kept, for real `<a href>` links. */
+		pageHref: (newPage: number) => string
 		count: number
 	}
 
 	const pageSize = 20
 
-	let currentPage = $state(1)
+	// Read from the URL up front so the server render already knows the current page.
+	let currentPage = $state(+(page.url.searchParams.get('page') || '1'))
 
 	const updateCurrentPage = () => {
 		const pageFromUrl = +(page.url.searchParams.get('page') || '1')
@@ -62,6 +66,9 @@
 		if (paginateProducts) paginateProducts()
 	}
 
+	// Crawlable link target, clamped to the real page range; goToPage stays the client-side path.
+	const pageHref = (newPage: number) => hrefForPage(page.url, Math.min(Math.max(newPage, 1), Math.max(Math.ceil(noOfPage) || 1, 1)))
+
 	const count = $derived(noOfPage * pageSize)
 
 	// Update currentPage when URL changes
@@ -73,4 +80,4 @@
 	})
 </script>
 
-{@render content?.({ currentPage, goToNextPage, goToPage, goToPreviousPage, pageSize, count })}
+{@render content?.({ currentPage, goToNextPage, goToPage, goToPreviousPage, pageHref, pageSize, count })}

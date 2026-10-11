@@ -216,9 +216,11 @@ export class Cart2State {
 				this.addToCartMessage = 'Add to cart'
 				this.showCheckout = false
 			}, 5000)
+			return true
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Add to cart failed')
 			this.addToCartMessage = 'Add to cart'
+			return false
 		} finally {
 			if (lineId) this.updatingItem[lineId] = false
 		}
@@ -243,9 +245,11 @@ export class Cart2State {
 				this.addToCartMessage = 'Add to cart'
 				this.showCheckout = false
 			}, 5000)
+			return true
 		} catch (e: unknown) {
 			toast.error(e instanceof Error ? e.message : 'Update cart failed')
 			this.addToCartMessage = 'Add to cart'
+			return false
 		} finally {
 			this.updatingItem[lineId] = false
 		}
@@ -319,17 +323,18 @@ export class Cart2State {
 		}
 	}
 
+	/** Resolves to true when the cart accepted the item, false when the request failed. */
 	async addOrUpdate({ productId, variantId, qty }: AddOrUpdateParams) {
 		const line_item = this.cart?.lineItems?.find?.((item) => item?.productId === productId && item?.variantId === variantId)
 		if (line_item) {
-			await this.update({
+			return await this.update({
 				qty: qty + line_item.qty,
 				lineId: line_item.id,
 				productId: productId,
 				variantId: variantId
 			})
 		} else {
-			await this.add({ qty, productId, variantId })
+			return await this.add({ qty, productId, variantId })
 		}
 		// try {
 		// } catch (e) {

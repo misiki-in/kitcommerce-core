@@ -18,6 +18,7 @@ export * from './whatsapp.js'
 export * from './affirm-injector.js'
 export * from './secure-catalogue.js'
 export * from './sort.js'
+export * from './seo.js'
 // `debounce` is re-exported explicitly further down; only validations was missing.
 export * from './validations.js'
 export * from './states.js'

@@ -85,9 +85,12 @@
 
 	function handleKeyDown(e: KeyboardEvent) {
 		if (e.key === 'Enter') {
-			searchResults = []
-			showSearchResults = false
-			goto(`/products?search=${encodeURIComponent(search)}`)
+			// Capture the query before closeSearch clears it. Closing resets the overlay, so the next
+			// open starts fresh instead of showing "no results" for the previous query.
+			e.preventDefault()
+			const query = (search || '').trim()
+			closeSearch()
+			goto(query ? `/products?search=${encodeURIComponent(query)}` : '/products')
 		} else if (e.key === 'Escape') closeSearch()
 		else {
 			showSearchResults = true

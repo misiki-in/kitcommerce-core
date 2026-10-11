@@ -4,7 +4,7 @@ import { page } from '$app/state'
 import type { CarouselAPI } from '$lib/types/index.js'
 import { storeProductToRecentlyViewed, findVariantWithOptionValue, addPendingWishlistAction, checkPendingWishlistActions } from '$lib/logic/index.js'
 import { getUserState, getCartState, getWishlistState, getProductKey } from '$lib/stores/index.js'
-import { deepCopy, fireGTagEvent } from '$lib/utils/index.js'
+import { deepCopy, fireGTagEvent, imageUrls, variesByProperty } from '$lib/utils/index.js'
 import { meilisearchService, productService, reviewService, wishlistService } from '$lib/services/index.js'
 import { getContext, onMount, setContext } from 'svelte'
 import { toast } from 'svelte-sonner'
@@ -55,7 +55,100 @@ class ProductState {
 	carouselApi: CarouselAPI | null = $state(null)
 	currentIndex = $state(0)
 
-	structuredData: any = $state({})
+	// Derived from the load data rather than assigned in an effect, so it is already filled during
+	// server rendering and the product JSON-LD is part of the first HTML response.
+	structuredData: any = $derived.by(() => {
+		const product = page.data?.product
+		if (!product) return {}
+
+		const images = imageUrls(product.images)
+		const productUrl = page.url.origin + page.url.pathname
+		const ownVariants = (product.variants || []).filter((v: any) => v?.title !== 'default')
+		const hasOwnVariants = ownVariants.length > 1
+		const family = !hasOwnVariants && product.pg?.length > 1
+
+		// Mirrors addToCartButtonDisabled: untracked inventory is always purchasable.
+		const anyVariantStock = product.variants?.some((v: any) => (v?.stock || 0) > 0)
+		const availability = (variant?: any) => {
+			if (!product.manageInventory) return 'InStock'
+			if (anyVariantStock) return variant?.manageInventory && !variant?.stock ? 'OutOfStock' : 'InStock'
+			return (product.stock || 0) > 0 ? 'InStock' : 'OutOfStock'
+		}
+
+		// Stable family id, the same on every child of a variant family. Fallback order:
+		// `groupedSku` (the API's grouping key, shared by every `pg` sibling), then `styleCode`,
+		// then, for a product that carries its own variants, its parent SKU and finally its id.
+		// The child SKU of a separate-product family is never used: it changes with every size.
+		const productGroupID =
+			product.groupedSku || product.styleCode || (hasOwnVariants ? product.sku || product.id : undefined) || undefined
+
+		const axisNames: string[] = hasOwnVariants
+			? (product.options || []).filter((o: any) => o?.values?.length > 1).map((o: any) => o.title)
+			: family
+				? Object.entries(product.ag || {})
+						.filter(([, values]) => Array.isArray(values) && values.length > 1)
+						.map(([name]) => name)
+				: []
+		const variesBy = [...new Set(axisNames.map(variesByProperty).filter(Boolean))].map((p) => `https://schema.org/${p}`)
+
+		// { color, size, material } for one child, from its [axis name, value] pairs.
+		const axisValues = (pairs: [string, unknown][]) => {
+			const values: Record<string, string> = {}
+			for (const [name, value] of pairs) {
+				const property = variesByProperty(name)
+				if (property && value && !values[property]) values[property] = String(value)
+			}
+			return values
+		}
+		const optionTitle = (optionId: string) => product.options?.find((o: any) => o?.id === optionId)?.title
+
+		const current = family ? product.pg.find((p: any) => p?.slug === product.slug) : null
+		const variants = hasOwnVariants
+			? ownVariants.map((v: any) => {
+					const variantImages = imageUrls(v.images || v.img || v.thumbnail)
+					return {
+						name: v.title,
+						sku: v.sku || undefined,
+						url: `${productUrl}?variant_id=${v.id}`,
+						image: variantImages.length ? variantImages : images,
+						price: v.price,
+						availability: availability(v),
+						...axisValues((v.options || []).map((o: any) => [optionTitle(o.optionId), o.value]))
+					}
+				})
+			: family
+				? [
+						{
+							name: product.title,
+							sku: product.sku || undefined,
+							url: productUrl,
+							image: images,
+							price: product.price,
+							availability: availability(),
+							...axisValues(axisNames.map((name) => [name, current?.[name]]))
+						}
+					]
+				: undefined
+
+		return {
+			name: product.title,
+			image: images.length ? images : imageUrls(product.thumbnail),
+			description: product.description,
+			sku: product.sku,
+			// No brandName: the schema component falls back to the store name.
+			aggregateRating: {
+				ratingValue: product.rating,
+				reviewCount: product.reviewCount
+			},
+			url: page.url.href,
+			priceCurrency: page.data?.store?.currency?.code,
+			price: product.price,
+			availability: availability(),
+			productGroupID,
+			variesBy: variesBy.length ? variesBy : undefined,
+			variants
+		}
+	})
 	showEnquiryModal = $state(false)
 
 	sortedAgEntries = $derived.by(() => {
@@ -377,20 +470,25 @@ class ProductState {
 		}
 	}
 
+	/** Resolves to true only when the cart accepted the item, so callers can gate add_to_cart on it. */
 	handleAddToCart = async () => {
+		let accepted = false
 		try {
 			this.isAdding = true
-			await this.cartState.addOrUpdate({
-				productId: page.data?.product?.id,
-				variantId: this.selectedVariant?.id,
-				qty: this.qty
-			})
+			// The cart store reports failure as false (it shows its own error toast).
+			accepted =
+				(await this.cartState.addOrUpdate({
+					productId: page.data?.product?.id,
+					variantId: this.selectedVariant?.id,
+					qty: this.qty
+				})) !== false
 		} catch (e) {
 			toast.error((e as Error).message || 'Failed to add item')
       return false
 		} finally {
 			this.isAdding = false
 		}
+		if (!accepted) return false
 		if (this.qty > 0) {
 			// cartState.isOpen = true
 			this.showAddToCartMessage = true
@@ -505,33 +603,6 @@ class ProductState {
 			} catch (error) {
 				console.error(error)
 			} 
-		})
-
-		$effect(() => {
-			if (page.data?.product) {
-				this.structuredData = {
-					name: page.data?.product?.title,
-					// all gallery images, not just the thumbnail
-					image: page.data?.product?.images
-						? page.data.product.images
-								.split(',')
-								.map((i: string) => i.trim())
-								.filter(Boolean)
-						: [page.data?.product?.thumbnail].filter(Boolean),
-					description: page.data?.product?.description,
-					sku: page.data?.product?.sku,
-					// brandName intentionally omitted — the schema component falls back to the store
-					// brand. (The previous value was vendorId, a UUID, which is invalid for brand.name.)
-					aggregateRating: {
-						ratingValue: page.data?.product?.rating,
-						reviewCount: page.data?.product?.reviewCount
-					},
-					url: page.url.href,
-					priceCurrency: page?.data?.store?.currency?.code,
-					price: page.data?.product?.price,
-					availability: page.data?.product?.stock > 0 ? 'InStock' : 'OutOfStock'
-				}
-			}
 		})
 
 		$effect(() => {
