@@ -141,6 +141,14 @@ export class Cart2State {
 							localStorage.removeItem('prev_cart_id')
 						}
 						this.resetSingleItemCheckoutSession()
+						// A recovery email links to /checkout/cart?cart_id=…: that cart becomes this
+						// browser's bag. Only on the cart page — the payment pages carry cart_id too,
+						// for a cart that has already become an order.
+						const linkedCartId = searchParams?.get('cart_id')?.trim()
+						const onCartPage = window.location.pathname.replace(/\/+$/, '') === '/checkout/cart'
+						if (onCartPage && linkedCartId && /^[\w-]{6,128}$/.test(linkedCartId)) {
+							localStorage.setItem('cart_id', linkedCartId)
+						}
 						const cartId = this.retrieveCartId()
 						if (cartId) {
 							try {
