@@ -1,6 +1,10 @@
 {
 	"name": "@misiki/kitcommerce-core",
 	"version": "0.1.57",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/misiki-in/kitcommerce-core.git"
+	},
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build && npm run prepack",
