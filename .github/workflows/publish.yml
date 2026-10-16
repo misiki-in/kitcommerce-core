@@ -1,0 +1,68 @@
+name: Publish
+
+# A release is a version bump on master. When package.json names a version npm
+# does not have yet, this tests, builds and publishes it with provenance, then
+# tags v<version> with a GitHub release. A run on a version already published
+# does nothing, so a version published by hand with `bun p` is not sent twice.
+#
+# npm accepts the publish in one of two ways, set up once on the package:
+# - trusted publishing, with no secret: on npmjs.com, @misiki/kitcommerce-core
+#   → Settings → Trusted publishing → GitHub Actions, repository
+#   misiki-in/kitcommerce-core, workflow publish.yml, environment npm-publish;
+# - or NPM_TOKEN, a secret of the npm-publish environment: an automation (or
+#   granular, publish-scoped) token for an account that may publish under
+#   @misiki, as gocommerce-connector has.
+on:
+  push:
+    branches: [master]
+    paths: [package.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # NPM_TOKEN, when used, is an environment secret, readable only by jobs
+    # that name the environment; trusted publishing names it too.
+    environment: npm-publish
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: is there a version to publish
+        id: version
+        run: |
+          name=$(node -p "require('./package.json').name")
+          version=$(node -p "require('./package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if npm view "$name@$version" version >/dev/null 2>&1; then
+            echo "$name@$version is already on npm; nothing to do."
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.version.outputs.publish == 'true'
+        run: bun install --frozen-lockfile
+      - if: steps.version.outputs.publish == 'true'
+        run: bun run test
+      - if: steps.version.outputs.publish == 'true'
+        run: bun run build
+      # Trusted publishing needs npm 11.5 or later, and Node 22 ships npm 10.
+      - if: steps.version.outputs.publish == 'true'
+        run: npm install -g npm@latest
+      - if: steps.version.outputs.publish == 'true'
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: GitHub release
+        if: steps.version.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ steps.version.outputs.version }}
+        run: gh release create "$TAG" --target "$GITHUB_SHA" --title "$TAG" --generate-notes
