@@ -87,7 +87,9 @@
 
 			toast.success('Account created successfully')
 			callback?.(true)
-			goto(`/auth/signup/success?email=${encodeURIComponent(info.email)}`)
+			// The address rides in the navigation's state, never the URL: every analytics tag on
+			// the page records the URL, and the history keeps it.
+			goto('/auth/signup/success', { state: { signupEmail: info.email } })
 			show = false
 		} catch (e: any) {
 			toast.error(e.message)
