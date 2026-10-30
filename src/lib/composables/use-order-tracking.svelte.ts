@@ -15,6 +15,12 @@ export class OrderTrackingModule {
 				this.loading = true
 				const otp = page.url?.searchParams?.get('otp') || ''
 				const email = page.url?.searchParams?.get('email') || ''
+				// Read once; the address and the code that opens the order leave the address bar, the
+				// history and every analytics tag that records the page.
+				const clean = new URL(location.href)
+				clean.searchParams.delete('otp')
+				clean.searchParams.delete('email')
+				history.replaceState(history.state, '', clean)
 				const res = await orderService.getOrderByEmailAndOTP({ email, otp })
 
 				if (res?.data) {

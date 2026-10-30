@@ -23,7 +23,9 @@ export class ResetPasswordModule {
 				this.token = page.url.searchParams.get('token') || ''
 				this.userId = page.url.searchParams.get('id') || ''
 				// Read once; the token resets the account's password, so it leaves the address bar,
-				// the history and every analytics tag that records the page.
+				// the history and every analytics tag that records the page. A reload then asks for a
+				// new link. The browser's own replaceState, with SvelteKit's state kept: the router's
+				// throws when called from onMount on the first page.
 				const clean = new URL(location.href)
 				clean.searchParams.delete('token')
 				clean.searchParams.delete('id')
