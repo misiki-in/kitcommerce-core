@@ -1,7 +1,5 @@
-import { browser } from '$app/environment'
 import { goto, replaceState } from '$app/navigation'
 import { authService } from '$lib/services/index.js'
-import { onMount } from 'svelte'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
 
@@ -19,18 +17,11 @@ export const forgotPasswordSchema = {
 export class ForgotPasswordModule {
   static _instance: ForgotPasswordModule
 
+	// Never read from or written to the URL: every analytics tag on the page records the URL, and
+	// the history keeps it. A caller with an address to offer sets it.
 	email = $state('')
 	success = $state(false)
 	isLoading = $state(false)
-
-	constructor() {
-		onMount(() => {
-			if (browser) {
-				const url = new URL(window.location.href)
-				this.email = decodeURIComponent(url.searchParams.get('email') || '')
-			}
-		})
-	}
 
 	handleSubmit = async (e: SubmitEvent, redirectAfterSuccess: boolean) => {
 		e.preventDefault()
@@ -38,7 +29,7 @@ export class ForgotPasswordModule {
 			this.isLoading = true
 			const referrer = new URL(window.location.href)?.origin
 			await authService.forgotPassword({ email: this.email, referrer })
-			if (redirectAfterSuccess) goto(`/auth/forgot-password/success?email=${encodeURIComponent(this.email)}`)
+			if (redirectAfterSuccess) goto('/auth/forgot-password/success')
 			this.success = true
 		} catch (e: any) {
 			toast.error(e.message)
