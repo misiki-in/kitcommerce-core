@@ -4,11 +4,16 @@ import { showModal } from './auth-store.ts'
 
 export type AuthType = 'login' | 'signup' | 'forgot-password'
 
+// A shopper's address or number never goes into the URL: every analytics tag on the page records
+// it, and the history keeps it. A caller that passes one along to the next screen loses it here.
+const PERSONAL = ['email', 'phone']
+
 export function updateQueryParam(key: string, value: string, extraqueries?: Record<string, string>) {
 	const url = new URL(window.location.href)
 	url.searchParams.set(key, value)
 	if (extraqueries) {
 		for (const [key, value] of Object.entries(extraqueries)) {
+			if (PERSONAL.includes(key)) continue
 			url.searchParams.set(key, encodeURIComponent(value))
 		}
 	}
