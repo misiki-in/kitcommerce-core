@@ -247,6 +247,7 @@ export class PaymentModule {
 		this.paymentLoader = true
 		try {
 			const pgCode = this.getPaymentCode()
+			const selectedMethod: any = this.allPaymentMethods.find((m: PaymentMethod) => m?.code === this.SELECTED_PG_CODE)
 
 			if (pgCode === 'RAZORPAY') {
 				if (!this.razorpayReady || typeof window.Razorpay === 'undefined') {
@@ -428,6 +429,19 @@ export class PaymentModule {
 					window.location.href = `${res.redirect_url}`
 				} else {
 					toast.error('Something went wrong with PayPal')
+					this.paymentLoader = false
+				}
+			} else if (selectedMethod?.redirects) {
+				// A connector with several hosted-page gateways names them all, so the PAYPAL flow, which
+				// says nothing of which one, cannot carry the rest.
+				const res: any = await (checkoutService as any).checkout(selectedMethod.engineCode, {
+					cartId,
+					returnUrl: `${origin}/checkout/success?cart_id=${encodeURIComponent(cartId)}`
+				})
+				if (res?.payment?.redirectUrl) {
+					window.location.href = res.payment.redirectUrl
+				} else {
+					toast.error('The payment page did not open. Please try again.')
 					this.paymentLoader = false
 				}
 			} else if (pgCode === 'CASHFREE') {
