@@ -9,7 +9,7 @@ const IS_DEV = false
 export class JoinAsVendorModule {
   static _instance: JoinAsVendorModule
 
-	firstName = $state(IS_DEV ? 'Swadesh' : '')
+	firstName = $state(IS_DEV ? 'Ipsita' : '')
 	lastName = $state(IS_DEV ? 'Behera' : '')
 	phone = $state(IS_DEV ? '1234567890' : '')
 	businessName = $state(IS_DEV ? 'Misiki' : '')
