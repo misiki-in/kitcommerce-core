@@ -1,6 +1,6 @@
 {
 	"name": "@misiki/kitcommerce-core",
-	"version": "0.1.60",
+	"version": "0.1.61",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/misiki-in/kitcommerce-core.git"
@@ -16,7 +16,7 @@
 		"lint": "prettier --check .",
 		"format": "prettier --write .",
 		"p": "npm run build && npm publish --access public",
-		"test": "bun run src/lib/utils/sort.spec.ts && bun run src/lib/utils/payment-reference.spec.ts && bun run src/lib/utils/seo.spec.ts"
+		"test": "bun run src/lib/utils/sort.spec.ts && bun run src/lib/utils/payment-reference.spec.ts && bun run src/lib/utils/seo.spec.ts && bun run src/lib/utils/direct-bnpl.spec.ts"
 	},
 	"files": [
 		"dist",

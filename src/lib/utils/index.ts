@@ -331,3 +331,4 @@ export function parseHTMLToText(html: string): string {
   return html
   
 }
+export * from './direct-bnpl.js'

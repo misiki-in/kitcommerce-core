@@ -7,6 +7,7 @@ import { browser } from '$app/environment'
 import { page } from '$app/state'
 import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
 import { fireGTagEvent } from '$lib/utils/gtag.js'
+import { directBnplGateway } from '$lib/utils/direct-bnpl.js'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -417,6 +418,20 @@ export class PaymentModule {
 					window.location.href = sp.url
 				} else {
 					toast.error(sp?.message || 'Failed to initiate Stripe / Apple Pay payment')
+					this.paymentLoader = false
+				}
+			} else if (directBnplGateway(pgCode)) {
+				// Direct Klarna (`klarna_pay`) / Afterpay (`afterpay_pay`), not the Stripe sub-methods above.
+				const direct = directBnplGateway(pgCode)!
+				const res: any = await (checkoutService as any).post(direct.checkout, {
+					cartId,
+					origin,
+					return_url: `${origin}/checkout/success`
+				})
+				if (res?.redirect_url) {
+					window.location.href = `${res.redirect_url}`
+				} else {
+					toast.error(res?.message || `Something went wrong with ${direct.label}`)
 					this.paymentLoader = false
 				}
 			} else if (pgCode === 'PAYPAL') {

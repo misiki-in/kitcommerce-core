@@ -1,5 +1,6 @@
 import { CheckoutService } from '$lib/services/index.js';
 import { paymentReferenceFromUrl } from '$lib/utils/payment-reference.js';
+import { directBnplCaptureBody, directBnplGateway } from '$lib/utils/direct-bnpl.js';
 import type { PageLoad } from '$lib/types/load-functions.js';
 import { redirect as coreRedirect } from '@sveltejs/kit';
 
@@ -16,7 +17,12 @@ export function getLoadWithContext(redirect: typeof coreRedirect): PageLoad {
 		let pg_name = url.searchParams.get('pg');
 		try {
 			const pgUpper = pg_name?.toUpperCase?.() || '';
-			if (['STRIPE', 'APPLE_PAY', 'APPLEPAY', 'STRIPE_APPLE_PAY', 'KLARNA', 'AFTERPAY', 'AFTERPAY_CLEARPAY', 'LINK', 'AMAZON_PAY', 'GOOGLE_PAY'].includes(pgUpper)) {
+			const direct = directBnplGateway(pgUpper);
+			if (direct) {
+				// Direct Klarna / Afterpay. Any non-2xx makes the service throw, which lands on the failed page.
+				const checkoutService = new CheckoutService(fetch);
+				await (checkoutService as any).post(direct.capture, directBnplCaptureBody(direct, url));
+			} else if (['STRIPE', 'APPLE_PAY', 'APPLEPAY', 'STRIPE_APPLE_PAY', 'KLARNA', 'AFTERPAY', 'AFTERPAY_CLEARPAY', 'LINK', 'AMAZON_PAY', 'GOOGLE_PAY'].includes(pgUpper)) {
 				const checkoutService = new CheckoutService(fetch);
 				await checkoutService.checkoutStripeCapture({
 					order_no,
