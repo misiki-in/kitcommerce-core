@@ -1,4 +1,4 @@
-// Klarna and Afterpay connected directly to the API, not through Stripe. They use their own
+// Klarna, Afterpay, Snap Finance and Shop Pay connected directly to the API, not through Stripe. They use their own
 // codes (`klarna_pay`, `afterpay_pay`) because `klarna` / `afterpay` already mean the Stripe
 // sub-methods, which the Stripe branches handle. The API places the order and returns the
 // provider's redirect_url. The provider sends the shopper back to /checkout/process?pg=<code>,
@@ -25,6 +25,27 @@ export const DIRECT_BNPL_GATEWAYS: Record<string, DirectBnplGateway> = {
 		checkout: '/api/checkout/afterpay',
 		capture: '/api/checkout/afterpay-capture',
 		returnParams: ['status']
+	},
+	// Snap has no redirect page: redirect_url is an API page that opens Snap's window.
+	SNAP_PAY: {
+		label: 'Snap Finance',
+		checkout: '/api/checkout/snap',
+		capture: '/api/checkout/snap-capture',
+		returnParams: ['application_id']
+	},
+	// Progressive Leasing, through ChargeAfter's window; the one-time token becomes the charge.
+	PROGRESSIVE_PAY: {
+		label: 'Progressive Leasing',
+		checkout: '/api/checkout/progressive',
+		capture: '/api/checkout/progressive-capture',
+		returnParams: ['ca_token']
+	},
+	// The receipt is looked up in Shopify by order, so nothing comes back in the URL.
+	SHOP_PAY: {
+		label: 'Shop Pay',
+		checkout: '/api/checkout/shop-pay',
+		capture: '/api/checkout/shop-pay-capture',
+		returnParams: []
 	}
 }
 

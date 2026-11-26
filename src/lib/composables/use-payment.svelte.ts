@@ -8,6 +8,9 @@ import { page } from '$app/state'
 import { appendOneTimeCartId, injectAffirm } from '$lib/utils/index.js'
 import { fireGTagEvent } from '$lib/utils/gtag.js'
 import { directBnplGateway } from '$lib/utils/direct-bnpl.js'
+import { openSnapCheckout } from '$lib/utils/snap-checkout.js'
+import { openProgressiveCheckout } from '$lib/utils/progressive-checkout.js'
+import { openShopPayCheckout } from '$lib/utils/shop-pay-checkout.js'
 
 // Define interfaces for better type safety
 interface Cart {
@@ -428,7 +431,24 @@ export class PaymentModule {
 					origin,
 					return_url: `${origin}/checkout/success`
 				})
-				if (res?.redirect_url) {
+				const openers: Record<string, (embed: any, onClose: (message?: string) => void) => Promise<void>> = {
+					SNAP_PAY: openSnapCheckout,
+					SHOP_PAY: openShopPayCheckout,
+					PROGRESSIVE_PAY: openProgressiveCheckout
+				}
+				const open = openers[pgCode]
+				if (open && res?.embed) {
+					// The provider's own button, here; if its script is blocked, the hosted page explains.
+					try {
+						await open(res.embed, (message?: string) => {
+							if (message) toast.error(message)
+							this.paymentLoader = false
+						})
+					} catch (e) {
+						console.warn(`${direct.label} button failed, using the payment page:`, e)
+						window.location.href = `${res.redirect_url}`
+					}
+				} else if (res?.redirect_url) {
 					window.location.href = `${res.redirect_url}`
 				} else {
 					toast.error(res?.message || `Something went wrong with ${direct.label}`)

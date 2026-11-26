@@ -28,6 +28,23 @@ assert.deepStrictEqual(
 	{ order_no: '10002', store_id: 's1', status: 'SUCCESS' }
 )
 
+// Snap returns with the application to verify.
+assert.strictEqual(directBnplGateway('snap_pay')?.checkout, '/api/checkout/snap')
+assert.deepStrictEqual(
+	directBnplCaptureBody(directBnplGateway('snap_pay')!, url('order_no=3&cart_id=c1&store_id=s1&pg=snap_pay&application_id=240521000XUT')),
+	{ order_no: '3', store_id: 's1', application_id: '240521000XUT' }
+)
+
+assert.deepStrictEqual(directBnplCaptureBody(directBnplGateway('shop_pay')!, url('order_no=4&store_id=s1&pg=shop_pay')), {
+	order_no: '4',
+	store_id: 's1'
+})
+
+assert.deepStrictEqual(
+	directBnplCaptureBody(directBnplGateway('progressive_pay')!, url('order_no=5&store_id=s1&pg=progressive_pay&ca_token=abc%2B1')),
+	{ order_no: '5', store_id: 's1', ca_token: 'abc+1' }
+)
+
 // Missing params become empty strings, which the API rejects.
 assert.deepStrictEqual(directBnplCaptureBody(directBnplGateway('afterpay_pay')!, url('pg=afterpay_pay')), {
 	order_no: '',

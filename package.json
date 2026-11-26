@@ -1,6 +1,6 @@
 {
 	"name": "@misiki/kitcommerce-core",
-	"version": "0.1.61",
+	"version": "0.1.62",
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/misiki-in/kitcommerce-core.git"
