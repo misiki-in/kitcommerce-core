@@ -7,6 +7,7 @@
 	import { toast } from 'svelte-sonner'
 	import { getProductKey, getUserState, getWishlistState } from '$lib/stores/index.js'
 	import { showAuthModal } from '$lib/components/index.ts';
+	import { addPendingWishlistAction } from '$lib/logic/index.js'
 
 	const cartState = getCartState()
   const userState = getUserState()
@@ -45,6 +46,8 @@
 	  loadingForWishlist = true
 		try {
 		  if (!userState?.user?.userId) {
+        // Saved by WishlistState once sign-in finishes.
+        addPendingWishlistAction({ productId: product?.id, variantId: product?.variants?.[0]?.id })
         showAuthModal("login")
 		  	toast.error('Please login to add to wishlist', { position: 'top-right' })
 		  	return

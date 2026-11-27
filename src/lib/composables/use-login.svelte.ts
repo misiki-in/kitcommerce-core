@@ -2,7 +2,7 @@ import { goto, replaceState } from '$app/navigation'
 import { page } from '$app/state'
 import { env } from '$env/dynamic/public'
 import { authService } from '$lib/services/index.js'
-import { getUserState, getCartState, getWishlistState } from '$lib/stores/index.js'
+import { getUserState, getCartState } from '$lib/stores/index.js'
 import { toast } from 'svelte-sonner'
 import { z } from 'zod'
 
@@ -28,7 +28,6 @@ export class LoginModule {
   static _instance: LoginModule
 
 	userState = getUserState()
-  wishlistState = getWishlistState()
 	cartState = getCartState()
 
   loginType = $derived(page.data.store?.loginType || env.PUBLIC_LOGIN_TYPE)
@@ -61,7 +60,6 @@ export class LoginModule {
 				if (success) {
 					const url = new URL(window.location.href)
 					const redirect = url.searchParams.get('redirect')
-          this.wishlistState.setState()
 					goto(decodeURIComponent(redirect || '') || url.pathname, { replaceState: true, invalidateAll: true })
 				}
 

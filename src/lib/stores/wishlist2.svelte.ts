@@ -1,5 +1,8 @@
-import { getContext, onMount, setContext } from 'svelte'
+import { getContext, onMount, setContext, untrack } from 'svelte'
+import { toast } from 'svelte-sonner'
 import { wishlistService, type Product } from '$lib/services/index.js'
+import { savePendingWishlistAction } from '$lib/logic/index.js'
+import { getUserState } from './auth.svelte.ts'
 
 interface Query {
   productId: string
@@ -18,6 +21,21 @@ class WishlistState {
   isWishlisted = $state<Record<string, boolean>>({})
 
   constructor() {
+    // Read the wishlist whenever a shopper becomes signed in — on load, or by any sign-in path
+    // (password, phone code, sign-up) without each one having to call setState — then save the
+    // heart they tapped while signed out. UserState fills `user` from the `me` cookie on mount, so
+    // this also covers the reload that signed-in visitors used to get the onMount read for.
+    const userState = getUserState()
+    if (userState) {
+      let signedInAs: string | undefined
+      $effect(() => {
+        const id = userState.user?.userId
+        if (id === signedInAs) return
+        signedInAs = id
+        if (id) untrack(() => this.onSignIn())
+      })
+      return
+    }
     onMount(() => {
       // Only read the wishlist for authenticated users. A guest has no session, so
       // /wishlists/me returns 422 on every page load (console noise fleet-wide). Gate on
@@ -46,6 +64,16 @@ class WishlistState {
     }
   }
 
+  onSignIn = async () => {
+    await this.setState()
+    const saved = await savePendingWishlistAction(
+      (productId, variantId) => Boolean(this.isWishlisted[key(productId, variantId)]),
+      (productId, variantId) => this.toggleWishlistFromIds(productId, variantId)
+    )
+    if (saved) toast.success('Item added to wishlist')
+  }
+
+  /** Resolves to whether the item is in the wishlist once the request settles. */
   toggleWishlistFromIds = async (productId: string, variantId: string) => {
     const k = key(productId, variantId)
 
@@ -67,12 +95,14 @@ class WishlistState {
       // update count
       if (next) this.count++
       else if (this.count) this.count--
+      return next
     } catch (e) {
       // rollback if API fails
       this.isWishlisted = {
         ...this.isWishlisted,
         [k]: current
       }
+      return current
     }
   }
 

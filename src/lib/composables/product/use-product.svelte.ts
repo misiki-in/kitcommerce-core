@@ -2,7 +2,7 @@ import { browser } from '$app/environment'
 import { afterNavigate, goto } from '$app/navigation'
 import { page } from '$app/state'
 import type { CarouselAPI } from '$lib/types/index.js'
-import { storeProductToRecentlyViewed, findVariantWithOptionValue, findClosestAggregationProduct, addPendingWishlistAction, checkPendingWishlistActions } from '$lib/logic/index.js'
+import { storeProductToRecentlyViewed, findVariantWithOptionValue, findClosestAggregationProduct, addPendingWishlistAction } from '$lib/logic/index.js'
 import { getUserState, getCartState, getWishlistState, getProductKey } from '$lib/stores/index.js'
 import { deepCopy, fireGTagEvent, imageUrls, variesByProperty } from '$lib/utils/index.js'
 import { meilisearchService, productService, reviewService, wishlistService } from '$lib/services/index.js'
@@ -446,9 +446,10 @@ class ProductState {
 
 	handleWishlistClick = async () => {
 		if (!this.userState?.user?.userId) {
+			// Saved by WishlistState once sign-in finishes, under the same key the toggle below uses.
 			addPendingWishlistAction({
 				productId: page.data?.product?.id,
-				variantId: this.selectedVariant?.id || ''
+				variantId: page.data?.product?.variants?.[0]?.id
 			})
 
 			this.showLoginModal = true
@@ -559,29 +560,6 @@ class ProductState {
 			}
 			await this.mount()
 		})
-
-		//$effect(() => {
-		//	if (this.userState?.user?.userId) {
-		//		checkPendingWishlistActions(this.userState?.user?.userId)
-		//			.then((value) => {
-		//				//this.wishlisted = value || false
-		//				//value && toast.success('Item added to wishlist')
-		//			})
-		//			.catch()
-		//	}
-		//})
-
-		//$effect(() => {
-		//	if (this.selectedVariant?.id || page.data?.product?.id) {
-		//		this.checkIfWishlisted(this.selectedVariant?.id || page.data?.product?.id)
-		//			.then((val) => {
-		//				//this.wishlisted = val || false
-		//			})
-		//			.catch((err) => {
-		//				console.error('$effect to check ifWishlisted', err)
-		//			})
-		//	}
-		//})
 
 		onMount(async () => {
 			// Load ratings and related products after the main content is displayed (lazy loading)
